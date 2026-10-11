@@ -68,3 +68,4 @@ _tidy_backup/
 *.log
 output/
 tmp/
+*.new
