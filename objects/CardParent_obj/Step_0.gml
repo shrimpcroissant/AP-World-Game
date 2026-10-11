@@ -1,0 +1,57 @@
+// Lays out every card in the hand as a fan, like cards held in real life.
+// Works for any object whose parent is CardParent_obj.
+
+// Hand settings, tweak these
+var hand_center_x = room_width / 2
+var hand_bottom_y = room_height - 20  // where the bottom of the middle card sits
+var spacing = 80    // pixels between each card (smaller = more overlap)
+var tilt = 6        // degrees each card tilts, per step away from the middle
+var drop = 6        // how much the outer cards dip down
+var move_speed = 0.2  // 1 = snap instantly, smaller = slide in smoother
+var hover_lift = 30  // how far a card rises when the mouse is over it
+
+if (!in_hand) exit
+
+// Collect every card in the hand and sort by the order they were made
+var cards = []
+with (CardParent_obj)
+{
+	if (in_hand) array_push(cards, id)
+}
+array_sort(cards, function(a, b) { return a.hand_order - b.hand_order })
+
+var count = array_length(cards)
+var index = 0
+for (var i = 0; i < count; i++)
+{
+	if (cards[i] == id) { index = i; break }
+}
+
+// offset is 0 for the middle card, negative on the left, positive on the right
+var offset = index - (count - 1) / 2
+
+rest_x = hand_center_x + offset * spacing
+rest_y = hand_bottom_y + offset * offset * drop
+rest_angle = -offset * tilt
+
+// Only the top card under the mouse lifts (cards further right sit on top)
+hovered = false
+var paused = variable_global_exists("paused") && global.paused
+if (!paused) for (var j = count - 1; j >= 0; j--)
+{
+	if (cards[j].is_mouse_over())
+	{
+		hovered = (cards[j] == id)
+		break
+	}
+}
+
+var target_y = rest_y
+if (hovered) target_y -= hover_lift
+
+x = lerp(x, rest_x, move_speed)
+y = lerp(y, target_y, move_speed)
+image_angle = lerp(image_angle, rest_angle, move_speed)
+
+// Cards further right draw on top
+depth = hand_depth - index
