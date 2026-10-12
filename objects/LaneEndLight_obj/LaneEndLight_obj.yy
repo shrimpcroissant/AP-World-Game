@@ -1,12 +1,12 @@
 {
   "$GMObject":"",
-  "%Name":"Figure_obj",
+  "%Name":"LaneEndLight_obj",
   "eventList":[
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"Figure_obj",
+  "name":"LaneEndLight_obj",
   "overriddenProperties":[],
   "parent":{
     "name":"Board",
@@ -31,8 +31,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"Figure_spr",
-    "path":"sprites/Figure_spr/Figure_spr.yy",
+    "name":"EndLaneLight_spr",
+    "path":"sprites/EndLaneLight_spr/EndLaneLight_spr.yy",
   },
   "spriteMaskId":null,
   "visible":true,

@@ -6,6 +6,16 @@ card_scale = 2
 image_xscale = card_scale
 image_yscale = card_scale
 
+// The figure this card places on the board when played.
+// Set it in each card's own Create event, under event_inherited().
+figure = noone
+
+// How many units it costs to play this card. Set it in each card's own Create event.
+cost = 0
+
+// The card you've clicked on, waiting to be played on the board
+if (!variable_global_exists("SelectedCard")) global.SelectedCard = noone
+
 // Cards in the hand draw just above the layer they were created on
 hand_depth = depth
 

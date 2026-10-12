@@ -2,3 +2,9 @@
 event_inherited()
 
 // This card's own variables go below
+
+// The figure this card places on the board
+figure = ProtoSailorFigure_obj
+
+// How many units it costs to play this card
+cost = 1

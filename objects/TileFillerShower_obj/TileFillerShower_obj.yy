@@ -32,5 +32,5 @@
     "path":"sprites/TileFilledShower_spr/TileFilledShower_spr.yy",
   },
   "spriteMaskId":null,
-  "visible":true,
+  "visible":false,
 }

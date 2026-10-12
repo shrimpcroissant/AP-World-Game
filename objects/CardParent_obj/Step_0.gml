@@ -46,12 +46,53 @@ if (!paused) for (var j = count - 1; j >= 0; j--)
 	}
 }
 
+// Click a card to choose it, click it again to put it back
+if (hovered && mouse_check_button_pressed(mb_left) && global.PlayerTurn)
+{
+	if (global.SelectedCard == id)
+	{
+		global.SelectedCard = noone
+	}
+	else if (instance_exists(Deck_obj) && !Deck_obj.can_play())
+	{
+		// Must draw first, so remind the player above the deck
+		with (Deck_obj) show_reminder("Draw a card first")
+	}
+	else if (cost > global.Units)
+	{
+		with (Deck_obj) show_reminder("Not enough units")
+	}
+	else
+	{
+		global.SelectedCard = id
+	}
+}
+
+// The chosen card sits higher than a hovered one
 var target_y = rest_y
-if (hovered) target_y -= hover_lift
+if (global.SelectedCard == id) target_y -= hover_lift * 2
+else if (hovered) target_y -= hover_lift
+
+// The chosen card pulses so it's clear which one you picked
+if (global.SelectedCard == id)
+{
+	var pulse = 1 + 0.06 * sin(current_time / 120)
+	image_xscale = card_scale * pulse
+	image_yscale = card_scale * pulse
+}
+else
+{
+	image_xscale = card_scale
+	image_yscale = card_scale
+}
 
 x = lerp(x, rest_x, move_speed)
 y = lerp(y, target_y, move_speed)
 image_angle = lerp(image_angle, rest_angle, move_speed)
+
+// Cards you can't afford right now are dimmed
+if (global.PlayerTurn && cost > global.Units) image_blend = c_gray
+else image_blend = c_white
 
 // Cards further right draw on top
 depth = hand_depth - index

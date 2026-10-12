@@ -1,4 +1,10 @@
-if place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1)
+// Clicking the token ends your turn. The AI plays its cards, then both sides battle.
+var paused = variable_global_exists("paused") && global.paused
+if (paused || !global.PlayerTurn || global.Winner != 0) exit
+
+// Click the token or press Space
+var clicked = place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1)
+if (clicked or keyboard_check_pressed(vk_space))
 {
 	if global.turn == noone
 	{
@@ -7,20 +13,10 @@ if place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1)
 	
 	global.turn *= -1;
 	
-	// Move every figure forward one space, front figures first,
-	// so the space ahead is already cleared for the ones behind
-	var figs = [];
-	with (Figure_obj) array_push(figs, id);
-	array_sort(figs, function(a, b) { return a.y - b.y; });
+	// End the turn: any chosen card goes back in the hand
+	global.SelectedCard = noone;
+	global.PlayerTurn = false;
 	
-	for (var i = 0; i < array_length(figs); i++)
-	{
-		with (figs[i])
-		{
-			if (y > 206 && !instance_position(x, y - 64, Figure_obj))
-			{
-				y -= 64;
-			}
-		}
-	}
+	// Now it's the AI's turn. After it plays, both sides battle.
+	with (EnemyAI_obj) start_turn();
 }

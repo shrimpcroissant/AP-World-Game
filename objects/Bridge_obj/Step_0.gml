@@ -1,8 +1,10 @@
-if place_meeting(x, y, Figure_obj)
+if place_meeting(x, y, FigureParent_obj)
 {
 	if spawned = 0
 	{
-		SpawnedID = instance_create_layer(x, y + 64, "SpawnChecker", TileFillerShower_obj)
+		// Show it behind the figure: below player figures, above enemy figures
+		var fig = instance_place(x, y, FigureParent_obj)
+		SpawnedID = instance_create_layer(x, y + 64 * fig.team, "SpawnChecker", TileFillerShower_obj)
 		spawned = 1
 	}	
 } else {
@@ -14,10 +16,3 @@ if place_meeting(x, y, Figure_obj)
 	}
 }
 
-if y = 452
-{
-	if place_meeting(x, y, Mouse_obj) and mouse_check_button(1)
-	{
-		instance_create_layer(x, y, "SpawnChecker", Figure_obj)
-	}
-}
