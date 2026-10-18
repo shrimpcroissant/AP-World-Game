@@ -42,6 +42,7 @@
     {"name":"inst_LANELT06","path":"rooms/Prototype_Room/Prototype_Room.yy",},
     {"name":"inst_LANELT07","path":"rooms/Prototype_Room/Prototype_Room.yy",},
     {"name":"inst_LANELT08","path":"rooms/Prototype_Room/Prototype_Room.yy",},
+    {"name":"inst_DAGGER01","path":"rooms/Prototype_Room/Prototype_Room.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -84,6 +85,7 @@
         {"$GMRInstance":"v4","%Name":"inst_6B75555E","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_6B75555E","objectId":{"name":"Resume_Button","path":"objects/Resume_Button/Resume_Button.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":683.0,"y":370.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Cards","depth":200,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
+        {"$GMRInstance":"v4","%Name":"inst_DAGGER01","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_DAGGER01","objectId":{"name":"Dagger_obj","path":"objects/Dagger_obj/Dagger_obj.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1120.0,"y":600.0,},
         {"$GMRInstance":"v4","%Name":"inst_ENEMYAI01","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_ENEMYAI01","objectId":{"name":"EnemyAI_obj","path":"objects/EnemyAI_obj/EnemyAI_obj.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1220.0,"y":170.0,},
         {"$GMRInstance":"v4","%Name":"inst_DECK0002","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_DECK0002","objectId":{"name":"Deck_obj","path":"objects/Deck_obj/Deck_obj.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1220.0,"y":600.0,},
       ],"layers":[],"name":"Cards","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},

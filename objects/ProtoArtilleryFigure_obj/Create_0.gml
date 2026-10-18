@@ -6,6 +6,6 @@ event_inherited()
 attack = 3
 hp = 1
 
-// Never moves. Every 3 turns it hits every figure in its lane for 3, friendly ones too.
+// Never moves. Every 5 turns it hits every figure in its lane for 3, friendly ones too.
 moves = false
-fire_every = 3
+fire_every = 5

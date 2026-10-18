@@ -26,7 +26,7 @@
   "origin":4,
   "parent":{
     "name":"PauseMenu",
-    "path":"folders/Sprites/Menus/PauseMenu.yy",
+    "path":"folders/Sprites/UIElements_spr/Menus/PauseMenu.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

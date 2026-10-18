@@ -26,7 +26,7 @@
   "origin":4,
   "parent":{
     "name":"Cursor",
-    "path":"folders/Sprites/Cursor.yy",
+    "path":"folders/Sprites/UIElements_spr/Cursor.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

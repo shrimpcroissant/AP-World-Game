@@ -26,7 +26,7 @@
   "origin":0,
   "parent":{
     "name":"StartMenu",
-    "path":"folders/Sprites/Menus/StartMenu.yy",
+    "path":"folders/Sprites/UIElements_spr/Menus/StartMenu.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

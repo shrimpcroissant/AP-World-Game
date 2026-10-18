@@ -47,7 +47,7 @@ if (!paused) for (var j = count - 1; j >= 0; j--)
 }
 
 // Click a card to choose it, click it again to put it back
-if (hovered && mouse_check_button_pressed(mb_left) && global.PlayerTurn)
+if (hovered && mouse_check_button_pressed(mb_left) && global.PlayerTurn && !global.DaggerAiming)
 {
 	if (global.SelectedCard == id)
 	{

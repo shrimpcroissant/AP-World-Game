@@ -7,11 +7,13 @@
 
 randomize()
 
-// Same deck as the player: 9 sailors, 3 artillery, 3 jumpers
+// Same deck as the player: 15 sailors, 3 jumpers, 2 artillery (artillery is 10% of the deck)
 deck = [
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardArtillery_obj, CardArtillery_obj, CardArtillery_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardJumper_obj, CardJumper_obj, CardJumper_obj,
+	CardArtillery_obj, CardArtillery_obj,
 ]
 deck = array_shuffle(deck)
 

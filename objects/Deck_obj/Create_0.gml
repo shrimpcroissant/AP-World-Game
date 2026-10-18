@@ -6,11 +6,13 @@ randomize()
 
 // Every card in the deck. To add a card, put its object in this list.
 // Any object whose parent is CardParent_obj works.
-// 9 sailors, 3 artillery, 3 jumpers
+// 15 sailors, 3 jumpers, 2 artillery (artillery is 10% of the deck)
 deck = [
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardArtillery_obj, CardArtillery_obj, CardArtillery_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardJumper_obj, CardJumper_obj, CardJumper_obj,
+	CardArtillery_obj, CardArtillery_obj,
 ]
 deck = array_shuffle(deck)
 
@@ -30,6 +32,9 @@ global.PlayerTurn = true
 
 // 0 while the game is going, 1 when you win, -1 when the AI wins (set by the lane lights)
 global.Winner = 0
+
+// True while the dagger is being aimed (Dagger_obj sets this)
+global.DaggerAiming = false
 
 // Units pay for cards. You refill every turn and unused units don't carry over.
 units_per_turn = 3
@@ -75,7 +80,7 @@ predict_battle = function()
 			moves: moves, fire_every: fire_every, turns_waited: turns_waited,
 			top_row_y: top_row_y, bottom_row_y: bottom_row_y,
 			jumps: jumps, dir_x: dir_x, left_lane_x: left_lane_x, right_lane_x: right_lane_x,
-			dmg: 0, dead: false
+			shield_used: shield_used, dmg: 0, dead: false
 		})
 	}
 
@@ -85,14 +90,20 @@ predict_battle = function()
 		if (s.team == 1) return (s.bottom_row_y - s.y) div 64
 		return (s.y - s.top_row_y) div 64
 	}
-	var s_hp = function(s, rows) { return s.hp + ((rows(s) <= 1) ? 1 : 0) }
+	var s_hp = function(s, rows) { return s.hp + ((rows(s) <= 1 && !s.shield_used) ? 1 : 0) }
 	var s_atk = function(s, rows) { return s.attack + ((rows(s) >= 3) ? 1 : 0) }
 
 	var hurt = function(s, amount, s_hp, rows)
 	{
-		s.hp -= amount
+		var to_hp = amount
+		if (rows(s) <= 1 && !s.shield_used)
+		{
+			s.shield_used = true
+			to_hp -= 1
+		}
+		s.hp -= to_hp
 		s.dmg += amount
-		if (s_hp(s, rows) <= 0) s.dead = true
+		if (s.hp <= 0) s.dead = true
 	}
 
 	var find_at = function(list, px, py)
@@ -152,7 +163,6 @@ predict_battle = function()
 					{
 						f.x = nx
 						f.y = next_y
-						if (s_hp(f, rows) <= 0) f.dead = true
 					}
 				}
 				else if (ahead.team != f.team)

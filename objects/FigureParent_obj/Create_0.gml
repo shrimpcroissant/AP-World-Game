@@ -36,16 +36,24 @@ flash = 0
 shake = 0
 
 // Takes damage, shows the hit, and removes the figure if it runs out of HP
+// The +1 HP row boost works like a shield: it soaks up the first point of damage.
+// Once used it's gone, and leaving your rows never kills a figure.
 take_damage = function(amount)
 {
-	hp -= amount
+	var dmg_to_hp = amount
+	if (hp_bonus() > 0)
+	{
+		shield_used = true
+		dmg_to_hp -= 1
+	}
+	hp -= dmg_to_hp
 	flash = 10
 	shake = 6
 	var fx = x
 	var fy = y
 	with (Deck_obj) add_popup(fx, fy - 20, "-" + string(amount), c_red)
 
-	if (total_hp() <= 0) die()
+	if (hp <= 0) die()
 }
 
 // Removes the figure with a fade-out
@@ -77,14 +85,15 @@ with (Tile_obj)
 }
 
 // Row boosts on the 5-row board, counted from this figure's own side:
-// rows 0-1 (your side) give +1 HP, row 2 (middle) gives nothing, rows 3-4 (enemy side) give +1 attack.
+// rows 0-1 (your side) give +1 HP (a one-time shield), row 2 (middle) gives nothing, rows 3-4 (enemy side) give +1 attack.
 // It's relative, so the AI's side is flipped.
 rows_from_home = function(py)
 {
 	if (team == 1) return (bottom_row_y - py) div 64
 	return (py - top_row_y) div 64
 }
-hp_bonus = function() { return (rows_from_home(y) <= 1) ? 1 : 0 }
+shield_used = false
+hp_bonus = function() { return (rows_from_home(y) <= 1 && !shield_used) ? 1 : 0 }
 atk_bonus = function() { return (rows_from_home(y) >= 3) ? 1 : 0 }
 
 // Stats with the row boost included. Use these for fighting, not attack and hp directly.
@@ -121,8 +130,6 @@ advance = function()
 		{
 			x = nx
 			y = next_y
-			// Leaving your side loses the HP boost, which can finish off a hurt figure
-			if (total_hp() <= 0) die()
 		}
 	}
 	else if (ahead.team != team)

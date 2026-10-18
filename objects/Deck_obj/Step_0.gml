@@ -18,8 +18,8 @@ if (variable_global_exists("paused") && global.paused) exit
 // Right-click puts a chosen card back
 if (mouse_check_button_pressed(mb_right)) global.SelectedCard = noone
 
-// No drawing during the AI's turn
-if (!global.PlayerTurn) exit
+// No drawing during the AI's turn or while aiming the dagger
+if (!global.PlayerTurn || global.DaggerAiming) exit
 
 // Click the deck to draw a card, once per turn
 if (mouse_check_button_pressed(mb_left))
