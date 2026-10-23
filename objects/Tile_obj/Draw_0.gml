@@ -1,4 +1,5 @@
-draw_self()
+// The tile itself isn't drawn any more: ShipBoard_obj draws the ship underneath.
+// The tile only draws the glow below.
 
 // While you have a card chosen, glow on the empty tiles you can play it on
 if (y != 452 || !global.PlayerTurn) exit

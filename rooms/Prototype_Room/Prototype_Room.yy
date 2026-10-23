@@ -43,6 +43,7 @@
     {"name":"inst_LANELT07","path":"rooms/Prototype_Room/Prototype_Room.yy",},
     {"name":"inst_LANELT08","path":"rooms/Prototype_Room/Prototype_Room.yy",},
     {"name":"inst_DAGGER01","path":"rooms/Prototype_Room/Prototype_Room.yy",},
+    {"name":"inst_SHIPBRD01","path":"rooms/Prototype_Room/Prototype_Room.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -89,6 +90,9 @@
         {"$GMRInstance":"v4","%Name":"inst_ENEMYAI01","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_ENEMYAI01","objectId":{"name":"EnemyAI_obj","path":"objects/EnemyAI_obj/EnemyAI_obj.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1220.0,"y":170.0,},
         {"$GMRInstance":"v4","%Name":"inst_DECK0002","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_DECK0002","objectId":{"name":"Deck_obj","path":"objects/Deck_obj/Deck_obj.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1220.0,"y":600.0,},
       ],"layers":[],"name":"Cards","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
+    {"$GMRInstanceLayer":"","%Name":"ShipBoard","depth":250,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
+        {"$GMRInstance":"v4","%Name":"inst_SHIPBRD01","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_SHIPBRD01","objectId":{"name":"ShipBoard_obj","path":"objects/ShipBoard_obj/ShipBoard_obj.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":672.0,"y":324.0,},
+      ],"layers":[],"name":"ShipBoard","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRBackgroundLayer":"","%Name":"Background","animationFPS":15.0,"animationSpeedType":0,"colour":4278190080,"depth":300,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"hspeed":0.0,"htiled":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Background","properties":[],"resourceType":"GMRBackgroundLayer","resourceVersion":"2.0","spriteId":null,"stretch":false,"userdefinedAnimFPS":false,"userdefinedDepth":false,"visible":true,"vspeed":0.0,"vtiled":false,"x":0,"y":0,},
   ],
   "name":"Prototype_Room",

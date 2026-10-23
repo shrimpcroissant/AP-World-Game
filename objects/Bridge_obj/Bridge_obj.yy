@@ -35,5 +35,5 @@
     "path":"sprites/Bridge_spr/Bridge_spr.yy",
   },
   "spriteMaskId":null,
-  "visible":true,
+  "visible":false,
 }

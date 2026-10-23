@@ -1,6 +1,21 @@
 // Draws the deck pile centered on x, y, with how many cards are left,
 // and any reminder text just above it
 
+// Playtest "Auto win" button (see debug_tools in the Create event)
+if (debug_tools && global.Winner == 0)
+{
+	var hover_btn = point_in_rectangle(mouse_x, mouse_y, debug_btn_x, debug_btn_y, debug_btn_x + debug_btn_w, debug_btn_y + debug_btn_h)
+	draw_set_color(hover_btn ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
+	draw_rectangle(debug_btn_x, debug_btn_y, debug_btn_x + debug_btn_w, debug_btn_y + debug_btn_h, false)
+	draw_set_color(c_white)
+	draw_rectangle(debug_btn_x, debug_btn_y, debug_btn_x + debug_btn_w, debug_btn_y + debug_btn_h, true)
+	draw_set_halign(fa_center)
+	draw_set_valign(fa_middle)
+	draw_text(debug_btn_x + debug_btn_w / 2, debug_btn_y + debug_btn_h / 2, "Auto win (F2)")
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+}
+
 if (message_timer > 0)
 {
 	// Fades out over the last half second
@@ -22,7 +37,20 @@ draw_text_transformed(x, y + pile_height / 2 + 8, "Units: " + string(global.Unit
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)
 
-if (array_length(deck) == 0) exit
+// Empty deck: show that your next turns will be skipped
+if (array_length(deck) == 0)
+{
+	draw_set_color(c_white)
+	draw_set_halign(fa_center)
+	draw_set_valign(fa_middle)
+	var skip_text = "Out of cards!"
+	if (skips_left > 0) skip_text += "\nSkipping " + string(skips_left) + " more"
+	else skip_text += "\nNext turn is skipped"
+	draw_text(x, y, skip_text)
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+	exit
+}
 
 var left = x - pile_width / 2
 var top = y - pile_height / 2

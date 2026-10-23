@@ -1,6 +1,6 @@
 // A light at one end of a lane. Starts red, turns green (and stays green)
 // once an opposing figure reaches this end of the lane, and wipes out every figure in the lane.
-// When all 4 lights at one end are green, the side attacking that end wins.
+// The player wins with 3 of the 4 enemy lights green; the AI needs all 4 of yours.
 
 image_speed = 0
 image_index = 0   // frame 0 = red, frame 1 = green

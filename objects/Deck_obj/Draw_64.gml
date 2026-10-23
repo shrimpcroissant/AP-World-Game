@@ -22,6 +22,8 @@ else
 	draw_text_transformed(cx, cy - 30, "You lose!", 4, 4, 0)
 }
 draw_set_color(c_white)
-draw_text_transformed(cx, cy + 40, "Click to return to the menu", 1.5, 1.5, 0)
+var next_text = "Click to return to the menu"
+if (global.Winner == 1) next_text = "Click to continue"
+draw_text_transformed(cx, cy + 40, next_text, 1.5, 1.5, 0)
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)

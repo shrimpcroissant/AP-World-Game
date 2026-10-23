@@ -1,6 +1,7 @@
-// The AI opponent. It plays by the same rules as the player:
-// it starts with 3 cards, draws 1 card each turn, gets 3 units each turn,
-// and pays the same card costs.
+// The AI opponent. It mostly plays by the same rules as the player:
+// it starts with 3 cards, draws 1 card each turn, and pays the same card costs.
+// To keep fights beginner-friendly it's a bit weaker: 2 units a turn instead of 3,
+// and some turns it holds back after one card (see hold_back_chance).
 //
 // Each bot along the route (China to Baghdad) can be a child of this object
 // that replaces choose_card and choose_tile with its own strategy.
@@ -8,19 +9,29 @@
 randomize()
 
 // Same deck as the player: 15 sailors, 3 jumpers, 2 artillery (artillery is 10% of the deck)
-deck = [
+full_deck = [
 	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardJumper_obj, CardJumper_obj, CardJumper_obj,
 	CardArtillery_obj, CardArtillery_obj,
 ]
-deck = array_shuffle(deck)
+deck = array_shuffle(full_deck)
+
+// Same out-of-cards rule as the player (see Deck_obj): an empty deck at the start
+// of its turn makes the AI skip skip_turns turns, then its deck is reshuffled back to full
+skip_turns = 3
+skips_left = 0
 
 starting_hand = 3
-units_per_turn = 3
+units_per_turn = 2
 units_max = units_per_turn
 units = units_max
+
+// Chance each turn that the AI "saves up" and stops after playing one card
+hold_back_chance = 1 / 3
+holding_back = false
+cards_played = 0
 
 // The AI's hand. These are real card instances, just hidden and kept out of the player's hand.
 hand = []
@@ -29,7 +40,8 @@ front_row_y = 196    // the row of tiles the AI places figures on
 move_limit_y = 452   // AI figures stop moving forward at this row
 
 // How the AI's turn plays out, one step at a time so the player can follow it
-think_delay = 20     // frames between each action (60 = 1 second)
+think_delay = 12     // frames between each action (60 = 1 second)
+skip_delay = 90      // how long a skipped turn's message stays up before moving on
 state = "waiting"    // "waiting" means it's the player's turn
 timer = 0
 
@@ -104,6 +116,26 @@ start_turn = function()
 	units = units_max
 	state = "draw"
 	timer = think_delay
+	holding_back = random(1) < hold_back_chance
+	cards_played = 0
+
+	// Out of cards: skip drawing and playing, go straight to the battle
+	if (skips_left == 0 && array_length(deck) == 0) skips_left = skip_turns
+	if (skips_left > 0)
+	{
+		skips_left -= 1
+		if (skips_left > 0)
+		{
+			with (Deck_obj) show_reminder("Enemy is out of cards! Turn skipped (" + string(other.skips_left) + " more)")
+		}
+		else
+		{
+			with (Deck_obj) show_reminder("Enemy's last skipped turn, its deck is reshuffled")
+			deck = array_shuffle(full_deck)
+		}
+		state = "skipped"
+		timer = skip_delay
+	}
 }
 
 repeat (starting_hand) draw_card()

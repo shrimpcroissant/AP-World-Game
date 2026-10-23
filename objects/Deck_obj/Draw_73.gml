@@ -18,7 +18,7 @@ for (var i = array_length(effects) - 1; i >= 0; i--)
 	}
 	else
 	{
-		draw_sprite_ext(e.spr, 0, e.x, e.y, k, e.ys * k, (1 - k) * 90, e.col, k)
+		draw_sprite_ext(e.spr, 0, e.x, e.y, k * e.ps, e.ys * k * e.ps, (1 - k) * 90, e.col, k)
 	}
 
 	e.t -= 1

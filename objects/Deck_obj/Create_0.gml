@@ -7,16 +7,50 @@ randomize()
 // Every card in the deck. To add a card, put its object in this list.
 // Any object whose parent is CardParent_obj works.
 // 15 sailors, 3 jumpers, 2 artillery (artillery is 10% of the deck)
-deck = [
+full_deck = [
 	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
 	CardJumper_obj, CardJumper_obj, CardJumper_obj,
 	CardArtillery_obj, CardArtillery_obj,
 ]
-deck = array_shuffle(deck)
+deck = array_shuffle(full_deck)
 
-starting_hand = 3  // cards drawn at the start
+// Running out of cards: when your deck is empty at the start of your turn,
+// you skip that turn and the next ones, skip_turns in total (no drawing, no playing,
+// but the battle still happens). After the last skipped turn your deck is reshuffled
+// back to full. The AI has the same rule in EnemyAI_obj.
+skip_turns = 3
+skips_left = 0
+
+// Called when your turn is about to start. Returns true if you skip this turn.
+check_skip = function()
+{
+	if (skips_left == 0 && array_length(deck) == 0) skips_left = skip_turns
+	if (skips_left == 0) return false
+
+	skips_left -= 1
+	if (skips_left > 0)
+	{
+		show_reminder("Out of cards! Turn skipped (" + string(skips_left) + " more)")
+	}
+	else
+	{
+		show_reminder("Out of cards! Last skipped turn, deck reshuffled")
+		deck = array_shuffle(full_deck)
+	}
+	return true
+}
+
+starting_hand = 4  // cards drawn at the start
+
+// Playtest tools: an "Auto win" button in the top-left corner (F2 does the same).
+// Set this to false before you hand the game in.
+debug_tools = true
+debug_btn_x = 20
+debug_btn_y = 20
+debug_btn_w = 150
+debug_btn_h = 40
 
 // Size of the deck pile, matches the cards in hand (54 x 74 art at 2x)
 pile_width = 108
@@ -80,7 +114,7 @@ predict_battle = function()
 			moves: moves, fire_every: fire_every, turns_waited: turns_waited,
 			top_row_y: top_row_y, bottom_row_y: bottom_row_y,
 			jumps: jumps, dir_x: dir_x, left_lane_x: left_lane_x, right_lane_x: right_lane_x,
-			shield_used: shield_used, dmg: 0, dead: false
+			dmg: 0, dead: false
 		})
 	}
 
@@ -90,20 +124,14 @@ predict_battle = function()
 		if (s.team == 1) return (s.bottom_row_y - s.y) div 64
 		return (s.y - s.top_row_y) div 64
 	}
-	var s_hp = function(s, rows) { return s.hp + ((rows(s) <= 1 && !s.shield_used) ? 1 : 0) }
+	var s_hp = function(s, rows) { return s.hp + ((rows(s) <= 1) ? 1 : 0) }
 	var s_atk = function(s, rows) { return s.attack + ((rows(s) >= 3) ? 1 : 0) }
 
 	var hurt = function(s, amount, s_hp, rows)
 	{
-		var to_hp = amount
-		if (rows(s) <= 1 && !s.shield_used)
-		{
-			s.shield_used = true
-			to_hp -= 1
-		}
-		s.hp -= to_hp
+		s.hp -= amount
 		s.dmg += amount
-		if (s.hp <= 0) s.dead = true
+		if (s_hp(s, rows) <= 0) s.dead = true
 	}
 
 	var find_at = function(list, px, py)
@@ -163,6 +191,8 @@ predict_battle = function()
 					{
 						f.x = nx
 						f.y = next_y
+						// Leaving the home rows loses the +1 HP boost
+						if (s_hp(f, rows) <= 0) f.dead = true
 					}
 				}
 				else if (ahead.team != f.team)
@@ -251,9 +281,10 @@ add_popup = function(px, py, text, col)
 }
 
 // A figure that just died, fading and shrinking away
-add_ghost = function(spr, px, py, ys, col)
+// ps is the figure's perspective size when it died (1 = full size)
+add_ghost = function(spr, px, py, ys, col, ps = 1)
 {
-	array_push(effects, { kind: "ghost", spr: spr, x: px, y: py, ys: ys, col: col, t: 20, life: 20 })
+	array_push(effects, { kind: "ghost", spr: spr, x: px, y: py, ys: ys, ps: ps, col: col, t: 20, life: 20 })
 }
 
 // Reminder text shown above the deck

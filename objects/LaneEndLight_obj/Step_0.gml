@@ -19,7 +19,8 @@ if (fig != noone && fig.team == watch_team)
 		if (instance_exists(in_lane[i])) in_lane[i].take_damage(in_lane[i].total_hp())
 	}
 
-	// If every light at this end is green, the attacking side wins
+	// The player wins by lighting all but one of the enemy's lights (3 of 4).
+	// The AI has to light all of yours.
 	var side = watch_team
 	var total = 0
 	var green = 0
@@ -31,5 +32,7 @@ if (fig != noone && fig.team == watch_team)
 			if (lit) green += 1
 		}
 	}
-	if (green == total && global.Winner == 0) global.Winner = side
+	var needed = total
+	if (side == 1) needed = total - 1
+	if (green >= needed && global.Winner == 0) global.Winner = side
 }
