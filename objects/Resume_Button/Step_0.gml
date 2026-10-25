@@ -1,11 +1,15 @@
-if place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1)
-{
-	global.paused = false
-}
+// Draw above the board, figures and item slots (the pause frame is at -1000)
+depth = -1001
 
 if global.paused = false
 {
 	image_alpha = 0
+	exit   // hidden: not clickable either
 } else {
 	image_alpha = 1
+}
+
+if place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1)
+{
+	global.paused = false
 }

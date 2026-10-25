@@ -7,4 +7,4 @@ event_inherited()
 figure = ProtoSailorFigure_obj
 
 // How many units it costs to play this card
-cost = 1
+cost = 2

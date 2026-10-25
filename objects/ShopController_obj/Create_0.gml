@@ -3,6 +3,9 @@
 // After a fight's shop, "Set sail" goes to the map. Before a fight's shop, it goes straight to the fight.
 items_init()
 if (!variable_global_exists("FightsWon")) global.FightsWon = 2
+
+// The game hides the normal cursor, so this room needs the custom cursor object
+if (!instance_exists(Mouse_obj)) instance_create_depth(mouse_x, mouse_y, -2000, Mouse_obj)
 if (!variable_global_exists("CurrentShop")) global.CurrentShop = "malacca"
 if (!variable_global_exists("ShopBeforeFight")) global.ShopBeforeFight = false
 

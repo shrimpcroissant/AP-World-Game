@@ -1,6 +1,10 @@
+// Draw above the board, figures and item slots (the pause frame is at -1000)
+depth = -1001
+
 if global.paused = false
 {
 	image_alpha = 0
+	exit   // hidden: not clickable either (it sits over the top of the board)
 } else {
 	image_alpha = 1
 }

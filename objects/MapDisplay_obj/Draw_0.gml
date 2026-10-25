@@ -10,6 +10,9 @@ if (!variable_instance_exists(id, "click_delay"))
 	global.Stops = route_stops()
 	click_delay = 20   // short wait so the click that won the fight doesn't also skip the map
 
+	// The game hides the normal cursor, so this room needs the custom cursor object
+	if (!instance_exists(Mouse_obj)) instance_create_depth(mouse_x, mouse_y, -2000, Mouse_obj)
+
 	// The monsoon detour: after Malacca you set sail for India, but the monsoon
 	// blows you off course to Mogadishu. pushed_off_course turns true after you click "set sail".
 	detour = (global.FightsWon == 2)

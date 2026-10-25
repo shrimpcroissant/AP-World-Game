@@ -34,8 +34,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"CardDefaultArtillery_spr",
-    "path":"sprites/CardDefaultArtillery_spr/CardDefaultArtillery_spr.yy",
+    "name":"CardArtillery_spr",
+    "path":"sprites/CardArtillery_spr/CardArtillery_spr.yy",
   },
   "spriteMaskId":null,
   "visible":true,

@@ -1,20 +1,19 @@
-// The AI opponent. It mostly plays by the same rules as the player:
-// it starts with 4 cards (one more than you), draws 1 card each turn, and pays the same card costs.
-// To keep fights beginner-friendly it's a bit weaker: 2 units a turn instead of 3,
-// and some turns it holds back after one card (see hold_back_chance).
+// The AI opponent. It plays by the same rules as the player: same units (4, ramping up),
+// same draw rules and card costs. It starts with 4 cards (one more than you).
+// The only thing still in your favor: you win with 3 of 4 lanes, it needs all 4.
 //
 // Each bot along the route (China to Baghdad) can be a child of this object
 // that replaces choose_card and choose_tile with its own strategy.
 
 randomize()
 
-// A smaller deck than yours, so the enemy runs out of cards partway through a fight
-// (it then skips 3 turns, same rule as you): 12 cards, 9 sailors, 2 jumpers, 1 artillery.
+// The enemy's deck: 20 cards, 12 sailors, 5 jumpers, 3 artillery.
+// It still runs out partway through a long fight (then it skips 3 turns, same rule as you).
 full_deck = [
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardJumper_obj, CardJumper_obj,
-	CardArtillery_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+	CardJumper_obj, CardJumper_obj, CardJumper_obj, CardJumper_obj, CardJumper_obj,
+	CardArtillery_obj, CardArtillery_obj, CardArtillery_obj,
 ]
 deck = array_shuffle(full_deck)
 
@@ -24,12 +23,14 @@ skip_turns = 3
 skips_left = 0
 
 starting_hand = 4
-units_per_turn = 2
+units_per_turn = 4   // same as you
 units_max = units_per_turn
 units = units_max
+ai_turn = 0   // counts the AI's turns, for the early-turn unit ramp (see Deck_obj's unit_ramp)
+max_hand = 7  // same hand limit as the player
 
 // Chance each turn that the AI "saves up" and stops after playing one card
-hold_back_chance = 1 / 5
+hold_back_chance = 0   // 0 = never holds back, plays every card it can afford
 holding_back = false
 cards_played = 0
 
@@ -61,6 +62,7 @@ pile_height = 148
 draw_card = function()
 {
 	if (array_length(deck) == 0) return noone
+	if (array_length(hand) >= max_hand) return noone
 	var card_type = array_pop(deck)
 	var card = instance_create_layer(x, y, layer, card_type)
 	card.in_hand = false   // keeps it out of the player's hand
@@ -121,8 +123,9 @@ play_card = function(card, tile)
 // Called by the turn token when the player ends their turn
 start_turn = function()
 {
-	// Same rule as the player: base units plus 1 per lane it holds
-	units_max = units_per_turn + Deck_obj.lanes_won(-1)
+	// Same rule as the player: base units, plus the early-turn ramp, plus 1 per lane it holds
+	ai_turn += 1
+	units_max = units_per_turn + Deck_obj.unit_ramp(ai_turn) + Deck_obj.lanes_won(-1)
 	units = units_max
 	state = "draw"
 	timer = think_delay

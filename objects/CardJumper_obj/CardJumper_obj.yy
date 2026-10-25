@@ -34,8 +34,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"CardDefaultJumper_spr",
-    "path":"sprites/CardDefaultJumper_spr/CardDefaultJumper_spr.yy",
+    "name":"CardJumper_spr",
+    "path":"sprites/CardJumper_spr/CardJumper_spr.yy",
   },
   "spriteMaskId":null,
   "visible":true,

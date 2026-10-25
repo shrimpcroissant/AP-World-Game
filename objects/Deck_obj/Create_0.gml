@@ -128,11 +128,30 @@ global.Winner = 0
 global.DaggerAiming = false
 
 // Units pay for cards. You refill every turn and unused units don't carry over.
-units_per_turn = 3
+units_per_turn = 4
 global.Units = units_per_turn
 
-// Units refilled at the start of your turn: units_per_turn plus 1 for each lane you hold
+// Units refilled at the start of your turn: units_per_turn, plus 1 more on each of the
+// first turns (turn 1 = +0, turn 2 = +1, turn 3 and after = +2, up to unit_ramp_max),
+// plus 1 for each lane you hold on top. The AI has the same ramp.
 global.UnitsMax = units_per_turn
+unit_ramp_max = 2
+player_turn = 1
+
+// Extra units from the ramp on a given turn number (1 = first turn)
+unit_ramp = function(turn)
+{
+	return min(turn - 1, unit_ramp_max)
+}
+
+// Hand limit: you can't hold more than this many cards. Extra draws stay in the deck.
+max_hand = 7
+hand_count = function()
+{
+	var n = 0
+	with (CardParent_obj) if (in_hand) n += 1
+	return n
+}
 
 // Which side acts first in the battle phase. Flips every round.
 global.FirstSide = 1
@@ -171,7 +190,7 @@ predict_battle = function()
 			moves: moves, fire_every: fire_every, turns_waited: turns_waited,
 			top_row_y: top_row_y, bottom_row_y: bottom_row_y,
 			jumps: jumps, dir_x: dir_x, left_lane_x: left_lane_x, right_lane_x: right_lane_x,
-			stunned: stunned, extra: (gallop ? 1 : 0) + sail_moves,
+			stunned: stunned, extra: (gallop ? 1 : 0) + sail_moves, blast_damage: blast_damage,
 			dmg: 0, dead: false
 		})
 	}
@@ -290,7 +309,9 @@ predict_battle = function()
 				f.extra = (f.extra > 0 && f.inst.gallop) ? 1 : 0
 			}
 
-			// Artillery countdown and lane blast
+			// Artillery countdown and lane blast (same rules as FigureParent_obj's blast_lane):
+			// blast_damage to every other figure in the lane except friendly artillery,
+			// then it moves up one row if that space is empty
 			if (f.fire_every > 0)
 			{
 				f.turns_waited += 1
@@ -299,9 +320,19 @@ predict_battle = function()
 					for (var j = 0; j < array_length(sims); j++)
 					{
 						var t = sims[j]
-						if (t != f && !t.dead && t.x == f.x) hurt(t, s_atk(f, rows), s_hp, rows)
+						if (t != f && !t.dead && t.x == f.x && !(t.team == f.team && t.fire_every > 0)) hurt(t, f.blast_damage, s_hp, rows)
 					}
 					f.turns_waited = 0
+
+					if (!f.moves && !f.dead)
+					{
+						var ay = f.y - 64 * f.team
+						if (find_at(sims, f.x, ay) == undefined && ay >= f.top_row_y && ay <= f.bottom_row_y)
+						{
+							f.y = ay
+							if (s_hp(f, rows) <= 0) f.dead = true
+						}
+					}
 				}
 			}
 		}
@@ -390,14 +421,15 @@ show_reminder = function(text)
 // True if the player is allowed to play a card right now
 can_play = function()
 {
-	// If the deck is empty there's nothing to draw, so don't block playing
-	return global.HasDrawn || array_length(deck) == 0
+	// If the deck is empty or your hand is full there's nothing to draw, so don't block playing
+	return global.HasDrawn || array_length(deck) == 0 || hand_count() >= max_hand
 }
 
 // Takes the top card off the deck and puts it in the hand
 draw_card = function()
 {
 	if (array_length(deck) == 0) return noone
+	if (hand_count() >= max_hand) return noone
 	var card_type = array_pop(deck)
 	return instance_create_layer(x, y, layer, card_type)
 }
@@ -407,3 +439,27 @@ repeat (starting_hand) draw_card()
 // Your item slots beside the ship (items bought in the shops, see Items_scr)
 items_init()
 instance_create_depth(0, 0, -500, ItemBar_obj)
+
+// Snapshot of your items at the start of this fight, so "Retry this stop" can put them back
+global.FightStartItems = items_copy(global.Items)
+global.FightStartLostCard = global.LastLostCard
+global.FightStartPepper = global.PepperTurns
+
+// Coins for winning, worked out once when you win (shown on the win screen)
+win_reward = -1
+
+// Buttons on the lose screen, in GUI coordinates (centered on the screen)
+lose_button = function(which)
+{
+	var cx = display_get_gui_width() / 2
+	var cy = display_get_gui_height() / 2
+	var w = 240
+	var h = 60
+	var bx = (which == "retry") ? cx - w - 20 : cx + 20
+	return { x1: bx, y1: cy + 30, x2: bx + w, y2: cy + 30 + h }
+}
+mouse_on_lose_button = function(which)
+{
+	var b = lose_button(which)
+	return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), b.x1, b.y1, b.x2, b.y2)
+}

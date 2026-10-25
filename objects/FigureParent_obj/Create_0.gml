@@ -141,9 +141,10 @@ next_x = function()
 // attacks it instead. If one of its own figures is in the way, waits.
 // With only_move = true (extra moves from items) it never attacks, it just stops.
 // Returns true if the figure moved.
-advance = function(only_move = false)
+// force = true lets figures that don't normally walk (Artillery) step forward anyway.
+advance = function(only_move = false, force = false)
 {
-	if (!moves) return false
+	if (!moves && !force) return false
 
 	var next_y = y - 64 * team   // player (team 1) goes up, AI (team -1) goes down
 	var nx = next_x()
@@ -175,17 +176,19 @@ advance = function(only_move = false)
 	return false
 }
 
-// Hits every other figure in this lane (same column) for this figure's attack,
-// friend or enemy
+// Artillery shot: hits every other figure in this lane (same column) for blast_damage,
+// friend or enemy, except friendly artillery (so you can stack artillery in one lane)
+blast_damage = 1
 blast_lane = function()
 {
 	var lane_x = x
-	var damage = total_attack()
+	var damage = blast_damage
 	var me = id
+	var my_team = team
 	var hit = []
 	with (FigureParent_obj)
 	{
-		if (x == lane_x && id != me) array_push(hit, id)
+		if (x == lane_x && id != me && !(team == my_team && fire_every > 0)) array_push(hit, id)
 	}
 	for (var i = 0; i < array_length(hit); i++)
 	{
@@ -232,6 +235,9 @@ take_action = function()
 			with (Deck_obj) add_popup(fx, fy - 20, "FIRE!", c_orange)
 			blast_lane()
 			turns_waited = 0
+
+			// Artillery moves up one row after it fires (only into an empty space, it never attacks)
+			if (instance_exists(id) && !moves) advance(true, true)
 		}
 	}
 }

@@ -103,6 +103,18 @@ if (hover != -1 && hover < array_length(global.Items) && global.ItemAiming == ""
 	draw_info_box(bx, slot_y[hover] - half, text)
 }
 
+// Bio of the card you're hovering in your hand (name, cost, stats, what it does)
+var hovered_card = noone
+with (CardParent_obj) if (in_hand && hovered) hovered_card = id
+if (hovered_card != noone && global.ItemAiming == "")
+{
+	var bio = card_bio(hovered_card.object_index, hovered_card.cost)
+	var bw = string_width(bio) + 16
+	var bh = string_height(bio) + 12
+	// Above the card, centered on it
+	draw_info_box(hovered_card.rest_x - bw / 2, hovered_card.rest_y - 148 - 40 - bh, bio)
+}
+
 draw_set_color(c_white)
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)

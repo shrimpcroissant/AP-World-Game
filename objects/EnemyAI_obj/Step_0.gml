@@ -79,7 +79,8 @@ switch (state)
 		state = "waiting"
 		global.PlayerTurn = true
 		global.HasDrawn = false
-		global.UnitsMax = Deck_obj.units_per_turn + Deck_obj.lanes_won(1)
+		Deck_obj.player_turn += 1
+		global.UnitsMax = Deck_obj.units_per_turn + Deck_obj.unit_ramp(Deck_obj.player_turn) + Deck_obj.lanes_won(1)
 		global.Units = global.UnitsMax
 		with (Deck_obj) show_reminder("Your turn, draw a card")
 

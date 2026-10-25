@@ -34,8 +34,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"CardDefaultSailor_spr",
-    "path":"sprites/CardDefaultSailor_spr/CardDefaultSailor_spr.yy",
+    "name":"CardSailor_spr",
+    "path":"sprites/CardSailor_spr/CardSailor_spr.yy",
   },
   "spriteMaskId":null,
   "visible":true,

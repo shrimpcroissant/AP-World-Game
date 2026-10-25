@@ -1,10 +1,14 @@
 // Count down the reminder text
 if (message_timer > 0) message_timer -= 1
 
-// Once someone has won, a click goes back to the menu
+// Once someone has won: win = click to continue, lose = "Retry this stop" or "Menu"
 if (global.Winner != 0)
 {
 	global.PlayerTurn = false
+
+	// Work out the coins once, as soon as you win, so the win screen can show them
+	if (global.Winner == 1 && win_reward == -1) win_reward = fight_reward()
+
 	if (mouse_check_button_pressed(mb_left))
 	{
 		if (global.Winner == 1)
@@ -15,14 +19,22 @@ if (global.Winner != 0)
 
 			// Earn coins for the shops (see fight_reward in Items_scr)
 			items_init()
-			global.Money += fight_reward()
+			global.Money += win_reward
 
 			// Go to this stop's shop if it has one (it goes on to the map after), otherwise the map
 			var shop = shop_after_fight(global.FightsWon)
 			if (shop != "") go_to_shop(shop, false)
 			else go_to_map()
 		}
-		else
+		else if (mouse_on_lose_button("retry"))
+		{
+			// Retry this stop: items go back to how they were when the fight started
+			global.Items = items_copy(global.FightStartItems)
+			global.LastLostCard = global.FightStartLostCard
+			global.PepperTurns = global.FightStartPepper
+			room_restart()
+		}
+		else if (mouse_on_lose_button("menu"))
 		{
 			room_goto(Menu_Room)
 		}
@@ -63,6 +75,12 @@ if (mouse_check_button_pressed(mb_left))
 		if (global.HasDrawn)
 		{
 			show_reminder("You already drew this turn")
+		}
+		else if (hand_count() >= max_hand)
+		{
+			// Hand is full: no card, but this still counts as your draw so you can play
+			show_reminder("Your hand is full (" + string(max_hand) + " cards)")
+			global.HasDrawn = true
 		}
 		else if (draw_card() != noone)
 		{

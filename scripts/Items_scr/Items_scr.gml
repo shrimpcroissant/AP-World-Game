@@ -181,6 +181,34 @@ function go_to_map()
 	room_goto(map_room)
 }
 
+// The bio shown when you hover a card in your hand. cost is passed in because it can change
+// (a card from the Storage chest costs 0). Keep the stats here in sync with the figure objects.
+function card_bio(card_obj, cost)
+{
+	var name = "Card"
+	var stats = ""
+	var text = ""
+	if (card_obj == CardSailor_obj)
+	{
+		name = "Sailor"
+		stats = "ATK 1   HP 1"
+		text = "The backbone of the fleet. Moves one row\nforward each battle and attacks the enemy\nfigure in front of it."
+	}
+	else if (card_obj == CardJumper_obj)
+	{
+		name = "Jumper"
+		stats = "ATK 1   HP 3"
+		text = "Moves diagonally: one row forward and one\nlane sideways each battle, bouncing off the\nsides of the ship."
+	}
+	else if (card_obj == CardArtillery_obj)
+	{
+		name = "Artillery"
+		stats = "HP 5   Fires every 5 turns"
+		text = "Doesn't walk. Every 5 turns it fires down its\nlane: 1 damage to every other figure there\n(not your other artillery), then moves up a row.\nStack them in one lane!"
+	}
+	return name + "   (Cost: " + string(cost) + " units)\n" + stats + "\n" + text
+}
+
 // The card that places a figure, so the Rhinoceros Horn can give a lost figure's card back
 function card_for_figure(fig_obj)
 {
@@ -214,11 +242,24 @@ function item_remove(kind)
 	}
 }
 
-// Coins earned at the end of a fight, right before a shop:
-// your units max minus the units you had left (the units you used on your last turn).
+// Coins earned for winning a fight: 4, plus 1 for each enemy lane light you turned green
 function fight_reward()
 {
-	return max(0, global.UnitsMax - global.Units)
+	var lit_lanes = 0
+	with (LaneEndLight_obj) if (watch_team == 1 && lit) lit_lanes += 1
+	return 4 + lit_lanes
+}
+
+// Copies your item bag (each item is a struct, so they're copied one by one).
+// Used to put your items back the way they were when you retry a fight.
+function items_copy(list)
+{
+	var result = []
+	for (var i = 0; i < array_length(list); i++)
+	{
+		array_push(result, { kind: list[i].kind, card: list[i].card })
+	}
+	return result
 }
 
 // Draws a sprite centered on (cx, cy), scaled to fit inside a size x size box
