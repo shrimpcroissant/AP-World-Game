@@ -35,6 +35,11 @@ draw_y = y
 flash = 0
 shake = 0
 
+// Item effects on this figure (see ItemBar_obj):
+gallop = false   // Arabian Horse: moves 2 spaces every turn
+sail_moves = 0   // Calicut Cotton Cloth: extra spaces to move in the next battle only
+stunned = 0      // Zebra: skips this many of its next actions
+
 // Takes damage, shows the hit, and removes the figure if it runs out of HP
 // The +1 HP row boost counts toward total HP, so a figure dies when total_hp() runs out.
 take_damage = function(amount)
@@ -46,12 +51,27 @@ take_damage = function(amount)
 	var fy = y
 	with (Deck_obj) add_popup(fx, fy - 20, "-" + string(amount), c_red)
 
-	if (total_hp() <= 0) die()
+	if (total_hp() <= 0 && !saved_by_myrrh()) die()
+}
+
+// The Myrrh item: the first time one of your figures would die, it survives with 1 HP instead
+saved_by_myrrh = function()
+{
+	if (team != 1 || !item_has("myrrh")) return false
+	item_remove("myrrh")
+	hp = 1 - hp_bonus()   // total HP of exactly 1
+	var fx = x
+	var fy = y
+	with (Deck_obj) add_popup(fx, fy - 40, "Saved by myrrh!", c_lime)
+	return true
 }
 
 // Removes the figure with a fade-out
 die = function()
 {
+	// Remember your last lost figure's card, for the Rhinoceros Horn item
+	if (team == 1) global.LastLostCard = card_for_figure(object_index)
+
 	var spr = sprite_index
 	var ys = image_yscale
 	var col = image_blend
@@ -119,9 +139,11 @@ next_x = function()
 
 // Moves one space toward the other side. If an enemy figure is in the way,
 // attacks it instead. If one of its own figures is in the way, waits.
-advance = function()
+// With only_move = true (extra moves from items) it never attacks, it just stops.
+// Returns true if the figure moved.
+advance = function(only_move = false)
 {
-	if (!moves) return
+	if (!moves) return false
 
 	var next_y = y - 64 * team   // player (team 1) goes up, AI (team -1) goes down
 	var nx = next_x()
@@ -135,20 +157,22 @@ advance = function()
 			y = next_y
 
 			// Leaving your home rows takes away the +1 HP boost, which can kill a hurt figure
-			if (total_hp() <= 0)
+			if (total_hp() <= 0 && !saved_by_myrrh())
 			{
 				var fx = x
 				var fy = y
 				with (Deck_obj) add_popup(fx, fy - 20, "Lost boost", c_red)
 				die()
 			}
+			return true
 		}
 	}
-	else if (ahead.team != team)
+	else if (ahead.team != team && !only_move)
 	{
 		ahead.take_damage(total_attack())
 		shake = 4   // little lunge so you can see who attacked
 	}
+	return false
 }
 
 // Hits every other figure in this lane (same column) for this figure's attack,
@@ -172,7 +196,31 @@ blast_lane = function()
 // What this figure does in the battle phase: move/attack, or count down and fire
 take_action = function()
 {
-	if (moves) advance()
+	// Dazzled by the Zebra: skips this action
+	if (stunned > 0)
+	{
+		stunned -= 1
+		var sx = x
+		var sy = y
+		with (Deck_obj) add_popup(sx, sy - 20, "Dazzled", c_white)
+		return
+	}
+
+	if (moves)
+	{
+		// Extra spaces from the Horse (every turn) or the Cotton Cloth (this battle only).
+		// Extra spaces only happen if the first step was a move, and they never attack.
+		var extra = (gallop ? 1 : 0) + sail_moves
+		sail_moves = 0
+		if (advance())
+		{
+			repeat (extra)
+			{
+				if (!instance_exists(id) || !advance(true)) break
+			}
+		}
+		if (!instance_exists(id)) return
+	}
 
 	if (fire_every > 0)
 	{

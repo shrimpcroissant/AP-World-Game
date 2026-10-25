@@ -4,17 +4,64 @@
 // so without it the shuffle would come out the same every time
 randomize()
 
-// Every card in the deck. To add a card, put its object in this list.
-// Any object whose parent is CardParent_obj works.
-// 15 sailors, 3 jumpers, 2 artillery (artillery is 10% of the deck)
-full_deck = [
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardJumper_obj, CardJumper_obj, CardJumper_obj,
-	CardArtillery_obj, CardArtillery_obj,
-]
-deck = array_shuffle(full_deck)
+// Every card in the deck: 20 cards, Sailors plus some good cards (Jumpers and Artillery).
+// Good cards get rarer each fight along the route, so the trip gets harder:
+//   China 6 jumpers + 4 artillery (10 sailors), Malacca 5 + 4, Mogadishu 5 + 3,
+//   India 4 + 3, Arabia 4 + 2, Iraq 3 + 2 (15 sailors).
+// The rest of the 20 are Sailors. Change the numbers in these lists to tune it.
+deck_size = 20
+jumpers_per_fight   = [6, 5, 5, 4, 4, 3]
+artillery_per_fight = [4, 4, 3, 3, 2, 2]
+
+var fight = 0
+if (variable_global_exists("FightsWon")) fight = clamp(global.FightsWon, 0, array_length(jumpers_per_fight) - 1)
+full_deck = []
+repeat (jumpers_per_fight[fight]) array_push(full_deck, CardJumper_obj)
+repeat (artillery_per_fight[fight]) array_push(full_deck, CardArtillery_obj)
+while (array_length(full_deck) < deck_size) array_push(full_deck, CardSailor_obj)
+
+// Shuffles the deck but spreads the good cards evenly through it, so you don't draw
+// them all early and then get nothing but Sailors for the rest of the fight.
+// The deck is cut into equal chunks, one per good card, and each good card lands
+// at a random spot inside its own chunk.
+spread_shuffle = function(cards)
+{
+	var good = []
+	var plain = []
+	for (var i = 0; i < array_length(cards); i++)
+	{
+		if (cards[i] == CardSailor_obj) array_push(plain, cards[i])
+		else array_push(good, cards[i])
+	}
+	var g = array_length(good)
+	if (g == 0) return array_shuffle(cards)
+	good = array_shuffle(good)
+	plain = array_shuffle(plain)
+
+	var n = array_length(cards)
+	var result = []
+	var p = 0
+	for (var k = 0; k < g; k++)
+	{
+		var size = floor((k + 1) * n / g) - floor(k * n / g)
+		var spot = irandom(size - 1)
+		for (var j = 0; j < size; j++)
+		{
+			if (j == spot) array_push(result, good[k])
+			else if (p < array_length(plain)) { array_push(result, plain[p]); p += 1 }
+		}
+	}
+	while (p < array_length(plain)) { array_push(result, plain[p]); p += 1 }
+	return result
+}
+deck = spread_shuffle(full_deck)
+
+// Extra draws: for every 4 units you get per turn (your units max), you draw 1 extra card.
+// So the normal 3 units = 1 card, 4-7 units = 2 cards, 8+ units = 3 cards. The AI has the same rule.
+cards_per_draw = function()
+{
+	return 1 + global.UnitsMax div 4
+}
 
 // Running out of cards: when your deck is empty at the start of your turn,
 // you skip that turn and the next ones, skip_turns in total (no drawing, no playing,
@@ -26,6 +73,15 @@ skips_left = 0
 // Called when your turn is about to start. Returns true if you skip this turn.
 check_skip = function()
 {
+	// The Magnetic Compass item refills an empty deck right away instead, then it's used up
+	if (skips_left == 0 && array_length(deck) == 0 && item_has("compass"))
+	{
+		item_remove("compass")
+		deck = spread_shuffle(full_deck)
+		show_reminder("Your compass found the way! Deck refilled")
+		return false
+	}
+
 	if (skips_left == 0 && array_length(deck) == 0) skips_left = skip_turns
 	if (skips_left == 0) return false
 
@@ -37,16 +93,17 @@ check_skip = function()
 	else
 	{
 		show_reminder("Out of cards! Last skipped turn, deck reshuffled")
-		deck = array_shuffle(full_deck)
+		deck = spread_shuffle(full_deck)
 	}
 	return true
 }
 
-starting_hand = 4  // cards drawn at the start
+starting_hand = 3  // cards drawn at the start
 
 // Playtest tools: an "Auto win" button in the top-left corner (F2 does the same).
 // Set this to false before you hand the game in.
 debug_tools = true
+global.DebugTools = debug_tools   // the shop also has a playtest key: F3 = +5 coins
 debug_btn_x = 20
 debug_btn_y = 20
 debug_btn_w = 150
@@ -57,7 +114,7 @@ pile_width = 108
 pile_height = 148
 back_sprite = noone  // set this to a card back sprite when you make one
 
-// You draw one card per turn, and must draw before playing a card.
+// You draw once per turn (1 card + extras, see cards_per_draw), and must draw before playing a card.
 // Clicking the turn token sets this back to false.
 global.HasDrawn = false
 
@@ -114,6 +171,7 @@ predict_battle = function()
 			moves: moves, fire_every: fire_every, turns_waited: turns_waited,
 			top_row_y: top_row_y, bottom_row_y: bottom_row_y,
 			jumps: jumps, dir_x: dir_x, left_lane_x: left_lane_x, right_lane_x: right_lane_x,
+			stunned: stunned, extra: (gallop ? 1 : 0) + sail_moves,
 			dmg: 0, dead: false
 		})
 	}
@@ -170,9 +228,17 @@ predict_battle = function()
 			var f = group[i]
 			if (f.dead) continue
 
+			// Dazzled figures (Zebra item) skip their action
+			if (f.stunned > 0)
+			{
+				f.stunned -= 1
+				continue
+			}
+
 			// Move or attack
 			if (f.moves)
 			{
+				var moved = false
 				var next_y = f.y - 64 * f.team
 				var nx = f.x
 				if (f.jumps)
@@ -193,12 +259,35 @@ predict_battle = function()
 						f.y = next_y
 						// Leaving the home rows loses the +1 HP boost
 						if (s_hp(f, rows) <= 0) f.dead = true
+						moved = true
 					}
 				}
 				else if (ahead.team != f.team)
 				{
 					hurt(ahead, s_atk(f, rows), s_hp, rows)
 				}
+
+				// Extra spaces from the Horse or Cotton Cloth items: only after a move, never attacking
+				if (moved) repeat (f.extra)
+				{
+					if (f.dead) break
+					var ey = f.y - 64 * f.team
+					var ex = f.x
+					if (f.jumps)
+					{
+						ex = f.x + 64 * f.dir_x
+						if (ex < f.left_lane_x || ex > f.right_lane_x)
+						{
+							f.dir_x *= -1
+							ex = f.x + 64 * f.dir_x
+						}
+					}
+					if (find_at(sims, ex, ey) != undefined || ey < f.top_row_y || ey > f.bottom_row_y) break
+					f.x = ex
+					f.y = ey
+					if (s_hp(f, rows) <= 0) f.dead = true
+				}
+				f.extra = (f.extra > 0 && f.inst.gallop) ? 1 : 0
 			}
 
 			// Artillery countdown and lane blast
@@ -314,3 +403,7 @@ draw_card = function()
 }
 
 repeat (starting_hand) draw_card()
+
+// Your item slots beside the ship (items bought in the shops, see Items_scr)
+items_init()
+instance_create_depth(0, 0, -500, ItemBar_obj)

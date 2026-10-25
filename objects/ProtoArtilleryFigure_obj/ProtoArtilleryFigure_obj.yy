@@ -34,8 +34,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"ProtoArtileryFigure_spr",
-    "path":"sprites/ProtoArtileryFigure_spr/ProtoArtileryFigure_spr.yy",
+    "name":"CannonFigure_spr",
+    "path":"sprites/CannonFigure_spr/CannonFigure_spr.yy",
   },
   "spriteMaskId":null,
   "visible":true,

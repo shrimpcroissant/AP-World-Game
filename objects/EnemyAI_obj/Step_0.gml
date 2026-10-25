@@ -12,7 +12,8 @@ if (timer > 0)
 switch (state)
 {
 	case "draw":
-		draw_card()
+		// Same rule as the player: 1 card, plus 1 extra for every 4 units it gets this turn
+		repeat (1 + units_max div 4) draw_card()
 		state = "play"
 		timer = think_delay
 		break
@@ -23,6 +24,7 @@ switch (state)
 		var card = choose_card()
 		var tiles = open_tiles()
 		if (holding_back && cards_played >= 1) card = noone
+		if (blocked_this_turn) card = noone   // Calicut Stone Tablet item
 		if (card != noone && array_length(tiles) > 0)
 		{
 			play_card(card, choose_tile(tiles))
@@ -48,6 +50,9 @@ switch (state)
 		break
 
 	case "move":
+		// The Zebra's lane block counts down once per enemy turn
+		if (blocked_lane_turns > 0) blocked_lane_turns -= 1
+
 		// Battle phase: one side acts, then the other. Who goes first flips every round.
 		with (Deck_obj) move_side(global.FirstSide)
 		state = "move_second"
@@ -77,6 +82,14 @@ switch (state)
 		global.UnitsMax = Deck_obj.units_per_turn + Deck_obj.lanes_won(1)
 		global.Units = global.UnitsMax
 		with (Deck_obj) show_reminder("Your turn, draw a card")
+
+		// Sack of Black Pepper item: +1 unit at the start of your turn while it lasts
+		if (variable_global_exists("PepperTurns") && global.PepperTurns > 0)
+		{
+			global.PepperTurns -= 1
+			global.Units += 1
+			with (Deck_obj) add_popup(x, y - 90, "Pepper: +1 unit", c_orange)
+		}
 		break
 
 	case "player_skipped":

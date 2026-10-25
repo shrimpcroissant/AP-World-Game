@@ -1,5 +1,5 @@
 // The AI opponent. It mostly plays by the same rules as the player:
-// it starts with 3 cards, draws 1 card each turn, and pays the same card costs.
+// it starts with 4 cards (one more than you), draws 1 card each turn, and pays the same card costs.
 // To keep fights beginner-friendly it's a bit weaker: 2 units a turn instead of 3,
 // and some turns it holds back after one card (see hold_back_chance).
 //
@@ -8,13 +8,13 @@
 
 randomize()
 
-// Same deck as the player: 15 sailors, 3 jumpers, 2 artillery (artillery is 10% of the deck)
+// A smaller deck than yours, so the enemy runs out of cards partway through a fight
+// (it then skips 3 turns, same rule as you): 12 cards, 9 sailors, 2 jumpers, 1 artillery.
 full_deck = [
 	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
-	CardJumper_obj, CardJumper_obj, CardJumper_obj,
-	CardArtillery_obj, CardArtillery_obj,
+	CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+	CardJumper_obj, CardJumper_obj,
+	CardArtillery_obj,
 ]
 deck = array_shuffle(full_deck)
 
@@ -23,15 +23,23 @@ deck = array_shuffle(full_deck)
 skip_turns = 3
 skips_left = 0
 
-starting_hand = 3
+starting_hand = 4
 units_per_turn = 2
 units_max = units_per_turn
 units = units_max
 
 // Chance each turn that the AI "saves up" and stops after playing one card
-hold_back_chance = 1 / 3
+hold_back_chance = 1 / 5
 holding_back = false
 cards_played = 0
+
+// Calicut Stone Tablet item: the AI plays no cards for this many of its turns
+blocked_turns = 0
+blocked_this_turn = false
+
+// Zebra item: the AI can't place figures in the lane at blocked_lane_x for this many of its turns
+blocked_lane_x = -1
+blocked_lane_turns = 0
 
 // The AI's hand. These are real card instances, just hidden and kept out of the player's hand.
 hand = []
@@ -88,9 +96,11 @@ open_tiles = function()
 {
 	var row_y = front_row_y
 	var tiles = []
+	// The Zebra item can block one lane so the enemy can't place figures in it
+	var blocked_x = (blocked_lane_turns > 0) ? blocked_lane_x : -1
 	with (Tile_obj)
 	{
-		if (y == row_y && !instance_position(x, y, FigureParent_obj)) array_push(tiles, id)
+		if (y == row_y && x != blocked_x && !instance_position(x, y, FigureParent_obj)) array_push(tiles, id)
 	}
 	return tiles
 }
@@ -118,6 +128,12 @@ start_turn = function()
 	timer = think_delay
 	holding_back = random(1) < hold_back_chance
 	cards_played = 0
+	blocked_this_turn = blocked_turns > 0
+	if (blocked_this_turn)
+	{
+		blocked_turns -= 1
+		with (Deck_obj) show_reminder("The enemy honors the Calicut tablet and plays no cards")
+	}
 
 	// Out of cards: skip drawing and playing, go straight to the battle
 	if (skips_left == 0 && array_length(deck) == 0) skips_left = skip_turns

@@ -9,13 +9,18 @@ if (global.Winner != 0)
 	{
 		if (global.Winner == 1)
 		{
-			// Won: show the map with this stop done
+			// Won: this stop is done
 			if (!variable_global_exists("FightsWon")) global.FightsWon = 0
 			global.FightsWon += 1
-			// Use the map room if the project has it, otherwise Map_Room
-			var map_room = asset_get_index("MapTravel_Room")
-			if (map_room == -1) map_room = Map_Room
-			room_goto(map_room)
+
+			// Earn coins for the shops (see fight_reward in Items_scr)
+			items_init()
+			global.Money += fight_reward()
+
+			// Go to this stop's shop if it has one (it goes on to the map after), otherwise the map
+			var shop = shop_after_fight(global.FightsWon)
+			if (shop != "") go_to_shop(shop, false)
+			else go_to_map()
 		}
 		else
 		{
@@ -61,6 +66,8 @@ if (mouse_check_button_pressed(mb_left))
 		}
 		else if (draw_card() != noone)
 		{
+			// Extra cards for every 4 units you have (stops early if the deck runs out)
+			repeat (cards_per_draw() - 1) draw_card()
 			global.HasDrawn = true
 		}
 	}

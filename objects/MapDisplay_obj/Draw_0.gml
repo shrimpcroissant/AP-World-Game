@@ -1,5 +1,5 @@
 // The route map, shown after every fight you win.
-// Stops in order: China (tutorial), Malacca, Mogadishu, India, Arabia.
+// Stops in order: China (tutorial), Malacca, Mogadishu, India, Arabia, Iraq (see route_stops in Items_scr).
 // Everything is in this Draw event on purpose, so it works even if the object only has a Draw event.
 
 // One-time setup
@@ -7,8 +7,13 @@ if (!variable_instance_exists(id, "click_delay"))
 {
 	// You only get here after winning a fight, so FightsWon is at least 1
 	if (!variable_global_exists("FightsWon") || global.FightsWon < 1) global.FightsWon = 1
-	global.Stops = ["China", "Malacca", "Mogadishu", "India", "Arabia"]
+	global.Stops = route_stops()
 	click_delay = 20   // short wait so the click that won the fight doesn't also skip the map
+
+	// The monsoon detour: after Malacca you set sail for India, but the monsoon
+	// blows you off course to Mogadishu. pushed_off_course turns true after you click "set sail".
+	detour = (global.FightsWon == 2)
+	pushed_off_course = false
 }
 
 // Area to fill: the camera view if the room uses one, otherwise the whole room
@@ -27,13 +32,20 @@ if (view_enabled && view_visible[0])
 var k = aw / 1366   // text scale, so it looks the same in a zoomed-in room
 
 // Which Map_spr frame: frame 0 after China (heading to Malacca), frame 1 after Malacca, and so on.
+// During the monsoon detour the map stays on the old frame until you click "set sail".
 // Map_spr only has 2 frames now, so later stops keep showing the last one until you add more.
-var frame = clamp(global.FightsWon - 1, 0, sprite_get_number(Map_spr) - 1)
+var frame_step = global.FightsWon - 1
+if (detour && !pushed_off_course) frame_step -= 1
+var frame = clamp(frame_step, 0, sprite_get_number(Map_spr) - 1)
 draw_sprite_stretched(Map_spr, frame, ax, ay, aw, ah)
 
 var done = global.FightsWon >= array_length(global.Stops)
 var text = ""
 if (done) text = "You reached " + global.Stops[array_length(global.Stops) - 1] + "! Journey complete.\nClick to return to the menu"
+else if (detour && !pushed_off_course) text = "Malacca done!  Next stop: India\nClick to set sail"
+else if (detour) text = "Oops! The monsoon winds pushed you toward Mogadishu!\nClick to continue"
+else if (global.Stops[global.FightsWon] == "Iraq") text = global.Stops[global.FightsWon - 1] + " done!  Next stop: the coast of Iraq\nClick to set sail"
+else if (shop_before_fight(global.FightsWon) != "") text = global.Stops[global.FightsWon - 1] + " done!  Next stop: " + global.Stops[global.FightsWon] + ", by way of Hormuz\nClick to set sail"
 else text = global.Stops[global.FightsWon - 1] + " done!  Next stop: " + global.Stops[global.FightsWon] + "\nClick to set sail"
 
 // Pulsing text near the bottom, with a dark box behind it so it reads on the map
@@ -62,5 +74,17 @@ if (click_delay > 0)
 else if (mouse_check_button_pressed(mb_left))
 {
 	if (done) room_goto(Menu_Room)
-	else room_goto(Prototype_Room)   // every stop uses this fight room for now
+	else if (detour && !pushed_off_course)
+	{
+		// "Set sail" for India: switch the map and show the monsoon message
+		pushed_off_course = true
+		click_delay = 20
+	}
+	else
+	{
+		// Some stops have a shop before the fight (Hormuz before Arabia), otherwise straight to the fight
+		var pre_shop = shop_before_fight(global.FightsWon)
+		if (pre_shop != "") go_to_shop(pre_shop, true)
+		else room_goto(fight_room_for(global.FightsWon))
+	}
 }
