@@ -1,5 +1,55 @@
-// Draw GUI: the win or lose message, drawn over everything in the middle of the screen
-if (global.Winner == 0) exit
+// Draw GUI: the "?" help button, the "How to play" panel, and the win or lose message,
+// all drawn over everything
+
+// "?" button, top right
+var gw = display_get_gui_width()
+var gh = display_get_gui_height()
+if (global.Winner == 0)
+{
+	var qx = gw - help_btn_size - 20
+	var qy = 20
+	draw_set_color(help_button_hit() ? make_color_rgb(110, 80, 40) : make_color_rgb(50, 35, 20))
+	draw_rectangle(qx, qy, qx + help_btn_size, qy + help_btn_size, false)
+	draw_set_color(c_white)
+	draw_rectangle(qx, qy, qx + help_btn_size, qy + help_btn_size, true)
+	draw_set_halign(fa_center)
+	draw_set_valign(fa_middle)
+	draw_text_transformed(qx + help_btn_size / 2, qy + help_btn_size / 2, "?", 2.5, 2.5, 0)
+}
+
+// "How to play" panel
+if (global.HelpOpen)
+{
+	draw_set_alpha(0.6)
+	draw_set_color(c_black)
+	draw_rectangle(0, 0, gw, gh, false)
+	draw_set_alpha(1)
+
+	var ts = 1.4   // text size
+	var pw = string_width(help_text) * ts + 60
+	var ph = string_height(help_text) * ts + 50
+	var px = gw / 2 - pw / 2
+	var py = gh / 2 - ph / 2
+	draw_set_color(make_color_rgb(60, 40, 20))
+	draw_rectangle(px, py, px + pw, py + ph, false)
+	draw_set_color(make_color_rgb(220, 190, 120))
+	draw_rectangle(px, py, px + pw, py + ph, true)
+	draw_rectangle(px + 3, py + 3, px + pw - 3, py + ph - 3, true)
+	draw_set_color(c_white)
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+	draw_text_transformed(px + 30, py + 25, help_text, ts, ts, 0)
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+	exit
+}
+
+if (global.Winner == 0)
+{
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+	exit
+}
 
 var cx = display_get_gui_width() / 2
 var cy = display_get_gui_height() / 2

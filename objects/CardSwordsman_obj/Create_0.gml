@@ -1,0 +1,10 @@
+// Runs CardParent_obj's Create first (hand setup). Keep this line at the top.
+event_inherited()
+
+// This card's own variables go below
+
+// The figure this card places on the board
+figure = SwordsmanFigure_obj
+
+// How many units it costs to play this card
+cost = 3

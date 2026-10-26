@@ -10,6 +10,7 @@ if place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1)
 		global.Items = []
 		global.LastLostCard = -1
 		global.PepperTurns = 0
+		global.TutorialShown = false   // show "How to play" again at the start of a new game
 	}
 	room_goto(Prototype_Room)
 }

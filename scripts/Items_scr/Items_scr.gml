@@ -206,6 +206,24 @@ function card_bio(card_obj, cost)
 		stats = "HP 5   Fires every 5 turns"
 		text = "Doesn't walk. Every 5 turns it fires down its\nlane: 1 damage to every other figure there\n(not your other artillery), then moves up a row.\nStack them in one lane!"
 	}
+	else if (card_obj == CardRunner_obj)
+	{
+		name = "Runner"
+		stats = "ATK 2   HP 2"
+		text = "Runs 2 spaces each battle (the 2nd step only\nmoves into an empty space). If it's blocked on the\nrow before the enemy's back row, it finishes\nthe lane anyway and turns the light green."
+	}
+	else if (card_obj == CardSwordsman_obj)
+	{
+		name = "Swordsman"
+		stats = "ATK 2   HP 1"
+		text = "Moves like a Sailor. When an enemy is in front\nof it, it strikes BOTH spaces in front: enemies\ntake full damage, your own figures take half."
+	}
+	else if (card_obj == CardSlave_obj)
+	{
+		name = "Slave"
+		stats = "ATK 0   HP 1"
+		text = "Enslaved people were forced into labor and traded\nacross the Indian Ocean world. Moves like a Sailor\nbut never attacks; it can only block and fill lanes."
+	}
 	return name + "   (Cost: " + string(cost) + " units)\n" + stats + "\n" + text
 }
 
@@ -215,6 +233,9 @@ function card_for_figure(fig_obj)
 	if (fig_obj == ProtoSailorFigure_obj) return CardSailor_obj
 	if (fig_obj == ProtoJumperFigure_obj) return CardJumper_obj
 	if (fig_obj == ProtoArtilleryFigure_obj) return CardArtillery_obj
+	if (fig_obj == RunnerFigure_obj) return CardRunner_obj
+	if (fig_obj == SwordsmanFigure_obj) return CardSwordsman_obj
+	if (fig_obj == SlaveFigure_obj) return CardSlave_obj
 	return -1
 }
 

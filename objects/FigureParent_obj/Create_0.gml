@@ -40,6 +40,11 @@ gallop = false   // Arabian Horse: moves 2 spaces every turn
 sail_moves = 0   // Calicut Cotton Cloth: extra spaces to move in the next battle only
 stunned = 0      // Zebra: skips this many of its next actions
 
+// Special abilities (set in each figure's own Create event):
+speed_moves = 0         // extra spaces moved every turn (Runner = 1)
+finishes_lane = false   // Runner: blocked on the row before the enemy's back row = lane finished
+cleaves = false         // Swordsman: strikes both spaces in front, half damage to your own figures
+
 // Takes damage, shows the hit, and removes the figure if it runs out of HP
 // The +1 HP row boost counts toward total HP, so a figure dies when total_hp() runs out.
 take_damage = function(amount)
@@ -150,6 +155,14 @@ advance = function(only_move = false, force = false)
 	var nx = next_x()
 	var ahead = instance_position(nx, next_y, FigureParent_obj)
 
+	// Runner: blocked on the row right before the enemy's back row, it finishes the lane anyway
+	var far_row = (team == 1) ? top_row_y : bottom_row_y
+	if (ahead != noone && finishes_lane && next_y == far_row)
+	{
+		finish_lane()
+		return false
+	}
+
 	if (ahead == noone)
 	{
 		if (next_y >= top_row_y && next_y <= bottom_row_y)
@@ -168,12 +181,42 @@ advance = function(only_move = false, force = false)
 			return true
 		}
 	}
-	else if (ahead.team != team && !only_move)
+	else if (ahead.team != team && !only_move && attack > 0)   // 0-attack figures (Slave) never attack
 	{
-		ahead.take_damage(total_attack())
+		if (cleaves)
+		{
+			// Swordsman: hits the figure in front AND the one behind it.
+			// Enemies take full attack, your own figures take half.
+			var dmg = total_attack()
+			var behind = instance_position(nx, next_y - 64 * team, FigureParent_obj)
+			ahead.take_damage(dmg)
+			if (behind != noone && instance_exists(behind))
+			{
+				if (behind.team != team) behind.take_damage(dmg)
+				else if (dmg div 2 > 0) behind.take_damage(dmg div 2)
+			}
+		}
+		else
+		{
+			ahead.take_damage(total_attack())
+		}
 		shake = 4   // little lunge so you can see who attacked
 	}
 	return false
+}
+
+// Runner: turns the enemy's light at the end of this lane green, like reaching the end
+finish_lane = function()
+{
+	var lx = x
+	var my_team = team
+	var fx = x
+	var fy = y
+	with (Deck_obj) add_popup(fx, fy - 20, "Lane finished!", c_lime)
+	with (LaneEndLight_obj)
+	{
+		if (lane_x == lx && watch_team == my_team && !lit) light_up()
+	}
 }
 
 // Artillery shot: hits every other figure in this lane (same column) for blast_damage,
@@ -213,7 +256,7 @@ take_action = function()
 	{
 		// Extra spaces from the Horse (every turn) or the Cotton Cloth (this battle only).
 		// Extra spaces only happen if the first step was a move, and they never attack.
-		var extra = (gallop ? 1 : 0) + sail_moves
+		var extra = (gallop ? 1 : 0) + sail_moves + speed_moves
 		sail_moves = 0
 		if (advance())
 		{

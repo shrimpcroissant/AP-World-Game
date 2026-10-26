@@ -42,6 +42,25 @@ if (global.Winner != 0)
 	exit
 }
 
+// "How to play" panel: any click closes it. The game unpauses one frame later,
+// so that click doesn't also pick a card or place a figure.
+if (help_unpause)
+{
+	help_unpause = false
+	global.paused = false
+}
+if (global.HelpOpen)
+{
+	if (mouse_check_button_pressed(mb_left)) close_help()
+	exit
+}
+// The "?" button (top-right) opens it again, any time you're not paused
+if (!global.paused && mouse_check_button_pressed(mb_left) && help_button_hit())
+{
+	open_help()
+	exit
+}
+
 // Keep the next-battle prediction up to date while it's your turn
 if (global.PlayerTurn) predict_battle()
 

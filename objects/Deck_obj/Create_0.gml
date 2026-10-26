@@ -4,20 +4,25 @@
 // so without it the shuffle would come out the same every time
 randomize()
 
-// Every card in the deck: 20 cards, Sailors plus some good cards (Jumpers and Artillery).
-// Good cards get rarer each fight along the route, so the trip gets harder:
-//   China 6 jumpers + 4 artillery (10 sailors), Malacca 5 + 4, Mogadishu 5 + 3,
-//   India 4 + 3, Arabia 4 + 2, Iraq 3 + 2 (15 sailors).
-// The rest of the 20 are Sailors. Change the numbers in these lists to tune it.
+// Every card in the deck: 20 cards. Good cards get rarer each fight along the route,
+// and Slaves only show up after India. The rest of the 20 are Sailors.
+// One number per fight: China, Malacca, Mogadishu, India, Arabia, Iraq.
 deck_size = 20
-jumpers_per_fight   = [6, 5, 5, 4, 4, 3]
-artillery_per_fight = [4, 4, 3, 3, 2, 2]
+jumpers_per_fight   = [5, 4, 4, 3, 3, 2]
+artillery_per_fight = [3, 3, 2, 2, 2, 1]
+runners_per_fight   = [2, 2, 2, 2, 1, 1]
+swordsmen_per_fight = [2, 2, 2, 2, 1, 1]
+slaves_per_fight    = [0, 0, 0, 0, 4, 6]
+//            Sailors: 8, 9,10,11, 9, 9  (whatever's left of the 20)
 
 var fight = 0
 if (variable_global_exists("FightsWon")) fight = clamp(global.FightsWon, 0, array_length(jumpers_per_fight) - 1)
 full_deck = []
 repeat (jumpers_per_fight[fight]) array_push(full_deck, CardJumper_obj)
 repeat (artillery_per_fight[fight]) array_push(full_deck, CardArtillery_obj)
+repeat (runners_per_fight[fight]) array_push(full_deck, CardRunner_obj)
+repeat (swordsmen_per_fight[fight]) array_push(full_deck, CardSwordsman_obj)
+repeat (slaves_per_fight[fight]) array_push(full_deck, CardSlave_obj)
 while (array_length(full_deck) < deck_size) array_push(full_deck, CardSailor_obj)
 
 // Shuffles the deck but spreads the good cards evenly through it, so you don't draw
@@ -190,7 +195,8 @@ predict_battle = function()
 			moves: moves, fire_every: fire_every, turns_waited: turns_waited,
 			top_row_y: top_row_y, bottom_row_y: bottom_row_y,
 			jumps: jumps, dir_x: dir_x, left_lane_x: left_lane_x, right_lane_x: right_lane_x,
-			stunned: stunned, extra: (gallop ? 1 : 0) + sail_moves, blast_damage: blast_damage,
+			stunned: stunned, extra: (gallop ? 1 : 0) + sail_moves + speed_moves, blast_damage: blast_damage,
+			finishes_lane: finishes_lane, cleaves: cleaves,
 			dmg: 0, dead: false
 		})
 	}
@@ -219,6 +225,24 @@ predict_battle = function()
 			if (!s.dead && s.x == px && s.y == py) return s
 		}
 		return undefined
+	}
+
+	// Runner finishing its lane early: lights the enemy's light there and wipes the lane
+	var finish = function(f, lights, sims, s_hp, rows, hurt)
+	{
+		for (var l = 0; l < array_length(lights); l++)
+		{
+			var lt = lights[l]
+			if (!lt.lit && lt.lane_x == f.x && lt.watch_team == f.team)
+			{
+				lt.lit = true
+				for (var j = 0; j < array_length(sims); j++)
+				{
+					var t = sims[j]
+					if (!t.dead && t.x == lt.lane_x) hurt(t, s_hp(t, rows), s_hp, rows)
+				}
+			}
+		}
 	}
 
 	// Unlit lane lights: a figure reaching one clears its whole lane
@@ -270,7 +294,12 @@ predict_battle = function()
 					}
 				}
 				var ahead = find_at(sims, nx, next_y)
-				if (ahead == undefined)
+				var far_row = (f.team == 1) ? f.top_row_y : f.bottom_row_y
+				if (ahead != undefined && f.finishes_lane && next_y == far_row)
+				{
+					finish(f, lights, sims, s_hp, rows, hurt)
+				}
+				else if (ahead == undefined)
 				{
 					if (next_y >= f.top_row_y && next_y <= f.bottom_row_y)
 					{
@@ -281,9 +310,17 @@ predict_battle = function()
 						moved = true
 					}
 				}
-				else if (ahead.team != f.team)
+				else if (ahead.team != f.team && f.attack > 0)
 				{
-					hurt(ahead, s_atk(f, rows), s_hp, rows)
+					var dmg = s_atk(f, rows)
+					var behind = f.cleaves ? find_at(sims, nx, next_y - 64 * f.team) : undefined
+					hurt(ahead, dmg, s_hp, rows)
+					// Swordsman: also hits the figure behind, half damage if it's friendly
+					if (behind != undefined)
+					{
+						if (behind.team != f.team) hurt(behind, dmg, s_hp, rows)
+						else if (dmg div 2 > 0) hurt(behind, dmg div 2, s_hp, rows)
+					}
 				}
 
 				// Extra spaces from the Horse or Cotton Cloth items: only after a move, never attacking
@@ -301,7 +338,12 @@ predict_battle = function()
 							ex = f.x + 64 * f.dir_x
 						}
 					}
-					if (find_at(sims, ex, ey) != undefined || ey < f.top_row_y || ey > f.bottom_row_y) break
+					if (find_at(sims, ex, ey) != undefined)
+					{
+						if (f.finishes_lane && ey == far_row) finish(f, lights, sims, s_hp, rows, hurt)
+						break
+					}
+					if (ey < f.top_row_y || ey > f.bottom_row_y) break
 					f.x = ex
 					f.y = ey
 					if (s_hp(f, rows) <= 0) f.dead = true
@@ -447,6 +489,58 @@ global.FightStartPepper = global.PepperTurns
 
 // Coins for winning, worked out once when you win (shown on the win screen)
 win_reward = -1
+
+// ---- "How to play" panel ----
+// Opens by itself at the start of the first fight (China) once per game,
+// and any time from the "?" button in the top-right corner. It pauses the game while open.
+global.HelpOpen = false
+help_unpause = false   // closing waits one frame so the closing click doesn't also play a card
+help_text =
+	"HOW TO PLAY\n\n" +
+	"GOAL: Turn 3 of the 4 lights at the TOP green.\n" +
+	"A light turns green when your figure reaches the enemy's back row.\n" +
+	"(The enemy wins if it turns all 4 lights at the BOTTOM green.)\n\n" +
+	"YOUR TURN:\n" +
+	"1. Click your deck (bottom right) to draw.\n" +
+	"2. Click a card, then a glowing tile in your front row.\n" +
+	"   Cards cost units (under your deck). Units refill each turn.\n" +
+	"3. End your turn with the token (left of the ship) or Space.\n\n" +
+	"BATTLE: every figure then moves forward by itself\n" +
+	"and attacks whatever is in front of it.\n\n" +
+	"TIPS:\n" +
+	"- Your 2 home rows give +1 HP. The enemy's 2 rows give +1 attack.\n" +
+	"- Hover cards, figures and items to see what they do.\n" +
+	"  \"DEATH\" means a figure won't survive the next battle.\n" +
+	"- Use items (beside the ship) on your turn. Right-click cancels.\n" +
+	"- Escape pauses. The ? button (top right) shows this again.\n\n" +
+	"Click anywhere to start"
+
+help_btn_size = 50
+help_button_hit = function()
+{
+	var bx = display_get_gui_width() - help_btn_size - 20
+	var by = 20
+	return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), bx, by, bx + help_btn_size, by + help_btn_size)
+}
+
+open_help = function()
+{
+	global.HelpOpen = true
+	global.paused = true
+	global.SelectedCard = noone
+}
+
+close_help = function()
+{
+	global.HelpOpen = false
+	global.TutorialShown = true
+	help_unpause = true   // unpause next frame
+}
+
+// Show it automatically at the start of the China fight, the first time
+if (!variable_global_exists("TutorialShown")) global.TutorialShown = false
+var first_fight = !variable_global_exists("FightsWon") || global.FightsWon == 0
+if (first_fight && !global.TutorialShown) open_help()
 
 // Buttons on the lose screen, in GUI coordinates (centered on the screen)
 lose_button = function(which)

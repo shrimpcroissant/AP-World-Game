@@ -30,8 +30,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"ExitButton_spr",
-    "path":"sprites/ExitButton_spr/ExitButton_spr.yy",
+    "name":"ContextButton_spr",
+    "path":"sprites/ContextButton_spr/ContextButton_spr.yy",
   },
   "spriteMaskId":null,
   "visible":true,

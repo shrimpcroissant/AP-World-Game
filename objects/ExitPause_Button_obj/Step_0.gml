@@ -1,7 +1,8 @@
 // Draw above the board, figures and item slots (the pause frame is at -1000)
 depth = -1001
 
-if global.paused = false
+// Hidden while unpaused, or while the "How to play" panel is open
+if (global.paused = false || (variable_global_exists("HelpOpen") && global.HelpOpen))
 {
 	image_alpha = 0
 	exit   // hidden: not clickable either (it sits over the top of the board)

@@ -59,7 +59,7 @@
     },
     "name":"Ship_APWORLD_spr",
     "playback":1,
-    "playbackSpeed":30.0,
+    "playbackSpeed":4.0,
     "playbackSpeedType":0,
     "resourceType":"GMSequence",
     "resourceVersion":"2.0",
