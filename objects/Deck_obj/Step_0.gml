@@ -44,6 +44,8 @@ if (global.Winner != 0)
 
 // "How to play" panel: any click closes it. The game unpauses one frame later,
 // so that click doesn't also pick a card or place a figure.
+// Story screens close with a click or Space.
+// Either way it asks "Are you sure?" first: Yes (or Space) closes it, No goes back.
 if (help_unpause)
 {
 	help_unpause = false
@@ -51,7 +53,21 @@ if (help_unpause)
 }
 if (global.HelpOpen)
 {
-	if (mouse_check_button_pressed(mb_left)) close_help()
+	var gmx = device_mouse_x_to_gui(0)
+	var gmy = device_mouse_y_to_gui(0)
+	if (confirming)
+	{
+		var pick = ""
+		if (mouse_check_button_pressed(mb_left)) pick = confirm_hit(0, 0, display_get_gui_width(), display_get_gui_height(), 1, gmx, gmy)
+		if (keyboard_check_pressed(vk_space)) pick = "yes"
+		if (pick == "yes")
+		{
+			confirming = false
+			close_help()
+		}
+		else if (pick == "no") confirming = false
+	}
+	else if (mouse_check_button_pressed(mb_left) || (story_open && keyboard_check_pressed(vk_space))) confirming = true
 	exit
 }
 // The "?" button (top-right) opens it again, any time you're not paused

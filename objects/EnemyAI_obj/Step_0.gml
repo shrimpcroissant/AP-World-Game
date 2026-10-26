@@ -67,6 +67,9 @@ switch (state)
 		break
 
 	case "end":
+		// Your turn comes around: cards that have been in your hand too long are discarded
+		var discarded = Deck_obj.age_hand()
+
 		// If the player is out of cards, their turn is skipped and the AI goes again
 		if (Deck_obj.check_skip())
 		{
@@ -83,6 +86,7 @@ switch (state)
 		global.UnitsMax = Deck_obj.units_per_turn + Deck_obj.unit_ramp(Deck_obj.player_turn) + Deck_obj.lanes_won(1)
 		global.Units = global.UnitsMax
 		with (Deck_obj) show_reminder("Your turn, draw a card")
+		with (Deck_obj) show_discarded(discarded)
 
 		// Sack of Black Pepper item: +1 unit at the start of your turn while it lasts
 		if (variable_global_exists("PepperTurns") && global.PepperTurns > 0)

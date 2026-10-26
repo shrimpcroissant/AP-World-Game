@@ -10,10 +10,10 @@ randomize()
 deck_size = 20
 jumpers_per_fight   = [5, 4, 4, 3, 3, 2]
 artillery_per_fight = [3, 3, 2, 2, 2, 1]
-runners_per_fight   = [2, 2, 2, 2, 1, 1]
-swordsmen_per_fight = [2, 2, 2, 2, 1, 1]
+runners_per_fight   = [2, 2, 2, 2, 2, 2]
+swordsmen_per_fight = [2, 2, 2, 2, 2, 2]
 slaves_per_fight    = [0, 0, 0, 0, 4, 6]
-//            Sailors: 8, 9,10,11, 9, 9  (whatever's left of the 20)
+//            Sailors: 8, 9,10,11, 7, 7  (whatever's left of the 20)
 
 var fight = 0
 if (variable_global_exists("FightsWon")) fight = clamp(global.FightsWon, 0, array_length(jumpers_per_fight) - 1)
@@ -151,6 +151,38 @@ unit_ramp = function(turn)
 
 // Hand limit: you can't hold more than this many cards. Extra draws stay in the deck.
 max_hand = 7
+
+// Cards only stay in your hand for hand_turns of your turns: a card drawn on turn 1 can be
+// played on turns 1, 2 and 3, then it leaves your hand when turn 4 starts.
+// Called by EnemyAI_obj each time your turn comes around (skipped turns count too).
+hand_turns = 3
+age_hand = function()
+{
+	var gone = 0
+	var limit = hand_turns
+	with (CardParent_obj)
+	{
+		if (!in_hand) continue
+		turns_in_hand += 1
+		if (turns_in_hand >= limit)
+		{
+			if (global.SelectedCard == id) global.SelectedCard = noone
+			var cx = rest_x
+			var cy = rest_y - 160
+			with (other) add_popup(cx, cy, "Discarded", c_orange)
+			instance_destroy()
+			gone += 1
+		}
+	}
+	return gone
+}
+
+// The reminder for cards age_hand discarded (shown after "Your turn" so it isn't covered up)
+show_discarded = function(gone)
+{
+	if (gone == 1) show_reminder("Your turn, draw a card. 1 old card was discarded")
+	else if (gone > 1) show_reminder("Your turn, draw a card. " + string(gone) + " old cards were discarded")
+}
 hand_count = function()
 {
 	var n = 0
@@ -352,8 +384,7 @@ predict_battle = function()
 			}
 
 			// Artillery countdown and lane blast (same rules as FigureParent_obj's blast_lane):
-			// blast_damage to every other figure in the lane except friendly artillery,
-			// then it moves up one row if that space is empty
+			// blast_damage to every enemy figure in the lane, then it moves up one row if that space is empty
 			if (f.fire_every > 0)
 			{
 				f.turns_waited += 1
@@ -362,7 +393,7 @@ predict_battle = function()
 					for (var j = 0; j < array_length(sims); j++)
 					{
 						var t = sims[j]
-						if (t != f && !t.dead && t.x == f.x && !(t.team == f.team && t.fire_every > 0)) hurt(t, f.blast_damage, s_hp, rows)
+						if (!t.dead && t.x == f.x && t.team != f.team) hurt(t, f.blast_damage, s_hp, rows)
 					}
 					f.turns_waited = 0
 
@@ -509,6 +540,7 @@ help_text =
 	"and attacks whatever is in front of it.\n\n" +
 	"TIPS:\n" +
 	"- Your 2 home rows give +1 HP. The enemy's 2 rows give +1 attack.\n" +
+	"- Cards only stay in your hand for 3 turns (orange = last turn).\n" +
 	"- Hover cards, figures and items to see what they do.\n" +
 	"  \"DEATH\" means a figure won't survive the next battle.\n" +
 	"- Use items (beside the ship) on your turn. Right-click cancels.\n" +
@@ -523,6 +555,13 @@ help_button_hit = function()
 	return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), bx, by, bx + help_btn_size, by + help_btn_size)
 }
 
+// The panel can also show a story screen (see story_text in Items_scr).
+// story_open = true means the panel is showing story_shown instead of help_text.
+story_open = false
+story_shown = ""
+help_after_story = false   // China: "How to play" opens right after the story screen
+confirming = false         // true while the "Are you sure?" box is up over the panel
+
 open_help = function()
 {
 	global.HelpOpen = true
@@ -532,15 +571,36 @@ open_help = function()
 
 close_help = function()
 {
+	// Story first, then "How to play" if it's waiting
+	if (story_open)
+	{
+		story_open = false
+		if (help_after_story)
+		{
+			help_after_story = false
+			return
+		}
+	}
+	else global.TutorialShown = true
 	global.HelpOpen = false
-	global.TutorialShown = true
 	help_unpause = true   // unpause next frame
 }
 
 // Show it automatically at the start of the China fight, the first time
 if (!variable_global_exists("TutorialShown")) global.TutorialShown = false
-var first_fight = !variable_global_exists("FightsWon") || global.FightsWon == 0
+var fights_before = variable_global_exists("FightsWon") ? global.FightsWon : 0
+var first_fight = (fights_before == 0)
 if (first_fight && !global.TutorialShown) open_help()
+
+// Story screen before this fight, once per game (so not again on "Retry this stop")
+var story_key = story_before_fight(fights_before)
+if (story_first_time(story_key))
+{
+	help_after_story = global.HelpOpen
+	story_open = true
+	story_shown = story_text(story_key)
+	open_help()
+}
 
 // Buttons on the lose screen, in GUI coordinates (centered on the screen)
 lose_button = function(which)

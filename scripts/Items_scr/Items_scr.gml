@@ -181,6 +181,149 @@ function go_to_map()
 	room_goto(map_room)
 }
 
+// ---- Story screens ----
+// Full-screen story text shown once per game (not again when you retry a fight).
+// "china", "malacca" and "arabia" show at the start of that fight (Deck_obj),
+// "detour" shows on the map after Malacca, when the ship ends up heading for Mogadishu (MapDisplay_obj).
+function story_text(key)
+{
+	switch (key)
+	{
+		case "china":
+			return "In 1410 you were appointed to be the captain of a massive trade between The Ming dynasty, The kingdom of Calicut, and The Jalayirid kingdom. You were to sail to India, pay them for 1,000 slaves, and sail them to the coast of Iraq where a series of small dhow ships would pick them up and take them to the finish line, as your massive ship could not sail on the shallower waters. This was a massive ploy to show the economic might of the Ming and convince more states to join the tributary system, because of this you were given a much higher budget for this journey than most, you were even given extra gold just to sell and buy new supplies in case anything went wrong."
+		case "malacca":
+			return "In 1405 the sultanate of Malacca joined the Chinese tributary system. Because of this Zheng He assisted them into the country they are today, a big project during this time was to rid Malacca of its criminal underworld."
+		case "detour":
+			return "Because of your Ming affiliations, former criminals misguided you and let your ship leave the harbor at an incorrect time, forcing you to detour at the city state Mogadishu."
+		case "arabia":
+			return "Because the trade was originally with the Jalayirid kingdom, the Kara Koyunlu Turkoman Dynasty decided to attack you on your way into the coast, you must attempt and escape while fighting off people on all sides at the dead of night."
+	}
+	return ""
+}
+
+// Which story screen comes before a fight, by how many fights you've won before it ("" = none)
+function story_before_fight(fights_won)
+{
+	switch (fights_won)
+	{
+		case 0: return "china"
+		case 1: return "malacca"
+		case 4: return "arabia"
+	}
+	return ""
+}
+
+// True the first time it's asked about a story this game, then false (so each one shows once).
+// Start_Button clears global.StorySeen when you start a new game.
+function story_first_time(key)
+{
+	if (key == "" || story_text(key) == "") return false
+	if (!variable_global_exists("StorySeen")) global.StorySeen = {}
+	if (variable_struct_exists(global.StorySeen, key)) return false
+	global.StorySeen[$ key] = true
+	return true
+}
+
+// Draws a story screen: dims the whole area, then a framed box with the text wrapped to fit.
+// (ax, ay, aw, ah) is the area to cover, k scales the text (1 = normal size).
+function draw_story_panel(ax, ay, aw, ah, k, text)
+{
+	draw_set_alpha(0.75)
+	draw_set_color(c_black)
+	draw_rectangle(ax, ay, ax + aw, ay + ah, false)
+	draw_set_alpha(1)
+
+	var ts = 1.6 * k          // text size
+	var wrap = 560            // wrap width before scaling
+	var footer = "Click or press Space to continue"
+	var tw = string_width_ext(text, -1, wrap) * ts
+	var th = string_height_ext(text, -1, wrap) * ts
+	var pw = max(tw, string_width(footer) * 1.2 * k) + 80 * k
+	var ph = th + 110 * k
+	var px = ax + aw / 2 - pw / 2
+	var py = ay + ah / 2 - ph / 2
+	draw_set_color(make_color_rgb(60, 40, 20))
+	draw_rectangle(px, py, px + pw, py + ph, false)
+	draw_set_color(make_color_rgb(220, 190, 120))
+	draw_rectangle(px, py, px + pw, py + ph, true)
+	draw_rectangle(px + 3, py + 3, px + pw - 3, py + ph - 3, true)
+
+	draw_set_halign(fa_center)
+	draw_set_valign(fa_top)
+	draw_set_color(c_white)
+	draw_text_ext_transformed(px + pw / 2, py + 40 * k, text, -1, wrap, ts, ts, 0)
+	draw_set_alpha(0.65 + 0.35 * sin(current_time / 200))
+	draw_set_color(make_color_rgb(220, 190, 120))
+	draw_text_transformed(px + pw / 2, py + ph - 40 * k, footer, 1.2 * k, 1.2 * k, 0)
+	draw_set_alpha(1)
+	draw_set_color(c_white)
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+}
+
+// ---- "Are you sure?" box ----
+// Shown when you try to close a pop-up (story screens, "How to play"), so a stray click
+// doesn't skip it. Yes closes the pop-up, No goes back to it.
+// (ax, ay, aw, ah) is the area it's centered in, k scales it (1 = normal size).
+
+// Where the Yes and No buttons are
+function confirm_button(ax, ay, aw, ah, k, which)
+{
+	var cx = ax + aw / 2
+	var cy = ay + ah / 2
+	var w = 150 * k
+	var h = 50 * k
+	var bx = (which == "yes") ? cx - w - 15 * k : cx + 15 * k
+	return { x1: bx, y1: cy + 10 * k, x2: bx + w, y2: cy + 10 * k + h }
+}
+
+// "yes", "no", or "" for whichever button (mx, my) is over
+function confirm_hit(ax, ay, aw, ah, k, mx, my)
+{
+	var b = confirm_button(ax, ay, aw, ah, k, "yes")
+	if (point_in_rectangle(mx, my, b.x1, b.y1, b.x2, b.y2)) return "yes"
+	b = confirm_button(ax, ay, aw, ah, k, "no")
+	if (point_in_rectangle(mx, my, b.x1, b.y1, b.x2, b.y2)) return "no"
+	return ""
+}
+
+function draw_confirm(ax, ay, aw, ah, k, mx, my)
+{
+	draw_set_alpha(0.5)
+	draw_set_color(c_black)
+	draw_rectangle(ax, ay, ax + aw, ay + ah, false)
+	draw_set_alpha(1)
+
+	var cx = ax + aw / 2
+	var cy = ay + ah / 2
+	var bw = 420 * k
+	var bh = 170 * k
+	draw_set_color(make_color_rgb(60, 40, 20))
+	draw_rectangle(cx - bw / 2, cy - 100 * k, cx + bw / 2, cy - 100 * k + bh, false)
+	draw_set_color(make_color_rgb(220, 190, 120))
+	draw_rectangle(cx - bw / 2, cy - 100 * k, cx + bw / 2, cy - 100 * k + bh, true)
+
+	draw_set_halign(fa_center)
+	draw_set_valign(fa_middle)
+	draw_set_color(c_white)
+	draw_text_transformed(cx, cy - 50 * k, "Are you sure?", 2 * k, 2 * k, 0)
+
+	var over = confirm_hit(ax, ay, aw, ah, k, mx, my)
+	var names = ["yes", "no"]
+	for (var i = 0; i < 2; i++)
+	{
+		var b = confirm_button(ax, ay, aw, ah, k, names[i])
+		if (i == 0) draw_set_color(over == "yes" ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
+		else draw_set_color(over == "no" ? make_color_rgb(130, 60, 60) : make_color_rgb(90, 40, 40))
+		draw_rectangle(b.x1, b.y1, b.x2, b.y2, false)
+		draw_set_color(c_white)
+		draw_rectangle(b.x1, b.y1, b.x2, b.y2, true)
+		draw_text_transformed((b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, (i == 0) ? "Yes" : "No", 1.5 * k, 1.5 * k, 0)
+	}
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+}
+
 // The bio shown when you hover a card in your hand. cost is passed in because it can change
 // (a card from the Storage chest costs 0). Keep the stats here in sync with the figure objects.
 function card_bio(card_obj, cost)
@@ -192,37 +335,37 @@ function card_bio(card_obj, cost)
 	{
 		name = "Sailor"
 		stats = "ATK 1   HP 1"
-		text = "The backbone of the fleet. Moves one row\nforward each battle and attacks the enemy\nfigure in front of it."
+		text = "Moves: 1 row forward each battle.\nAttacks: an enemy right in front of it\n(instead of moving). Waits behind your own figures."
 	}
 	else if (card_obj == CardJumper_obj)
 	{
 		name = "Jumper"
 		stats = "ATK 1   HP 3"
-		text = "Moves diagonally: one row forward and one\nlane sideways each battle, bouncing off the\nsides of the ship."
+		text = "Moves: diagonally, 1 row forward and 1 lane over,\nbouncing off the sides of the ship.\nAttacks: an enemy on the diagonal space it\nwould move to."
 	}
 	else if (card_obj == CardArtillery_obj)
 	{
 		name = "Artillery"
 		stats = "HP 5   Fires every 5 turns"
-		text = "Doesn't walk. Every 5 turns it fires down its\nlane: 1 damage to every other figure there\n(not your other artillery), then moves up a row.\nStack them in one lane!"
+		text = "Moves: doesn't walk.\nAttacks: every 5 turns it fires its whole lane,\n1 damage to every enemy there (never your\nown figures), then moves up a row."
 	}
 	else if (card_obj == CardRunner_obj)
 	{
 		name = "Runner"
 		stats = "ATK 2   HP 2"
-		text = "Runs 2 spaces each battle (the 2nd step only\nmoves into an empty space). If it's blocked on the\nrow before the enemy's back row, it finishes\nthe lane anyway and turns the light green."
+		text = "Moves: 2 spaces each battle (the 2nd step only\ngoes into an empty space). Attacks: like a Sailor.\nSpecial: blocked on the row before the enemy's\nback row, it finishes the lane anyway."
 	}
 	else if (card_obj == CardSwordsman_obj)
 	{
 		name = "Swordsman"
 		stats = "ATK 2   HP 1"
-		text = "Moves like a Sailor. When an enemy is in front\nof it, it strikes BOTH spaces in front: enemies\ntake full damage, your own figures take half."
+		text = "Moves: like a Sailor.\nAttacks: with an enemy in front, it hits BOTH\nspaces ahead. Enemies take full damage,\nyour own figures take half."
 	}
 	else if (card_obj == CardSlave_obj)
 	{
 		name = "Slave"
 		stats = "ATK 0   HP 1"
-		text = "Enslaved people were forced into labor and traded\nacross the Indian Ocean world. Moves like a Sailor\nbut never attacks; it can only block and fill lanes."
+		text = "Enslaved people were forced into labor and traded\nacross the Indian Ocean world.\nMoves: like a Sailor. Never attacks:\nit can only block and fill lanes."
 	}
 	return name + "   (Cost: " + string(cost) + " units)\n" + stats + "\n" + text
 }

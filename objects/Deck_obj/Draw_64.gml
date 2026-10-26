@@ -17,6 +17,14 @@ if (global.Winner == 0)
 	draw_text_transformed(qx + help_btn_size / 2, qy + help_btn_size / 2, "?", 2.5, 2.5, 0)
 }
 
+// Story screen (uses the same pause as the "How to play" panel)
+if (global.HelpOpen && story_open)
+{
+	draw_story_panel(0, 0, gw, gh, 1, story_shown)
+	if (confirming) draw_confirm(0, 0, gw, gh, 1, device_mouse_x_to_gui(0), device_mouse_y_to_gui(0))
+	exit
+}
+
 // "How to play" panel
 if (global.HelpOpen)
 {
@@ -41,6 +49,7 @@ if (global.HelpOpen)
 	draw_text_transformed(px + 30, py + 25, help_text, ts, ts, 0)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
+	if (confirming) draw_confirm(0, 0, gw, gh, 1, device_mouse_x_to_gui(0), device_mouse_y_to_gui(0))
 	exit
 }
 

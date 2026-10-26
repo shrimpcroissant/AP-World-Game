@@ -22,6 +22,9 @@ hand_depth = depth
 // Cards with in_hand = true get laid out in the hand fan
 in_hand = true
 
+// How many of your turns this card has been in your hand. At Deck_obj.hand_turns it's discarded.
+turns_in_hand = 0
+
 // Remembers the order cards were made in, so the hand keeps a stable order
 if (!variable_global_exists("CardOrder"))
 {

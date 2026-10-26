@@ -109,6 +109,12 @@ with (CardParent_obj) if (in_hand && hovered) hovered_card = id
 if (hovered_card != noone && global.ItemAiming == "")
 {
 	var bio = card_bio(hovered_card.object_index, hovered_card.cost)
+	if (instance_exists(Deck_obj))
+	{
+		var turns_left = Deck_obj.hand_turns - hovered_card.turns_in_hand
+		if (turns_left <= 1) bio += "\nLAST TURN: discarded if you don't play it now"
+		else bio += "\nLeaves your hand in " + string(turns_left) + " turns"
+	}
 	var bw = string_width(bio) + 16
 	var bh = string_height(bio) + 12
 	// Above the card, centered on it

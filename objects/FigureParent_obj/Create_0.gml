@@ -19,7 +19,7 @@ hp = 1
 
 // Figures that don't move (like Artillery) set moves = false.
 // fire_every > 0 makes the figure blast its whole lane every that many turns,
-// hitting every other figure in the lane for its attack, friendly ones too.
+// hitting every enemy figure in the lane (never its own side).
 moves = true
 fire_every = 0
 turns_waited = 0
@@ -219,19 +219,18 @@ finish_lane = function()
 	}
 }
 
-// Artillery shot: hits every other figure in this lane (same column) for blast_damage,
-// friend or enemy, except friendly artillery (so you can stack artillery in one lane)
+// Artillery shot: hits every enemy figure in this lane (same column) for blast_damage.
+// Your own figures are never hit.
 blast_damage = 1
 blast_lane = function()
 {
 	var lane_x = x
 	var damage = blast_damage
-	var me = id
 	var my_team = team
 	var hit = []
 	with (FigureParent_obj)
 	{
-		if (x == lane_x && id != me && !(team == my_team && fire_every > 0)) array_push(hit, id)
+		if (x == lane_x && team != my_team) array_push(hit, id)
 	}
 	for (var i = 0; i < array_length(hit); i++)
 	{

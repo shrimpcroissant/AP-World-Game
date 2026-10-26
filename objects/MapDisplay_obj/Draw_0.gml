@@ -13,10 +13,13 @@ if (!variable_instance_exists(id, "click_delay"))
 	// The game hides the normal cursor, so this room needs the custom cursor object
 	if (!instance_exists(Mouse_obj)) instance_create_depth(mouse_x, mouse_y, -2000, Mouse_obj)
 
-	// The monsoon detour: after Malacca you set sail for India, but the monsoon
-	// blows you off course to Mogadishu. pushed_off_course turns true after you click "set sail".
+	// The detour: after Malacca you set sail for India, but former criminals in Malacca make
+	// you leave at the wrong time and you detour to Mogadishu. pushed_off_course turns true after you click "set sail",
+	// and the "detour" story screen shows then (once per game, see story_text in Items_scr).
 	detour = (global.FightsWon == 2)
 	pushed_off_course = false
+	story_showing = false
+	confirming = false   // the "Are you sure?" box over the story screen
 }
 
 // Area to fill: the camera view if the room uses one, otherwise the whole room
@@ -35,7 +38,7 @@ if (view_enabled && view_visible[0])
 var k = aw / 1366   // text scale, so it looks the same in a zoomed-in room
 
 // Which Map_spr frame: frame 0 after China (heading to Malacca), frame 1 after Malacca, and so on.
-// During the monsoon detour the map stays on the old frame until you click "set sail".
+// During the detour the map stays on the old frame until you click "set sail".
 // Map_spr only has 2 frames now, so later stops keep showing the last one until you add more.
 var frame_step = global.FightsWon - 1
 if (detour && !pushed_off_course) frame_step -= 1
@@ -46,7 +49,7 @@ var done = global.FightsWon >= array_length(global.Stops)
 var text = ""
 if (done) text = "You reached " + global.Stops[array_length(global.Stops) - 1] + "! Journey complete.\nClick to return to the menu"
 else if (detour && !pushed_off_course) text = "Malacca done!  Next stop: India\nClick to set sail"
-else if (detour) text = "Oops! The monsoon winds pushed you toward Mogadishu!\nClick to continue"
+else if (detour) text = "Oops! You left Malacca at the wrong time!\nDetour to Mogadishu. Click to continue"
 else if (global.Stops[global.FightsWon] == "Iraq") text = global.Stops[global.FightsWon - 1] + " done!  Next stop: the coast of Iraq\nClick to set sail"
 else if (shop_before_fight(global.FightsWon) != "") text = global.Stops[global.FightsWon - 1] + " done!  Next stop: " + global.Stops[global.FightsWon] + ", by way of Hormuz\nClick to set sail"
 else text = global.Stops[global.FightsWon - 1] + " done!  Next stop: " + global.Stops[global.FightsWon] + "\nClick to set sail"
@@ -69,18 +72,42 @@ draw_set_alpha(1)
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)
 
+// The detour story screen, over the map
+if (story_showing) draw_story_panel(ax, ay, aw, ah, k, story_text("detour"))
+if (story_showing && confirming) draw_confirm(ax, ay, aw, ah, k, mouse_x, mouse_y)
+
 // Click anywhere to sail to the next fight, or back to the menu after Arabia
 if (click_delay > 0)
 {
 	click_delay -= 1
+}
+else if (story_showing)
+{
+	// Click or Space asks "Are you sure?". Yes (or Space) closes the story screen,
+	// then the map's own message shows. No goes back to the story.
+	if (confirming)
+	{
+		var pick = ""
+		if (mouse_check_button_pressed(mb_left)) pick = confirm_hit(ax, ay, aw, ah, k, mouse_x, mouse_y)
+		if (keyboard_check_pressed(vk_space)) pick = "yes"
+		if (pick == "yes")
+		{
+			confirming = false
+			story_showing = false
+			click_delay = 20
+		}
+		else if (pick == "no") confirming = false
+	}
+	else if (mouse_check_button_pressed(mb_left) || keyboard_check_pressed(vk_space)) confirming = true
 }
 else if (mouse_check_button_pressed(mb_left))
 {
 	if (done) room_goto(Menu_Room)
 	else if (detour && !pushed_off_course)
 	{
-		// "Set sail" for India: switch the map and show the monsoon message
+		// "Set sail" for India: switch the map, then show the detour story screen
 		pushed_off_course = true
+		story_showing = story_first_time("detour")
 		click_delay = 20
 	}
 	else

@@ -90,9 +90,10 @@ x = lerp(x, rest_x, move_speed)
 y = lerp(y, target_y, move_speed)
 image_angle = lerp(image_angle, rest_angle, move_speed)
 
-// Cards you can't afford right now are dimmed
-if (global.PlayerTurn && cost > global.Units) image_blend = c_gray
-else image_blend = c_white
+// Cards you can't afford right now are dimmed, and cards on their last turn in your hand are orange
+var last_turn = instance_exists(Deck_obj) && turns_in_hand >= Deck_obj.hand_turns - 1
+if (global.PlayerTurn && cost > global.Units) image_blend = last_turn ? make_color_rgb(150, 100, 60) : c_gray
+else image_blend = last_turn ? make_color_rgb(255, 170, 90) : c_white
 
 // Cards further right draw on top
 depth = hand_depth - index
