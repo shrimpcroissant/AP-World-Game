@@ -1,4 +1,4 @@
-if (variable_global_exists("paused") && global.paused) exit
+if (input_blocked()) exit
 
 switch (state)
 {

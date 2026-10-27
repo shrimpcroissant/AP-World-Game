@@ -8,7 +8,11 @@ var help_open = variable_global_exists("HelpOpen") && global.HelpOpen
 if (keyboard_check_pressed(vk_escape) && !help_open)
 {
 	global.paused = !global.paused
+	if (!global.paused) block_input_briefly()   // closing it doesn't also click the board
 }
+
+// Slate blue instead of the skin-colored art
+image_blend = make_color_rgb(120, 150, 200)
 
 if (global.paused = false || help_open)
 {

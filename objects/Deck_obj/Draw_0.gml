@@ -37,15 +37,15 @@ draw_text_transformed(x, y + pile_height / 2 + 8, "Units: " + string(global.Unit
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)
 
-// Empty deck: show that your next turns will be skipped
-if (array_length(deck) == 0)
+// Empty deck (or waiting for the reshuffle): no drawing on these turns
+if (array_length(deck) == 0 || draw_skipped)
 {
 	draw_set_color(c_white)
 	draw_set_halign(fa_center)
 	draw_set_valign(fa_middle)
-	var skip_text = "Out of cards!"
-	if (skips_left > 0) skip_text += "\nSkipping " + string(skips_left) + " more"
-	else skip_text += "\nNext turn is skipped"
+	var skip_text = "Out of cards!\nNo draw"
+	if (skips_left > 0) skip_text += "\n(" + string(skips_left) + " more)"
+	else if (array_length(deck) > 0) skip_text += "\nReshuffled\nfor next turn"
 	draw_text(x, y, skip_text)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)

@@ -42,10 +42,10 @@ if (global.Winner != 0)
 	exit
 }
 
-// "How to play" panel: any click closes it. The game unpauses one frame later,
-// so that click doesn't also pick a card or place a figure.
-// Story screens close with a click or Space.
-// Either way it asks "Are you sure?" first: Yes (or Space) closes it, No goes back.
+// The panel (story screen or "How to play"). The game unpauses one frame after it closes,
+// so the closing click doesn't also pick a card or place a figure.
+// First-time screens: hold the mouse button or Space until the bar fills.
+// "How to play" from the "?" button: any click closes it.
 if (help_unpause)
 {
 	help_unpause = false
@@ -53,25 +53,67 @@ if (help_unpause)
 }
 if (global.HelpOpen)
 {
-	var gmx = device_mouse_x_to_gui(0)
-	var gmy = device_mouse_y_to_gui(0)
-	if (confirming)
+	if (needs_hold)
 	{
-		var pick = ""
-		if (mouse_check_button_pressed(mb_left)) pick = confirm_hit(0, 0, display_get_gui_width(), display_get_gui_height(), 1, gmx, gmy)
-		if (keyboard_check_pressed(vk_space)) pick = "yes"
-		if (pick == "yes")
-		{
-			confirming = false
-			close_help()
-		}
-		else if (pick == "no") confirming = false
+		if (mouse_check_button(mb_left) || keyboard_check(vk_space)) hold += delta_time / 1000000
+		else hold = 0
+		if (hold >= hold_needed) close_help()
 	}
-	else if (mouse_check_button_pressed(mb_left) || (story_open && keyboard_check_pressed(vk_space))) confirming = true
+	else if (mouse_check_button_pressed(mb_left) || keyboard_check_pressed(vk_space)) close_help()
 	exit
 }
+
+// China tutorial prompts: each step moves on when you do what it says, or with Next
+if (tutorial_step >= 0 && global.Winner == 0)
+{
+	// Slower enemy turn and battle while learning, so you can follow what happens
+	with (EnemyAI_obj) think_delay = 36
+
+	var step = tutorial_steps[tutorial_step]
+	var done = false
+	switch (step.wait)
+	{
+		case "draw":   done = global.HasDrawn; break
+		case "place":  done = player_figure_count() > tutorial_figs; break
+		case "end":    done = !global.PlayerTurn; break
+		case "battle": done = global.PlayerTurn; break
+	}
+	if (!input_blocked() && mouse_check_button_pressed(mb_left))
+	{
+		var hit = tutorial_hit(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0))
+		if (hit != "") block_input_briefly()   // clicks on the prompt box don't reach the board
+		if (hit == "next") done = true
+		else if (hit == "skip")
+		{
+			tutorial_step = -1
+			global.TutorialShown = true
+			done = false
+		}
+	}
+	if (done) tutorial_advance()
+}
+else with (EnemyAI_obj) think_delay = 12
+// Playtest "Auto win": lights the enemy's lanes one after another (a quick, sure win)
+if (auto_win_timer >= 0)
+{
+	auto_win_timer += 1
+	if (auto_win_timer mod 20 == 0)
+	{
+		var lit_one = false
+		with (LaneEndLight_obj)
+		{
+			if (!lit_one && watch_team == 1 && !lit)
+			{
+				light_up()
+				lit_one = true
+			}
+		}
+	}
+	exit
+}
+
 // The "?" button (top-right) opens it again, any time you're not paused
-if (!global.paused && mouse_check_button_pressed(mb_left) && help_button_hit())
+if (!input_blocked() && mouse_check_button_pressed(mb_left) && help_button_hit())
 {
 	open_help()
 	exit
@@ -80,10 +122,10 @@ if (!global.paused && mouse_check_button_pressed(mb_left) && help_button_hit())
 // Keep the next-battle prediction up to date while it's your turn
 if (global.PlayerTurn) predict_battle()
 
-// No drawing cards while the game is paused
-if (variable_global_exists("paused") && global.paused) exit
+// No drawing cards while the game is paused or a pop-up just closed
+if (input_blocked()) exit
 
-// Playtest shortcut: the "Auto win" button (or F2) wins the fight instantly.
+// Playtest shortcut: the "Auto win" button (or F2) plays out a quick win.
 // Turn it off for the real game with debug_tools = false in Deck_obj's Create event.
 if (debug_tools)
 {
@@ -91,7 +133,10 @@ if (debug_tools)
 	if (mouse_check_button_pressed(mb_left) && point_in_rectangle(mouse_x, mouse_y, debug_btn_x, debug_btn_y, debug_btn_x + debug_btn_w, debug_btn_y + debug_btn_h)) auto_win = true
 	if (auto_win)
 	{
-		global.Winner = 1
+		auto_win_timer = 0
+		global.SelectedCard = noone
+		global.PlayerTurn = false   // no more moves while it plays out
+		show_reminder("Auto win (playtest)")
 		exit
 	}
 }
@@ -107,7 +152,11 @@ if (mouse_check_button_pressed(mb_left))
 {
 	if (point_in_rectangle(mouse_x, mouse_y, x - pile_width / 2, y - pile_height / 2, x + pile_width / 2, y + pile_height / 2))
 	{
-		if (global.HasDrawn)
+		if (draw_skipped)
+		{
+			show_reminder("Out of cards: no draw this turn")
+		}
+		else if (global.HasDrawn)
 		{
 			show_reminder("You already drew this turn")
 		}

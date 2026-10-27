@@ -68,14 +68,14 @@ cards_per_draw = function()
 	return 1 + global.UnitsMax div 4
 }
 
-// Running out of cards: when your deck is empty at the start of your turn,
-// you skip that turn and the next ones, skip_turns in total (no drawing, no playing,
-// but the battle still happens). After the last skipped turn your deck is reshuffled
-// back to full. The AI has the same rule in EnemyAI_obj.
+// Running out of cards: when your deck is empty at the start of your turn, you can't draw
+// for skip_turns turns (you still play the cards in your hand, and they don't age meanwhile).
+// On the last of those turns your deck is reshuffled back to full for the turn after.
+// The AI skips whole turns instead (see EnemyAI_obj).
 skip_turns = 3
 skips_left = 0
 
-// Called when your turn is about to start. Returns true if you skip this turn.
+// Called when your turn is about to start. Returns true if you can't draw this turn.
 check_skip = function()
 {
 	// The Magnetic Compass item refills an empty deck right away instead, then it's used up
@@ -93,15 +93,19 @@ check_skip = function()
 	skips_left -= 1
 	if (skips_left > 0)
 	{
-		show_reminder("Out of cards! Turn skipped (" + string(skips_left) + " more)")
+		show_reminder("Out of cards! No draw this turn (" + string(skips_left) + " more)")
 	}
 	else
 	{
-		show_reminder("Out of cards! Last skipped turn, deck reshuffled")
+		show_reminder("Out of cards! No draw this turn, deck reshuffled for next turn")
 		deck = spread_shuffle(full_deck)
 	}
 	return true
 }
+
+// True on a turn where you can't draw because you ran out of cards (set by EnemyAI_obj
+// when your turn starts). You still get the turn and can play the cards in your hand.
+draw_skipped = false
 
 starting_hand = 3  // cards drawn at the start
 
@@ -119,7 +123,8 @@ pile_width = 108
 pile_height = 148
 back_sprite = noone  // set this to a card back sprite when you make one
 
-// You draw once per turn (1 card + extras, see cards_per_draw), and must draw before playing a card.
+// You can draw once per turn (1 card + extras, see cards_per_draw). Drawing is optional:
+// you can play cards and end your turn without drawing.
 // Clicking the turn token sets this back to false.
 global.HasDrawn = false
 
@@ -180,8 +185,8 @@ age_hand = function()
 // The reminder for cards age_hand discarded (shown after "Your turn" so it isn't covered up)
 show_discarded = function(gone)
 {
-	if (gone == 1) show_reminder("Your turn, draw a card. 1 old card was discarded")
-	else if (gone > 1) show_reminder("Your turn, draw a card. " + string(gone) + " old cards were discarded")
+	if (gone == 1) show_reminder("Your turn. 1 old card was discarded")
+	else if (gone > 1) show_reminder("Your turn. " + string(gone) + " old cards were discarded")
 }
 hand_count = function()
 {
@@ -521,31 +526,36 @@ global.FightStartPepper = global.PepperTurns
 // Coins for winning, worked out once when you win (shown on the win screen)
 win_reward = -1
 
-// ---- "How to play" panel ----
-// Opens by itself at the start of the first fight (China) once per game,
-// and any time from the "?" button in the top-right corner. It pauses the game while open.
+// Playtest "Auto win": counts up while it lights the enemy's lanes one by one (-1 = off)
+auto_win_timer = -1
+
+// ---- Story screens, the "How to play" panel and the China tutorial ----
+// The panel pauses the game while it's open. It shows either a story screen (story_open)
+// or the "How to play" text. "?" (top right) opens "How to play" any time.
 global.HelpOpen = false
 help_unpause = false   // closing waits one frame so the closing click doesn't also play a card
 help_text =
 	"HOW TO PLAY\n\n" +
-	"GOAL: Turn 3 of the 4 lights at the TOP green.\n" +
-	"A light turns green when your figure reaches the enemy's back row.\n" +
-	"(The enemy wins if it turns all 4 lights at the BOTTOM green.)\n\n" +
-	"YOUR TURN:\n" +
-	"1. Click your deck (bottom right) to draw.\n" +
-	"2. Click a card, then a glowing tile in your front row.\n" +
-	"   Cards cost units (under your deck). Units refill each turn.\n" +
-	"3. End your turn with the token (left of the ship) or Space.\n\n" +
-	"BATTLE: every figure then moves forward by itself\n" +
-	"and attacks whatever is in front of it.\n\n" +
-	"TIPS:\n" +
-	"- Your 2 home rows give +1 HP. The enemy's 2 rows give +1 attack.\n" +
-	"- Cards only stay in your hand for 3 turns (orange = last turn).\n" +
-	"- Hover cards, figures and items to see what they do.\n" +
-	"  \"DEATH\" means a figure won't survive the next battle.\n" +
-	"- Use items (beside the ship) on your turn. Right-click cancels.\n" +
-	"- Escape pauses. The ? button (top right) shows this again.\n\n" +
-	"Click anywhere to start"
+	"THE BOARD is the decks of two ships side by side as the two crews battle at sea: " +
+	"your crew starts at the bottom, the enemy crew at the top. Each column is a lane.\n\n" +
+	"GOAL: get one of your figures to the far end of a lane to turn that lane's light (at the top) green. " +
+	"Turn 3 of the 4 green to win. The enemy has to turn all 4 of yours (at the bottom) green.\n\n" +
+	"YOUR TURN\n" +
+	"- UNITS (shown under your deck) are what you spend to place cards. Each card costs units. " +
+	"They refill every turn, and you get more as the fight goes on and for each lane where you have more figures.\n" +
+	"- DRAWING is free and optional: click your deck once per turn to draw.\n" +
+	"- To place a figure, click a card, then a glowing tile on your front row.\n" +
+	"- END YOUR TURN with the token (left of the ship) or Space. You can end it without drawing or playing anything.\n" +
+	"- Cards only stay in your hand for 3 turns (orange = last turn).\n\n" +
+	"THE BATTLE: after the enemy places its figures, every figure moves forward by itself " +
+	"and attacks the enemy in front of it. Your 2 home rows give +1 HP; the enemy's 2 rows give +1 attack.\n\n" +
+	"THE DAGGER (next to your deck): click it, then one of your own figures on your first two rows, " +
+	"to remove that figure and free up its spot.\n\n" +
+	"COINS AND SHOPS: winning a fight earns coins (more for each light you turned green). " +
+	"Between fights you stop at port shops to spend coins on items. Items sit beside the ship; " +
+	"click one on your turn to use it. Coins are only for shops; units are only for placing cards in a fight.\n\n" +
+	"TIPS: hover cards, figures and items to see what they do. \"DEATH\" means a figure won't survive " +
+	"the next battle. Right-click cancels. Escape pauses."
 
 help_btn_size = 50
 help_button_hit = function()
@@ -555,53 +565,108 @@ help_button_hit = function()
 	return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), bx, by, bx + help_btn_size, by + help_btn_size)
 }
 
-// The panel can also show a story screen (see story_text in Items_scr).
-// story_open = true means the panel is showing story_shown instead of help_text.
+// story_open = true means the panel is showing story_shown instead of help_text
 story_open = false
 story_shown = ""
-help_after_story = false   // China: "How to play" opens right after the story screen
-confirming = false         // true while the "Are you sure?" box is up over the panel
 
-open_help = function()
+// First-time screens (stories, and "How to play" at the end of the tutorial) close by holding
+// the mouse button or Space for hold_needed seconds while a bar fills, so a stray click can't
+// skip them. "How to play" opened from the "?" button closes with one click.
+hold_needed = 1
+hold = 0
+needs_hold = false
+
+open_help = function(first_time = false)
 {
 	global.HelpOpen = true
 	global.paused = true
 	global.SelectedCard = noone
+	needs_hold = first_time
+	hold = 0
 }
 
 close_help = function()
 {
-	// Story first, then "How to play" if it's waiting
-	if (story_open)
-	{
-		story_open = false
-		if (help_after_story)
-		{
-			help_after_story = false
-			return
-		}
-	}
-	else global.TutorialShown = true
+	story_open = false
 	global.HelpOpen = false
+	hold = 0
 	help_unpause = true   // unpause next frame
+	block_input_briefly() // and ignore that click/Space for a moment
 }
 
-// Show it automatically at the start of the China fight, the first time
-if (!variable_global_exists("TutorialShown")) global.TutorialShown = false
 var fights_before = variable_global_exists("FightsWon") ? global.FightsWon : 0
-var first_fight = (fights_before == 0)
-if (first_fight && !global.TutorialShown) open_help()
+if (!variable_global_exists("TutorialShown")) global.TutorialShown = false
+
+// ---- China tutorial ----
+// The first fight walks you through your first turn with short prompts at the top of the
+// screen. Each step moves on when you do what it says (wait), or with its Next button.
+// "Skip tutorial" ends it. At the end "How to play" opens once with the full rules.
+tutorial_steps = [
+	{ wait: "draw",   text: "Welcome aboard! Your crew is at the bottom, the enemy crew at the top.\nClick your deck (bottom right) to draw cards. Drawing is free, once per turn." },
+	{ wait: "place",  text: "Placing a card costs units (shown under your deck).\nClick a card in your hand, then a glowing tile on your front row." },
+	{ wait: "end",    text: "Place more figures if you have units left.\nWhen you're done, end your turn with the token left of the ship (or Space)." },
+	{ wait: "battle", text: "Battle! The enemy places its figures, then every figure moves forward\nby itself and attacks the enemy in front of it. Watch the board." },
+	{ wait: "next",   text: "Get a figure to the far end of a lane to turn its light at the top green.\nTurn 3 of the 4 green to win. The enemy needs all 4 of yours." },
+	{ wait: "next",   text: "The Dagger (next to your deck) removes one of your own figures on your\nfirst two rows to free up a spot. Hover anything to see what it does." },
+	{ wait: "next",   text: "Cards only stay in your hand for 3 turns, so use them.\nPress Next for the full rules. The ? button (top right) shows them any time." }
+]
+tutorial_step = (fights_before == 0 && !global.TutorialShown) ? 0 : -1
+tutorial_figs = 0   // your figures on the board when the current step started
+
+// How many of your figures are on the board
+player_figure_count = function()
+{
+	var n = 0
+	with (FigureParent_obj) if (team == 1) n += 1
+	return n
+}
+
+// The prompt box and its buttons, in GUI coordinates
+tutorial_box = function()
+{
+	var w = 780
+	var x1 = display_get_gui_width() / 2 - w / 2
+	return { x1: x1, y1: 16, x2: x1 + w, y2: 16 + 130 }
+}
+tutorial_button = function(which)
+{
+	var b = tutorial_box()
+	if (which == "next") return { x1: b.x2 - 130, y1: b.y2 - 44, x2: b.x2 - 12, y2: b.y2 - 10 }
+	return { x1: b.x2 - 290, y1: b.y2 - 44, x2: b.x2 - 142, y2: b.y2 - 10 }
+}
+tutorial_hit = function(mx, my)
+{
+	var names = ["next", "skip"]
+	for (var i = 0; i < 2; i++)
+	{
+		var r = tutorial_button(names[i])
+		if (point_in_rectangle(mx, my, r.x1, r.y1, r.x2, r.y2)) return names[i]
+	}
+	var b = tutorial_box()
+	if (point_in_rectangle(mx, my, b.x1, b.y1, b.x2, b.y2)) return "box"
+	return ""
+}
+
+tutorial_advance = function()
+{
+	tutorial_step += 1
+	tutorial_figs = player_figure_count()
+	if (tutorial_step >= array_length(tutorial_steps))
+	{
+		tutorial_step = -1
+		global.TutorialShown = true
+		open_help(true)   // the full rules once, with the hold-to-continue bar
+	}
+}
 
 // Story screen before this fight, once per game (so not again on "Retry this stop")
 var story_key = story_before_fight(fights_before)
 if (story_first_time(story_key))
 {
-	help_after_story = global.HelpOpen
 	story_open = true
 	story_shown = story_text(story_key)
-	open_help()
+	open_help(true)
 }
-
 // Buttons on the lose screen, in GUI coordinates (centered on the screen)
 lose_button = function(which)
 {

@@ -1,5 +1,5 @@
 // Clicking the token ends your turn. The AI plays its cards, then both sides battle.
-var paused = variable_global_exists("paused") && global.paused
+var paused = input_blocked()
 if (paused || !global.PlayerTurn || global.Winner != 0 || global.DaggerAiming) exit
 
 // Click the token or press Space

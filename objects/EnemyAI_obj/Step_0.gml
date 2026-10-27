@@ -67,25 +67,22 @@ switch (state)
 		break
 
 	case "end":
-		// Your turn comes around: cards that have been in your hand too long are discarded
-		var discarded = Deck_obj.age_hand()
+		// Out of cards: you still get your turn and can play your hand, you just can't draw.
+		// Your hand doesn't age on those turns.
+		var no_draw = Deck_obj.check_skip()
+		Deck_obj.draw_skipped = no_draw
 
-		// If the player is out of cards, their turn is skipped and the AI goes again
-		if (Deck_obj.check_skip())
-		{
-			state = "player_skipped"
-			timer = skip_delay
-			break
-		}
+		// Cards that have been in your hand too long are discarded
+		var discarded = no_draw ? 0 : Deck_obj.age_hand()
 
 		// Hand the turn back to the player
 		state = "waiting"
 		global.PlayerTurn = true
-		global.HasDrawn = false
+		global.HasDrawn = no_draw   // nothing to draw on an out-of-cards turn
 		Deck_obj.player_turn += 1
 		global.UnitsMax = Deck_obj.units_per_turn + Deck_obj.unit_ramp(Deck_obj.player_turn) + Deck_obj.lanes_won(1)
 		global.Units = global.UnitsMax
-		with (Deck_obj) show_reminder("Your turn, draw a card")
+		if (!no_draw) with (Deck_obj) show_reminder("Your turn")
 		with (Deck_obj) show_discarded(discarded)
 
 		// Sack of Black Pepper item: +1 unit at the start of your turn while it lasts

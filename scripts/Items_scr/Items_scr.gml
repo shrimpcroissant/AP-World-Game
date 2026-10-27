@@ -95,11 +95,54 @@ function item_info_base(kind)
 	return { sprite: -1, name: kind, price: 0, desc: "" }
 }
 
+// ---- The ending ----
+// Shown on the map after you win the Iraq fight: ted's closing narrative, then the credits,
+// then back to the menu. Replace the placeholder text with the real text.
+function ending_text()
+{
+	return "[ENDING TEXT GOES HERE: what happens after you reach the coast of Iraq.]"
+}
+
+function credits_text()
+{
+	return "MONSOON ROUTE\n\n[CREDITS GO HERE]\n\nArt and design: ted\n\nThanks for playing!"
+}
+
+// ---- Difficulty ----
+// global.Difficulty: 0 = Easy, 1 = Normal, 2 = Hard. Picked on the start screen (Start_Button).
+// The enemy's settings for each are in EnemyAI_obj's Create event.
+function difficulty_names()
+{
+	return ["Easy", "Normal", "Hard"]
+}
+
+function difficulty()
+{
+	if (!variable_global_exists("Difficulty")) global.Difficulty = 1
+	return global.Difficulty
+}
+
+// The Easy / Normal / Hard buttons on the start screen (the menu art is 341 x 192)
+function difficulty_button(i)
+{
+	var w = 46
+	var h = 16
+	var gap = 6
+	var x1 = 170 - (3 * w + 2 * gap) / 2 + i * (w + gap)
+	return { x1: x1, y1: 132, x2: x1 + w, y2: 132 + h }
+}
+
 // ---- The route ----
 // Stops in order. The fight at stop i is the (i+1)th fight, so after it global.FightsWon = i + 1.
 function route_stops()
 {
 	return ["China", "Malacca", "Mogadishu", "India", "Arabia", "Iraq"]
+}
+
+// Where each stop is on the map art (Map_spr is 341 x 192), in route order
+function route_stop_points()
+{
+	return [[238, 66], [211, 112], [90, 104], [157, 93], [108, 62], [92, 44]]
 }
 
 // The room each fight happens in, by how many fights you've won before it.
@@ -115,12 +158,13 @@ function fight_room_for(fights_won)
 }
 
 // The shop you visit right AFTER winning a fight ("" = none).
-// China is fight 1, so 2 = after Malacca, 3 = after Mogadishu, 4 = after India,
+// China is fight 1, so 1 = after China (a small starter shop), 2 = after Malacca, 3 = after Mogadishu, 4 = after India,
 // 5 = after Arabia (you sail back into Hormuz before heading for Iraq).
 function shop_after_fight(fights_won)
 {
 	switch (fights_won)
 	{
+		case 1: return "china"
 		case 2: return "malacca"
 		case 3: return "mogadishu"
 		case 4: return "calicut"
@@ -145,6 +189,7 @@ function shop_items(shop)
 {
 	switch (shop)
 	{
+		case "china":     return ["compass", "cloves"]   // small starter shop after the tutorial fight
 		case "malacca":   return ["tin", "cloves", "compass", "storage"]
 		case "mogadishu": return ["zebra", "ivory", "rhino", "ambergris"]
 		case "calicut":   return ["pepper", "cloth", "wootz", "tablet"]
@@ -156,6 +201,12 @@ function shop_items(shop)
 // The merchant picture for each shop
 function shop_merchant(shop)
 {
+	// China has no merchant art yet: it uses ShopMerchantChina_spr once that sprite exists
+	if (shop == "china")
+	{
+		var china = asset_get_index("ShopMerchantChina_spr")
+		if (china != -1) return china
+	}
 	switch (shop)
 	{
 		case "mogadishu": return ShopMerchantMogadishu_spr
@@ -190,14 +241,13 @@ function story_text(key)
 	switch (key)
 	{
 		case "china":
-			return "In 1410 you were appointed to be the captain of a massive trade between The Ming dynasty, The kingdom of Calicut, and The Jalayirid kingdom. You were to sail to India, pay them for 1,000 slaves, and sail them to the coast of Iraq where a series of small dhow ships would pick them up and take them to the finish line, as your massive ship could not sail on the shallower waters. This was a massive ploy to show the economic might of the Ming and convince more states to join the tributary system, because of this you were given a much higher budget for this journey than most, you were even given extra gold just to sell and buy new supplies in case anything went wrong."
+			return "In 1410, you were appointed captain of a massive trade deal between the Ming dynasty, the Kingdom of Calicut, and the Jalayirid Sultanate. You were to sail to India, pay for 1,000 slaves, and carry them to the coast of Iraq, where a series of small dhows would pick them up and take them the rest of the way, since your massive ship could not sail in the shallower waters. The deal was a ploy to show off the economic might of the Ming and convince more states to join the tributary system. Because of this, you were given a much bigger budget than most voyages, and even extra gold to sell or trade for new supplies in case anything went wrong. You will need it: pirates infest the whole route, so expect to fight your way from port to port."
 		case "malacca":
-			return "In 1405 the sultanate of Malacca joined the Chinese tributary system. Because of this Zheng He assisted them into the country they are today, a big project during this time was to rid Malacca of its criminal underworld."
+			return "In 1405, the Sultanate of Malacca joined the Chinese tributary system. Because of this, Zheng He helped it grow into the country it is today. A big project during this time was ridding Malacca of its criminal underworld."
 		case "detour":
-			return "Because of your Ming affiliations, former criminals misguided you and let your ship leave the harbor at an incorrect time, forcing you to detour at the city state Mogadishu."
+			return "Because of your Ming connections, former criminals misled you and let your ship leave the harbor at the wrong time, forcing you to detour to the city-state of Mogadishu."
 		case "arabia":
-			return "Because the trade was originally with the Jalayirid kingdom, the Kara Koyunlu Turkoman Dynasty decided to attack you on your way into the coast, you must attempt and escape while fighting off people on all sides at the dead of night."
-	}
+			return "Your deal was with the Jalayirids, but the Kara Koyunlu, a Turkoman dynasty, have just taken Baghdad from them. Because of this, the Kara Koyunlu attack you on your way into the coast. You must attempt an escape while fighting off attackers on all sides in the dead of night."	}
 	return ""
 }
 
@@ -224,9 +274,10 @@ function story_first_time(key)
 	return true
 }
 
-// Draws a story screen: dims the whole area, then a framed box with the text wrapped to fit.
+// Draws a story screen: dims the whole area, then a framed box with the text wrapped to fit,
+// and the hold-to-continue bar (hold_frac 0 to 1).
 // (ax, ay, aw, ah) is the area to cover, k scales the text (1 = normal size).
-function draw_story_panel(ax, ay, aw, ah, k, text)
+function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac)
 {
 	draw_set_alpha(0.75)
 	draw_set_color(c_black)
@@ -235,11 +286,10 @@ function draw_story_panel(ax, ay, aw, ah, k, text)
 
 	var ts = 1.6 * k          // text size
 	var wrap = 560            // wrap width before scaling
-	var footer = "Click or press Space to continue"
 	var tw = string_width_ext(text, -1, wrap) * ts
 	var th = string_height_ext(text, -1, wrap) * ts
-	var pw = max(tw, string_width(footer) * 1.2 * k) + 80 * k
-	var ph = th + 110 * k
+	var pw = max(tw, 320 * k) + 80 * k
+	var ph = th + 130 * k
 	var px = ax + aw / 2 - pw / 2
 	var py = ay + ah / 2 - ph / 2
 	draw_set_color(make_color_rgb(60, 40, 20))
@@ -252,78 +302,62 @@ function draw_story_panel(ax, ay, aw, ah, k, text)
 	draw_set_valign(fa_top)
 	draw_set_color(c_white)
 	draw_text_ext_transformed(px + pw / 2, py + 40 * k, text, -1, wrap, ts, ts, 0)
-	draw_set_alpha(0.65 + 0.35 * sin(current_time / 200))
-	draw_set_color(make_color_rgb(220, 190, 120))
-	draw_text_transformed(px + pw / 2, py + ph - 40 * k, footer, 1.2 * k, 1.2 * k, 0)
-	draw_set_alpha(1)
+	draw_hold_bar(px + pw / 2, py + ph - 70 * k, 300 * k, k, hold_frac)
 	draw_set_color(c_white)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
 }
 
-// ---- "Are you sure?" box ----
-// Shown when you try to close a pop-up (story screens, "How to play"), so a stray click
-// doesn't skip it. Yes closes the pop-up, No goes back to it.
-// (ax, ay, aw, ah) is the area it's centered in, k scales it (1 = normal size).
-
-// Where the Yes and No buttons are
-function confirm_button(ax, ay, aw, ah, k, which)
+// ---- Pop-ups and input ----
+// True while a pop-up or the pause menu is open, and for a moment after one closes,
+// so the click (or Space) that closes it doesn't also play a card, place a figure, etc.
+// Everything you click during a fight checks this first.
+function input_blocked()
 {
-	var cx = ax + aw / 2
-	var cy = ay + ah / 2
-	var w = 150 * k
-	var h = 50 * k
-	var bx = (which == "yes") ? cx - w - 15 * k : cx + 15 * k
-	return { x1: bx, y1: cy + 10 * k, x2: bx + w, y2: cy + 10 * k + h }
+	if (variable_global_exists("paused") && global.paused) return true
+	if (variable_global_exists("InputBlockUntil") && current_time < global.InputBlockUntil) return true
+	return false
 }
 
-// "yes", "no", or "" for whichever button (mx, my) is over
-function confirm_hit(ax, ay, aw, ah, k, mx, my)
+// Call this when a pop-up closes
+function block_input_briefly()
 {
-	var b = confirm_button(ax, ay, aw, ah, k, "yes")
-	if (point_in_rectangle(mx, my, b.x1, b.y1, b.x2, b.y2)) return "yes"
-	b = confirm_button(ax, ay, aw, ah, k, "no")
-	if (point_in_rectangle(mx, my, b.x1, b.y1, b.x2, b.y2)) return "no"
-	return ""
+	global.InputBlockUntil = current_time + 150
 }
 
-function draw_confirm(ax, ay, aw, ah, k, mx, my)
+// ---- Cursor ----
+// The cursor art: Cursor_spr if it exists (ted's custom cursor), otherwise Mouse_spr
+function custom_cursor_sprite()
 {
-	draw_set_alpha(0.5)
-	draw_set_color(c_black)
-	draw_rectangle(ax, ay, ax + aw, ay + ah, false)
-	draw_set_alpha(1)
+	var spr = asset_get_index("Cursor_spr")
+	if (spr != -1 && sprite_exists(spr)) return spr
+	return Mouse_spr
+}
 
-	var cx = ax + aw / 2
-	var cy = ay + ah / 2
-	var bw = 420 * k
-	var bh = 170 * k
-	draw_set_color(make_color_rgb(60, 40, 20))
-	draw_rectangle(cx - bw / 2, cy - 100 * k, cx + bw / 2, cy - 100 * k + bh, false)
+// Draws the cursor in a Draw GUI event, so it shows on top of every pop-up
+function draw_cursor_gui()
+{
+	draw_sprite(Mouse_spr, 0, device_mouse_x_to_gui(0), device_mouse_y_to_gui(0))
+}
+
+// ---- Hold to continue ----
+// The bar on first-time screens: fills while you hold the mouse button or Space.
+// frac is 0 to 1. Drawn centered on cx, with its top at y, w wide (k scales it).
+function draw_hold_bar(cx, y, w, k, frac)
+{
+	var h = 14 * k
+	draw_set_color(make_color_rgb(30, 20, 10))
+	draw_rectangle(cx - w / 2, y, cx + w / 2, y + h, false)
 	draw_set_color(make_color_rgb(220, 190, 120))
-	draw_rectangle(cx - bw / 2, cy - 100 * k, cx + bw / 2, cy - 100 * k + bh, true)
-
+	if (frac > 0) draw_rectangle(cx - w / 2, y, cx - w / 2 + w * clamp(frac, 0, 1), y + h, false)
+	draw_rectangle(cx - w / 2, y, cx + w / 2, y + h, true)
 	draw_set_halign(fa_center)
-	draw_set_valign(fa_middle)
-	draw_set_color(c_white)
-	draw_text_transformed(cx, cy - 50 * k, "Are you sure?", 2 * k, 2 * k, 0)
-
-	var over = confirm_hit(ax, ay, aw, ah, k, mx, my)
-	var names = ["yes", "no"]
-	for (var i = 0; i < 2; i++)
-	{
-		var b = confirm_button(ax, ay, aw, ah, k, names[i])
-		if (i == 0) draw_set_color(over == "yes" ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
-		else draw_set_color(over == "no" ? make_color_rgb(130, 60, 60) : make_color_rgb(90, 40, 40))
-		draw_rectangle(b.x1, b.y1, b.x2, b.y2, false)
-		draw_set_color(c_white)
-		draw_rectangle(b.x1, b.y1, b.x2, b.y2, true)
-		draw_text_transformed((b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, (i == 0) ? "Yes" : "No", 1.5 * k, 1.5 * k, 0)
-	}
-	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
+	draw_set_color(c_white)
+	draw_set_alpha(0.65 + 0.35 * sin(current_time / 200))
+	draw_text_transformed(cx, y + h + 8 * k, "Hold click or Space to continue", 1.2 * k, 1.2 * k, 0)
+	draw_set_alpha(1)
 }
-
 // The bio shown when you hover a card in your hand. cost is passed in because it can change
 // (a card from the Storage chest costs 0). Keep the stats here in sync with the figure objects.
 function card_bio(card_obj, cost)

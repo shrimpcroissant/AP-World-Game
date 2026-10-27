@@ -18,7 +18,7 @@ if place_meeting(x, y, FigureParent_obj)
 
 // Clicking a tile in the front row plays the chosen card's figure here.
 // With no card chosen, nothing happens.
-var paused = variable_global_exists("paused") && global.paused
+var paused = input_blocked()
 if y = 452 and !paused and !global.DaggerAiming
 {
 	if place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1) and filled = false

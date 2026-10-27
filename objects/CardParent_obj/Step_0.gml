@@ -36,7 +36,7 @@ rest_angle = -offset * tilt
 
 // Only the top card under the mouse lifts (cards further right sit on top)
 hovered = false
-var paused = variable_global_exists("paused") && global.paused
+var paused = input_blocked()
 if (!paused) for (var j = count - 1; j >= 0; j--)
 {
 	if (cards[j].is_mouse_over())
@@ -52,11 +52,6 @@ if (hovered && mouse_check_button_pressed(mb_left) && global.PlayerTurn && !glob
 	if (global.SelectedCard == id)
 	{
 		global.SelectedCard = noone
-	}
-	else if (instance_exists(Deck_obj) && !Deck_obj.can_play())
-	{
-		// Must draw first, so remind the player above the deck
-		with (Deck_obj) show_reminder("Draw a card first")
 	}
 	else if (cost > global.Units)
 	{

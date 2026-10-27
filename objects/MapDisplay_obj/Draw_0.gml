@@ -19,7 +19,8 @@ if (!variable_instance_exists(id, "click_delay"))
 	detour = (global.FightsWon == 2)
 	pushed_off_course = false
 	story_showing = false
-	confirming = false   // the "Are you sure?" box over the story screen
+	hold = 0   // seconds the mouse button or Space has been held on the story screen
+	ending_stage = 0   // after Iraq: 1 = ending text, 2 = credits, then the menu
 }
 
 // Area to fill: the camera view if the room uses one, otherwise the whole room
@@ -46,13 +47,77 @@ var frame = clamp(frame_step, 0, sprite_get_number(Map_spr) - 1)
 draw_sprite_stretched(Map_spr, frame, ax, ay, aw, ah)
 
 var done = global.FightsWon >= array_length(global.Stops)
+
+// ---- Stop markers ----
+// Past stops: green with a tick. Where you are: yellow, pulsing. Next stop: orange ring.
+// Later stops: white rings. The final destination (Iraq) is a big red ring.
+var cur = global.FightsWon - 1     // the stop you just finished
+var nxt = global.FightsWon         // where you're sailing next
+if (detour && !pushed_off_course) nxt = 3   // you plan to sail for India, before the detour
+if (done) { cur = array_length(global.Stops); nxt = -1 }
+var pts = route_stop_points()
+var sx = aw / sprite_get_width(Map_spr)
+var sy = ah / sprite_get_height(Map_spr)
+var r = 9 * k
+var pulse_r = r + 4 * k * (0.5 + 0.5 * sin(current_time / 150))
+draw_set_halign(fa_center)
+draw_set_valign(fa_top)
+for (var i = 0; i < array_length(global.Stops); i++)
+{
+	var mx = ax + pts[i][0] * sx
+	var my = ay + pts[i][1] * sy
+	var last = (i == array_length(global.Stops) - 1)
+	var label = global.Stops[i]
+	if (i < cur || (done && i == cur - 1))
+	{
+		draw_set_color(c_black)
+		draw_circle(mx, my, r + 2 * k, false)
+		draw_set_color(make_color_rgb(60, 170, 70))
+		draw_circle(mx, my, r, false)
+		draw_set_color(c_white)
+		draw_line_width(mx - 4 * k, my, mx - 1 * k, my + 4 * k, 2 * k)
+		draw_line_width(mx - 1 * k, my + 4 * k, mx + 5 * k, my - 4 * k, 2 * k)
+	}
+	else if (i == cur)
+	{
+		draw_set_color(c_yellow)
+		draw_circle(mx, my, pulse_r + 2 * k, true)
+		draw_set_color(c_black)
+		draw_circle(mx, my, r + 2 * k, false)
+		draw_set_color(c_yellow)
+		draw_circle(mx, my, r, false)
+		label += " (you are here)"
+	}
+	else
+	{
+		var ring = (i == nxt) ? make_color_rgb(255, 150, 30) : c_white
+		if (last) ring = make_color_rgb(220, 30, 30)
+		var rr = last ? r + 4 * k : r
+		if (i == nxt) rr = pulse_r
+		draw_set_color(c_black)
+		draw_circle(mx, my, rr + 2 * k, true)
+		draw_set_color(ring)
+		draw_circle(mx, my, rr, true)
+		draw_circle(mx, my, rr - 1, true)
+		draw_circle(mx, my, rr - 2, true)
+		if (i == nxt) label += " (next stop)"
+		if (last) label += " (final destination)"
+	}
+	// Name under the marker, with a dark shadow so it reads on land and sea
+	draw_set_color(c_black)
+	draw_text_transformed(mx + 1, my + r + 4 * k + 1, label, 1.2 * k, 1.2 * k, 0)
+	draw_set_color(c_white)
+	draw_text_transformed(mx, my + r + 4 * k, label, 1.2 * k, 1.2 * k, 0)
+}
+
+// ---- Message at the bottom ----
 var text = ""
-if (done) text = "You reached " + global.Stops[array_length(global.Stops) - 1] + "! Journey complete.\nClick to return to the menu"
-else if (detour && !pushed_off_course) text = "Malacca done!  Next stop: India\nClick to set sail"
-else if (detour) text = "Oops! You left Malacca at the wrong time!\nDetour to Mogadishu. Click to continue"
-else if (global.Stops[global.FightsWon] == "Iraq") text = global.Stops[global.FightsWon - 1] + " done!  Next stop: the coast of Iraq\nClick to set sail"
-else if (shop_before_fight(global.FightsWon) != "") text = global.Stops[global.FightsWon - 1] + " done!  Next stop: " + global.Stops[global.FightsWon] + ", by way of Hormuz\nClick to set sail"
-else text = global.Stops[global.FightsWon - 1] + " done!  Next stop: " + global.Stops[global.FightsWon] + "\nClick to set sail"
+if (done) text = "You reached the coast of Iraq!\nJourney complete."
+else if (detour && !pushed_off_course) text = "Malacca: done!\nNext stop: India.  Click to set sail"
+else if (detour) text = "Oops! You left Malacca at the wrong time!\nDetour to Mogadishu.  Click to continue"
+else if (global.Stops[global.FightsWon] == "Iraq") text = global.Stops[global.FightsWon - 1] + ": done!\nNext stop: the coast of Iraq, your final destination.  Click to set sail"
+else if (shop_before_fight(global.FightsWon) != "") text = global.Stops[global.FightsWon - 1] + ": done!\nNext stop: " + global.Stops[global.FightsWon] + ", by way of the port of Hormuz.  Click to set sail"
+else text = global.Stops[global.FightsWon - 1] + ": done!\nNext stop: " + global.Stops[global.FightsWon] + ".  Click to set sail"
 
 // Pulsing text near the bottom, with a dark box behind it so it reads on the map
 var pulse = 0.65 + 0.35 * sin(current_time / 200)
@@ -62,7 +127,7 @@ var tx = ax + aw / 2
 var ty = ay + ah - 30 * k
 var w = (string_width(text) * 2 + 30) * k
 var h = (string_height(text) * 2 + 16) * k
-draw_set_alpha(0.6)
+draw_set_alpha(0.75)
 draw_set_color(c_black)
 draw_rectangle(tx - w / 2, ty - h, tx + w / 2, ty + 8 * k, false)
 draw_set_alpha(pulse)
@@ -72,33 +137,43 @@ draw_set_alpha(1)
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)
 
+// ---- The ending: ted's closing text, then the credits, then the menu ----
+if (done && ending_stage == 0) ending_stage = 1
+if (ending_stage == 1) draw_story_panel(ax, ay, aw, ah, k, ending_text(), hold)
+if (ending_stage == 2) draw_story_panel(ax, ay, aw, ah, k, credits_text(), hold)
 // The detour story screen, over the map
-if (story_showing) draw_story_panel(ax, ay, aw, ah, k, story_text("detour"))
-if (story_showing && confirming) draw_confirm(ax, ay, aw, ah, k, mouse_x, mouse_y)
+if (story_showing) draw_story_panel(ax, ay, aw, ah, k, story_text("detour"), hold)
 
-// Click anywhere to sail to the next fight, or back to the menu after Arabia
+// Click anywhere to sail to the next fight
 if (click_delay > 0)
 {
 	click_delay -= 1
 }
+else if (ending_stage > 0)
+{
+	// Hold to move on: ending text, then credits, then back to the menu
+	if (mouse_check_button(mb_left) || keyboard_check(vk_space)) hold += delta_time / 1000000
+	else hold = 0
+	if (hold >= 1)
+	{
+		hold = 0
+		click_delay = 20
+		ending_stage += 1
+		if (ending_stage > 2) room_goto(Menu_Room)
+	}
+}
 else if (story_showing)
 {
-	// Click or Space asks "Are you sure?". Yes (or Space) closes the story screen,
-	// then the map's own message shows. No goes back to the story.
-	if (confirming)
+	// Hold the mouse button or Space for 1 second (the bar fills) to close the story screen,
+	// then the map's own message shows
+	if (mouse_check_button(mb_left) || keyboard_check(vk_space)) hold += delta_time / 1000000
+	else hold = 0
+	if (hold >= 1)
 	{
-		var pick = ""
-		if (mouse_check_button_pressed(mb_left)) pick = confirm_hit(ax, ay, aw, ah, k, mouse_x, mouse_y)
-		if (keyboard_check_pressed(vk_space)) pick = "yes"
-		if (pick == "yes")
-		{
-			confirming = false
-			story_showing = false
-			click_delay = 20
-		}
-		else if (pick == "no") confirming = false
+		story_showing = false
+		hold = 0
+		click_delay = 20
 	}
-	else if (mouse_check_button_pressed(mb_left) || keyboard_check_pressed(vk_space)) confirming = true
 }
 else if (mouse_check_button_pressed(mb_left))
 {

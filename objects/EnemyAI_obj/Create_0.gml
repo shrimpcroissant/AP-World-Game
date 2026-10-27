@@ -157,4 +157,48 @@ start_turn = function()
 	}
 }
 
+// Hard bot placement: puts figures in the lanes where your figures are furthest along,
+// to block the lanes you're winning (ties are picked at random)
+smart_tile = function(tiles)
+{
+	var best = []
+	var best_score = -1
+	for (var i = 0; i < array_length(tiles); i++)
+	{
+		var lane_x = tiles[i].x
+		var lane_score = 0
+		with (FigureParent_obj)
+		{
+			if (x == lane_x && team == 1) lane_score += 1 + rows_from_home(y)
+		}
+		if (lane_score > best_score)
+		{
+			best_score = lane_score
+			best = [tiles[i]]
+		}
+		else if (lane_score == best_score) array_push(best, tiles[i])
+	}
+	return best[irandom(array_length(best) - 1)]
+}
+
+// ---- Difficulty (picked on the start screen, see difficulty() in Items_scr) ----
+// Easy: 3 units a turn to start with, and 1 turn in 4 it stops after one card.
+// Normal: everything above as it is.
+// Hard: 5 units a turn to start with, 1 more card in its starting hand,
+// and it places figures to block the lanes you're winning.
+switch (difficulty())
+{
+	case 0:
+		units_per_turn = 3
+		hold_back_chance = 0.25
+		break
+	case 2:
+		units_per_turn = 5
+		starting_hand = 5
+		choose_tile = smart_tile
+		break
+}
+units_max = units_per_turn
+units = units_max
+
 repeat (starting_hand) draw_card()

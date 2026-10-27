@@ -2,7 +2,7 @@ draw_self()
 
 // Glows once you've drawn, as a hint that ending your turn is next
 var cx = x + sprite_width / 2
-var ready = global.PlayerTurn && global.HasDrawn && global.Winner == 0
+var ready = global.PlayerTurn && global.Winner == 0   // you can end your turn any time, drawing is optional
 if (ready)
 {
 	var pulse = 0.5 + 0.5 * sin(current_time / 150)

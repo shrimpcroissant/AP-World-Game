@@ -1,6 +1,6 @@
 // Clicking items, and aiming the ones that need a target
 items_init()
-if (variable_global_exists("paused") && global.paused) exit
+if (input_blocked()) exit
 
 // One frame after aiming ends, let clicks through again
 if (finishing)

@@ -10,7 +10,12 @@ if (global.paused = false || (variable_global_exists("HelpOpen") && global.HelpO
 	image_alpha = 1
 }
 
-if place_meeting(x, y, Mouse_obj) and mouse_check_button_pressed(1)
+// Lights up while the mouse is over it
+var over = place_meeting(x, y, Mouse_obj)
+image_blend = over ? make_color_rgb(255, 225, 140) : c_white
+
+if (over && mouse_check_button_pressed(1))
 {
 	global.paused = false
+	block_input_briefly()   // so this click doesn't also click the board underneath
 }
