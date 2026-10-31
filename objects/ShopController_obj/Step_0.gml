@@ -47,6 +47,7 @@ if (mouse_check_button_pressed(mb_left))
 			array_push(global.Items, { kind: item.kind, card: -1 })
 			item.sold = true
 			say("Bought the " + info.name + "!")
+			dbg("Bought " + item.kind + ", coins left " + string(global.Money))
 		}
 	}
 }

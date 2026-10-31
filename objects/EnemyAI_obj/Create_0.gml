@@ -116,6 +116,7 @@ play_card = function(card, tile)
 	fig.image_blend = make_color_rgb(255, 170, 170)  // light red so you can tell it apart
 
 	units -= card.cost
+	dbg("AI placed " + object_get_name(card.figure) + " in lane x=" + string(tile.x) + " (units left " + string(units) + ")")
 	array_delete(hand, array_get_index(hand, card), 1)
 	instance_destroy(card)
 }
@@ -130,6 +131,7 @@ start_turn = function()
 	state = "draw"
 	timer = think_delay
 	holding_back = random(1) < hold_back_chance
+	dbg("AI turn " + string(ai_turn) + ": units " + string(units) + ", hand " + string(array_length(hand)) + ", deck " + string(array_length(deck)) + (holding_back ? ", holding back" : ""))
 	cards_played = 0
 	blocked_this_turn = blocked_turns > 0
 	if (blocked_this_turn)
@@ -153,6 +155,7 @@ start_turn = function()
 			deck = array_shuffle(full_deck)
 		}
 		state = "skipped"
+		dbg("AI out of cards, turn skipped (" + string(skips_left) + " more)")
 		timer = skip_delay
 	}
 }
@@ -197,6 +200,25 @@ switch (difficulty())
 		starting_hand = 5
 		choose_tile = smart_tile
 		break
+}
+// ---- Final fight (coast of Iraq): the boss ----
+// Whatever the difficulty: a deck with Runners and Swordsmen, at least 6 units a turn and 6 starting
+// cards, it never holds back, it blocks the lanes you're winning, and it only needs 3 of your
+// 4 lights (see LaneEndLight_obj). Tested in the balance sim: very hard even for strong players.
+if (is_boss_fight())
+{
+	full_deck = [
+		CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj, CardSailor_obj,
+		CardJumper_obj, CardJumper_obj, CardJumper_obj, CardJumper_obj,
+		CardArtillery_obj, CardArtillery_obj,
+		CardRunner_obj, CardRunner_obj, CardRunner_obj, CardRunner_obj,
+		CardSwordsman_obj, CardSwordsman_obj, CardSwordsman_obj, CardSwordsman_obj
+	]
+	deck = array_shuffle(full_deck)
+	units_per_turn = max(units_per_turn, 6)
+	starting_hand = max(starting_hand, 6)
+	hold_back_chance = 0
+	choose_tile = smart_tile
 }
 units_max = units_per_turn
 units = units_max

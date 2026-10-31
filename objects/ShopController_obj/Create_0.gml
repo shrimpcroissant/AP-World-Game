@@ -10,6 +10,7 @@ if (!variable_global_exists("CurrentShop")) global.CurrentShop = "malacca"
 if (!variable_global_exists("ShopBeforeFight")) global.ShopBeforeFight = false
 
 merchant = shop_merchant(global.CurrentShop)
+dbg("Shop opened: " + global.CurrentShop + ", coins " + string(global.Money) + ", before fight " + string(global.ShopBeforeFight))
 
 // What's for sale: one per square of the shop board (a revisited shop is fully restocked)
 stock = []
@@ -60,6 +61,7 @@ say = function(text)
 
 leave_shop = function()
 {
+	dbg("Leaving shop")
 	if (global.ShopBeforeFight) room_goto(fight_room_for(global.FightsWon))
 	else go_to_map()
 }

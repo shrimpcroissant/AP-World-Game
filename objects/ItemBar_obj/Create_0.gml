@@ -40,6 +40,7 @@ stop_aiming = function()
 // Uses up the item in slot i
 consume = function(i)
 {
+	dbg("Item used: " + global.Items[i].kind)
 	array_delete(global.Items, i, 1)
 }
 

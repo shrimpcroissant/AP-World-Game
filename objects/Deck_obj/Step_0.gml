@@ -1,10 +1,41 @@
 // Count down the reminder text
 if (message_timer > 0) message_timer -= 1
 
+// Backup win check: count the green lights every step, in case a light turned green
+// without its own check catching it. You win with all but one of the top lights green,
+// the enemy wins with all of the bottom ones.
+if (global.Winner == 0)
+{
+	var top_total = 0
+	var top_lit = 0
+	var bottom_total = 0
+	var bottom_lit = 0
+	with (LaneEndLight_obj)
+	{
+		if (watch_team == 1)
+		{
+			top_total += 1
+			if (lit) top_lit += 1
+		}
+		else
+		{
+			bottom_total += 1
+			if (lit) bottom_lit += 1
+		}
+	}
+	if (top_total > 0 && top_lit >= top_total - 1) global.Winner = 1
+	else if (bottom_total > 0 && bottom_lit >= bottom_total - (is_boss_fight() ? 1 : 0)) global.Winner = -1
+}
+
 // Once someone has won: win = click to continue, lose = "Retry this stop" or "Menu"
 if (global.Winner != 0)
 {
 	global.PlayerTurn = false
+	if (!dbg_winner_said)
+	{
+		dbg_winner_said = true
+		dbg((global.Winner == 1) ? "FIGHT WON" : "FIGHT LOST")
+	}
 
 	// Work out the coins once, as soon as you win, so the win screen can show them
 	if (global.Winner == 1 && win_reward == -1) win_reward = fight_reward()
@@ -119,8 +150,20 @@ if (!input_blocked() && mouse_check_button_pressed(mb_left) && help_button_hit()
 	exit
 }
 
-// Keep the next-battle prediction up to date while it's your turn
-if (global.PlayerTurn) predict_battle()
+// Keep the next-battle prediction up to date while it's your turn (timed, it runs every frame)
+if (global.PlayerTurn)
+{
+	var t_predict = get_timer()
+	predict_battle()
+	dbg_time("predict_battle", t_predict)
+}
+
+// Every 5 seconds: frame rate and how many instances exist (a growing count = something leaking)
+if (current_time - dbg_last_fps >= 5000)
+{
+	dbg_last_fps = current_time
+	dbg("FPS " + string(fps) + " (real " + string(round(fps_real)) + "), instances " + string(instance_count) + ", figures " + string(instance_number(FigureParent_obj)) + ", effects " + string(array_length(effects)))
+}
 
 // No drawing cards while the game is paused or a pop-up just closed
 if (input_blocked()) exit
@@ -170,6 +213,7 @@ if (mouse_check_button_pressed(mb_left))
 		{
 			// Extra cards for every 4 units you have (stops early if the deck runs out)
 			repeat (cards_per_draw() - 1) draw_card()
+			dbg("Player drew: hand " + string(hand_count()) + ", deck " + string(array_length(deck)))
 			global.HasDrawn = true
 		}
 	}

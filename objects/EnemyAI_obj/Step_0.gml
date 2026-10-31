@@ -54,13 +54,19 @@ switch (state)
 		if (blocked_lane_turns > 0) blocked_lane_turns -= 1
 
 		// Battle phase: one side acts, then the other. Who goes first flips every round.
+		var t_move = get_timer()
 		with (Deck_obj) move_side(global.FirstSide)
+		dbg_time("battle, first side", t_move, 2)
+		dbg("Battle: side " + string(global.FirstSide) + " moved, figures left " + string(instance_number(FigureParent_obj)))
 		state = "move_second"
 		timer = think_delay
 		break
 
 	case "move_second":
+		var t_move2 = get_timer()
 		with (Deck_obj) move_side(-global.FirstSide)
+		dbg_time("battle, second side", t_move2, 2)
+		dbg("Battle: side " + string(-global.FirstSide) + " moved, figures left " + string(instance_number(FigureParent_obj)))
 		global.FirstSide *= -1
 		state = "end"
 		timer = think_delay
@@ -74,6 +80,7 @@ switch (state)
 
 		// Cards that have been in your hand too long are discarded
 		var discarded = no_draw ? 0 : Deck_obj.age_hand()
+		dbg("Your turn: no_draw " + string(no_draw) + ", discarded " + string(discarded) + ", deck " + string(array_length(Deck_obj.deck)))
 
 		// Hand the turn back to the player
 		state = "waiting"

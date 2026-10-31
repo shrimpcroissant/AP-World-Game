@@ -16,6 +16,7 @@ if (clicked or keyboard_check_pressed(vk_space))
 	// End the turn: any chosen card goes back in the hand
 	global.SelectedCard = noone;
 	global.PlayerTurn = false;
+	dbg("Player ended turn")
 	
 	// Now it's the AI's turn. After it plays, both sides battle.
 	with (EnemyAI_obj) start_turn();

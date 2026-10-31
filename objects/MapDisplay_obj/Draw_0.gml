@@ -21,6 +21,7 @@ if (!variable_instance_exists(id, "click_delay"))
 	story_showing = false
 	hold = 0   // seconds the mouse button or Space has been held on the story screen
 	ending_stage = 0   // after Iraq: 1 = ending text, 2 = credits, then the menu
+	dbg("Map: fights won " + string(global.FightsWon) + ", coins " + string(global.Money) + ", items " + string(array_length(global.Items)))
 }
 
 // Area to fill: the camera view if the room uses one, otherwise the whole room

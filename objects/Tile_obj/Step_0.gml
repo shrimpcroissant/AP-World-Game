@@ -27,6 +27,7 @@ if y = 452 and !paused and !global.DaggerAiming
 		if (instance_exists(card) && card.figure != noone && card.cost <= global.Units)
 		{
 			global.Units -= card.cost
+			dbg("Player placed " + object_get_name(card.figure) + " in lane x=" + string(x) + " (units left " + string(global.Units) + ")")
 			instance_create_layer(x, y, "SpawnChecker", card.figure)
 			instance_destroy(card)
 			global.SelectedCard = noone

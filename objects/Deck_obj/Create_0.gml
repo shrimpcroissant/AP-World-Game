@@ -12,8 +12,8 @@ jumpers_per_fight   = [5, 4, 4, 3, 3, 2]
 artillery_per_fight = [3, 3, 2, 2, 2, 1]
 runners_per_fight   = [2, 2, 2, 2, 2, 2]
 swordsmen_per_fight = [2, 2, 2, 2, 2, 2]
-slaves_per_fight    = [0, 0, 0, 0, 4, 6]
-//            Sailors: 8, 9,10,11, 7, 7  (whatever's left of the 20)
+slaves_per_fight    = [0, 0, 0, 0, 0, 0]   // the Slave card is out of the game
+//            Sailors: 8, 9,10,11,11,13  (whatever's left of the 20)
 
 var fight = 0
 if (variable_global_exists("FightsWon")) fight = clamp(global.FightsWon, 0, array_length(jumpers_per_fight) - 1)
@@ -590,6 +590,7 @@ close_help = function()
 	story_open = false
 	global.HelpOpen = false
 	hold = 0
+	dbg("Panel closed (story or How to play)")
 	help_unpause = true   // unpause next frame
 	block_input_briefly() // and ignore that click/Space for a moment
 }
@@ -650,6 +651,7 @@ tutorial_hit = function(mx, my)
 tutorial_advance = function()
 {
 	tutorial_step += 1
+	dbg("Tutorial step " + string(tutorial_step + 1))
 	tutorial_figs = player_figure_count()
 	if (tutorial_step >= array_length(tutorial_steps))
 	{
@@ -681,4 +683,16 @@ mouse_on_lose_button = function(which)
 {
 	var b = lose_button(which)
 	return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), b.x1, b.y1, b.x2, b.y2)
+}
+
+// Debug prints (see dbg in Items_scr)
+dbg_last_fps = current_time
+dbg_winner_said = false
+dbg("Fight start: stop " + string(fights_before) + " in " + room_get_name(room) + ", difficulty " + string(difficulty()) + ", deck " + string(array_length(deck)) + ", items " + string(array_length(global.Items)))
+
+// Final fight: warn the player about the boss (longer than a normal reminder)
+if (is_boss_fight())
+{
+	show_reminder("FINAL BATTLE: the enemy only needs 3 of your lanes!")
+	message_timer = 480
 }

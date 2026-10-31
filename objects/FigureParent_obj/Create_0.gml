@@ -76,6 +76,7 @@ die = function()
 {
 	// Remember your last lost figure's card, for the Rhinoceros Horn item
 	if (team == 1) global.LastLostCard = card_for_figure(object_index)
+	dbg("Died: " + object_get_name(object_index) + ((team == 1) ? " (yours)" : " (enemy)") + " at x=" + string(x) + " y=" + string(y))
 
 	var spr = sprite_index
 	var ys = image_yscale

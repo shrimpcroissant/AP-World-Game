@@ -26,7 +26,9 @@ else
 // Called when a figure reaches this end (Step event), or when a Runner finishes the lane early.
 light_up = function()
 {
-	if (lit) return
+	// The semicolon matters: without it GameMaker reads "return lit = true" as one line,
+	// so lit never became true and green lights didn't count toward winning
+	if (lit) return;
 	lit = true
 	image_index = 1
 
@@ -57,5 +59,7 @@ light_up = function()
 	}
 	var needed = total
 	if (side == 1) needed = total - 1
+	if (side == -1 && is_boss_fight()) needed = total - 1   // the final boss only needs 3 of yours
+	dbg("Light lit: " + ((side == 1) ? "enemy end (top)" : "your end (bottom)") + " lane x=" + string(lane_x) + ", " + string(green) + "/" + string(total) + " green, " + string(needed) + " needed")
 	if (green >= needed && global.Winner == 0) global.Winner = side
 }

@@ -39,58 +39,58 @@ function item_info_base(kind)
 		// ---- Malacca ----
 		case "tin":
 			return { sprite: TinIngot_spr, name: "Tin Ingot", price: 2,
-				desc: "Malacca's money was cast from tin.\n+2 units this turn." }
+				desc: "+2 units this turn." }
 		case "cloves":
 			return { sprite: NutmegandCloves_spr, name: "Nutmeg & Cloves", price: 2,
-				desc: "Spices from the Spice Islands, used as medicine.\nClick, then click your figure: +1 HP.", target: "own" }
+				desc: "Click, then click your figure: +1 HP.", target: "own" }
 		case "compass":
 			return { sprite: MagneticCompass_spr, name: "Magnetic Compass", price: 4,
-				desc: "Chinese sailors steered by compass.\nAutomatic: when your deck runs out,\nit refills right away (no skipped turns). One use.", target: "passive" }
+				desc: "Automatic: when your deck runs out,\nit refills right away (no turns without drawing). One use.", target: "passive" }
 		case "storage":
 			return { sprite: Storage_spr, name: "Storage Chest", price: 3,
-				desc: "The fleet stored goods in Malacca's warehouse.\nClick, then click a card to store it.\nClick again later to take it back for 0 units.", target: "storage" }
+				desc: "Click, then click a card to store it.\nClick again later to take it back for 0 units.", target: "storage" }
 
 		// ---- Mogadishu ----
 		case "zebra":
 			return { sprite: Zebra_spr, name: "Zebra", price: 3,
-				desc: "Mogadishu sent zebras to the Ming court as tribute.\nClick, then click a lane: the enemy can't place\nfigures in that lane for its next 3 turns.", target: "lane" }
+				desc: "Click, then click a lane: the enemy can't place\nfigures in that lane for its next 3 turns.", target: "lane" }
 		case "ivory":
 			return { sprite: IvoryTusks, name: "Ivory Tusks", price: 4,
-				desc: "East African ivory was prized in China.\nClick, then click your figure:\n+1 attack for the rest of the fight.", target: "own" }
+				desc: "Click, then click your figure:\n+1 attack for the rest of the fight.", target: "own" }
 		case "rhino":
 			return { sprite: RhinoHorn_spr, name: "Rhinoceros Horn", price: 4,
-				desc: "Valued in Chinese medicine.\nRevive: the card of the last figure\nyou lost comes back to your hand." }
+				desc: "Revive: the card of the last figure\nyou lost comes back to your hand." }
 		case "ambergris":
 			return { sprite: Ambergris_spr, name: "Ambergris", price: 2,
-				desc: "Rare whale ambergris, worth a fortune.\nSell it: 5 cards are added back to your deck." }
+				desc: "Sell it: 5 cards are added back to your deck." }
 
 		// ---- Calicut (India) ----
 		case "pepper":
 			return { sprite: PepperCornSack_spr, name: "Sack of Black Pepper", price: 3,
-				desc: "Calicut's pepper was the biggest thing\nChinese ships bought.\n+1 unit at the start of your next 3 turns." }
+				desc: "+1 unit at the start of your next 3 turns." }
 		case "cloth":
 			return { sprite: ClothBolt_spr, name: "Calicut Cotton Cloth", price: 2,
-				desc: "Indian cotton (calico) made fine new sails.\nClick, then click your figure:\nit moves 2 spaces in the next battle." , target: "own" }
+				desc: "Click, then click your figure:\nit moves 2 spaces in the next battle." , target: "own" }
 		case "wootz":
 			return { sprite: WootzSteelBlade_spr, name: "Wootz Steel Blade", price: 3,
-				desc: "South Indian crucible steel, the best blades of the age.\nClick, then click an enemy figure: 2 damage.", target: "enemy" }
+				desc: "Click, then click an enemy figure: 2 damage.", target: "enemy" }
 		case "tablet":
 			return { sprite: CalicutStoneTablet_spr, name: "Calicut Stone Tablet", price: 4,
-				desc: "Zheng He set up a stone tablet in Calicut in 1407\nto honor peace and trade with China.\nThe enemy can't play cards on its next turn." }
+				desc: "The enemy can't play cards on its next turn." }
 
 		// ---- Hormuz (Arabia) ----
 		case "frankincense":
 			return { sprite: Frankincense_spr, name: "Frankincense", price: 3,
-				desc: "Arabian incense, burned in Chinese temples.\nHeal all your figures +1 HP." }
+				desc: "Heal all your figures +1 HP." }
 		case "horse":
 			return { sprite: ArabianHorse_spr, name: "Arabian Horse", price: 4,
-				desc: "Arabian horses were traded across the ocean.\nClick, then click your figure:\nit gallops 2 spaces every turn from now on.", target: "own" }
+				desc: "Click, then click your figure:\nit gallops 2 spaces every turn from now on.", target: "own" }
 		case "pearl":
 			return { sprite: HormuzPearl_spr, name: "Hormuz Pearls", price: 2,
-				desc: "Hormuz was famous for Persian Gulf pearls.\nSell them: +3 units this turn." }
+				desc: "Sell them: +3 units this turn." }
 		case "myrrh":
 			return { sprite: Myrrh_spr, name: "Myrrh", price: 3,
-				desc: "A healing resin from Arabia and Somalia.\nAutomatic: the next time one of your figures\nwould die, it survives with 1 HP. One use.", target: "passive" }
+				desc: "Automatic: the next time one of your figures\nwould die, it survives with 1 HP. One use.", target: "passive" }
 	}
 	return { sprite: -1, name: kind, price: 0, desc: "" }
 }
@@ -145,6 +145,13 @@ function route_stop_points()
 	return [[238, 66], [211, 112], [90, 104], [157, 93], [108, 62], [92, 44]]
 }
 
+// True during the final fight (the coast of Iraq): the enemy is a boss that's much harder to beat.
+// It has a stronger deck, more units and cards, blocks your best lanes, and only needs 3 of your 4 lights.
+function is_boss_fight()
+{
+	return variable_global_exists("FightsWon") && global.FightsWon == 5
+}
+
 // The room each fight happens in, by how many fights you've won before it.
 // The Iraq coast fight (the last one) has its own room; the rest use Prototype_Room for now.
 function fight_room_for(fights_won)
@@ -158,17 +165,16 @@ function fight_room_for(fights_won)
 }
 
 // The shop you visit right AFTER winning a fight ("" = none).
-// China is fight 1, so 1 = after China (a small starter shop), 2 = after Malacca, 3 = after Mogadishu, 4 = after India,
-// 5 = after Arabia (you sail back into Hormuz before heading for Iraq).
+// China is fight 1 (no shop after it), 2 = after Malacca, 3 = after Mogadishu, 4 = after India,
+// 5 = after Arabia (a merchant boat at sea, right before Iraq).
 function shop_after_fight(fights_won)
 {
 	switch (fights_won)
 	{
-		case 1: return "china"
 		case 2: return "malacca"
 		case 3: return "mogadishu"
 		case 4: return "calicut"
-		case 5: return "hormuz"
+		case 5: return "ocean"
 	}
 	return ""
 }
@@ -194,6 +200,7 @@ function shop_items(shop)
 		case "mogadishu": return ["zebra", "ivory", "rhino", "ambergris"]
 		case "calicut":   return ["pepper", "cloth", "wootz", "tablet"]
 		case "hormuz":    return ["frankincense", "horse", "pearl", "myrrh"]
+		case "ocean":     return ["horse", "tablet", "zebra", "myrrh"]   // merchant boat at sea before Iraq: the four strongest items, for the final fight
 	}
 	return []
 }
@@ -212,6 +219,7 @@ function shop_merchant(shop)
 		case "mogadishu": return ShopMerchantMogadishu_spr
 		case "calicut":   return ShopMerchantCalicut_spr
 		case "hormuz":    return ShopMerchantHormuz_spr
+		case "ocean":     return OceanMerchant_spr
 	}
 	return ShopMerchantMalacca_spr
 }
@@ -306,6 +314,23 @@ function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac)
 	draw_set_color(c_white)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
+}
+
+// ---- Debug prints ----
+// Messages in GameMaker's Output window (or the browser console for HTML5), to see what
+// the game is doing and what's slow. Set global.DebugLog = false (here) to turn them all off.
+function dbg(msg)
+{
+	if (!variable_global_exists("DebugLog")) global.DebugLog = true
+	if (global.DebugLog) show_debug_message("[" + string(current_time) + " ms] " + msg)
+}
+
+// Timing: var t = get_timer() before the code, dbg_time("what it was", t) after.
+// Only prints if it took at least min_ms milliseconds, so fast frames don't flood the log.
+function dbg_time(label, start, min_ms = 4)
+{
+	var ms = (get_timer() - start) / 1000
+	if (ms >= min_ms) dbg("SLOW: " + label + " took " + string_format(ms, 0, 1) + " ms")
 }
 
 // ---- Pop-ups and input ----
