@@ -316,7 +316,10 @@ function story_text(key)
 		case "detour":
 			return "Because of your Ming connections, former criminals misled you and let your ship leave the harbor at the wrong time, forcing you to detour to the city-state of Mogadishu."
 		case "arabia":
-			return "Your deal was with the Jalayirids, but the Kara Koyunlu, a Turkoman dynasty, have just taken Baghdad from them. Because of this, the Kara Koyunlu attack you on your way into the coast. You must attempt an escape while fighting off attackers on all sides in the dead of night."	}
+			return "Your deal was with the Jalayirids, but the Kara Koyunlu, a Turkoman dynasty, have just taken Baghdad from them. Because of this, the Kara Koyunlu attack you on your way into the coast. You must attempt an escape while fighting off attackers on all sides in the dead of night."
+		case "boss":
+			return "FINAL BOSS BATTLE!\n\nTo win, you must light all four lanes at the top."
+	}
 	return ""
 }
 
@@ -328,6 +331,7 @@ function story_before_fight(fights_won)
 		case 0: return "china"
 		case 1: return "malacca"
 		case 4: return "arabia"
+		case 5: return "boss"   // final fight: the boss warning
 	}
 	return ""
 }

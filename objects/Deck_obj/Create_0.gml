@@ -864,9 +864,4 @@ dbg_winner_said = false
 global.BossOpe = false   // final fight: true when you were "about to win" (see LaneEndLight_obj)
 dbg("Fight start: stop " + string(fights_before) + " in " + room_get_name(room) + ", difficulty " + string(difficulty()) + ", deck " + string(array_length(deck)) + ", items " + string(array_length(global.Items)))
 
-// Final fight: warn the player about the boss (longer than a normal reminder)
-if (is_boss_fight())
-{
-	show_reminder("FINAL BOSS BATTLE! You must light all four top lanes to win... if you can. Muahaha!")
-	message_timer = 480
-}
+// Final fight: the boss warning is a story pop-up (see story_before_fight)
