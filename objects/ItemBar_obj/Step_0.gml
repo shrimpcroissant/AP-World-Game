@@ -1,6 +1,6 @@
 // Clicking items, and aiming the ones that need a target
 items_init()
-if (input_blocked()) exit
+if (input_blocked() || !tutorial_allows("items")) exit
 
 // One frame after aiming ends, let clicks through again
 if (finishing)

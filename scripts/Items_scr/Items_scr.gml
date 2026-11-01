@@ -321,7 +321,7 @@ function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac)
 // the game is doing and what's slow. Set global.DebugLog = false (here) to turn them all off.
 function dbg(msg)
 {
-	if (!variable_global_exists("DebugLog")) global.DebugLog = true
+	if (!variable_global_exists("DebugLog")) global.DebugLog = false   // true = show the debug prints
 	if (global.DebugLog) show_debug_message("[" + string(current_time) + " ms] " + msg)
 }
 
@@ -331,6 +331,16 @@ function dbg_time(label, start, min_ms = 4)
 {
 	var ms = (get_timer() - start) / 1000
 	if (ms >= min_ms) dbg("SLOW: " + label + " took " + string_format(ms, 0, 1) + " ms")
+}
+
+// ---- Scripted tutorial ----
+// True if the player may do this action right now. During the China tutorial only the current
+// step's actions work (global.TutorialAllow, set by Deck_obj, e.g. "place,end"); otherwise everything does.
+// Actions: draw, place, end, dagger, items.
+function tutorial_allows(action)
+{
+	if (!variable_global_exists("TutorialAllow") || global.TutorialAllow == "all") return true
+	return string_pos(action, global.TutorialAllow) > 0
 }
 
 // ---- Pop-ups and input ----
@@ -350,6 +360,62 @@ function block_input_briefly()
 	global.InputBlockUntil = current_time + 150
 }
 
+// ---- Fit the game to the browser window (website version) ----
+// Called every step by Mouse_obj (it's in every room). In a browser it makes the game fill the
+// window and shows the whole room, adding extra space on the sides or top/bottom when the
+// window's shape doesn't match, so nothing is ever cropped. Only does work when the window
+// size or room changes. Does nothing in the desktop version (Display_obj handles that).
+function fit_to_browser()
+{
+	if (os_browser == browser_not_a_browser) return;
+	var bw = max(1, browser_width)
+	var bh = max(1, browser_height)
+	// Nothing changed? Mouse_obj's Create sets global.FitDirty on every room start, including a
+	// restarted room (like "Retry this stop", which loses the view), so those always re-fit.
+	if (variable_global_exists("FitW") && global.FitW == bw && global.FitH == bh && !global.FitDirty) return;
+	global.FitW = bw
+	global.FitH = bh
+	global.FitDirty = false
+	window_set_size(bw, bh)
+
+	// The area that must always be visible: the start screen uses its top-left 341 x 192
+	var area_w = (room == Menu_Room) ? 341 : room_width
+	var area_h = (room == Menu_Room) ? 192 : room_height
+	var view_w = area_w
+	var view_h = area_h
+	if (bw / bh > area_w / area_h) view_w = round(area_h * bw / bh)   // wider window: extra on the sides
+	else view_h = round(area_w * bh / bw)                             // taller window: extra on top and bottom
+
+	if (!variable_global_exists("FitCam")) global.FitCam = camera_create()
+	camera_set_view_size(global.FitCam, view_w, view_h)
+	camera_set_view_pos(global.FitCam, (area_w - view_w) / 2, (area_h - view_h) / 2)
+	view_enabled = true
+	view_visible[0] = true
+	view_camera[0] = global.FitCam
+	view_xport[0] = 0
+	view_yport[0] = 0
+	view_wport[0] = bw
+	view_hport[0] = bh
+	surface_resize(application_surface, bw, bh)
+	// Pop-ups (Draw GUI) use the same coordinates as the view, scaled to the window like the room
+	display_set_gui_maximize(bw / view_w, bh / view_h, 0, 0)
+	dbg("Fit to browser " + string(bw) + "x" + string(bh) + ", view " + string(view_w) + "x" + string(view_h))
+}
+
+// ---- Mouse position on the pop-up layer (Draw GUI) ----
+// Worked out from the room's mouse position, which is always right. (GameMaker's own
+// device_mouse_x_to_gui ignores the pop-up scaling the website uses, so it pointed at the wrong spot.)
+function gui_mouse_x()
+{
+	if (view_enabled && view_visible[0]) return (mouse_x - camera_get_view_x(view_camera[0])) * display_get_gui_width() / camera_get_view_width(view_camera[0])
+	return mouse_x * display_get_gui_width() / room_width
+}
+function gui_mouse_y()
+{
+	if (view_enabled && view_visible[0]) return (mouse_y - camera_get_view_y(view_camera[0])) * display_get_gui_height() / camera_get_view_height(view_camera[0])
+	return mouse_y * display_get_gui_height() / room_height
+}
+
 // ---- Cursor ----
 // The cursor art: Cursor_spr if it exists (ted's custom cursor), otherwise Mouse_spr
 function custom_cursor_sprite()
@@ -362,7 +428,7 @@ function custom_cursor_sprite()
 // Draws the cursor in a Draw GUI event, so it shows on top of every pop-up
 function draw_cursor_gui()
 {
-	draw_sprite(Mouse_spr, 0, device_mouse_x_to_gui(0), device_mouse_y_to_gui(0))
+	draw_sprite(Mouse_spr, 0, gui_mouse_x(), gui_mouse_y())
 }
 
 // ---- Hold to continue ----
@@ -394,7 +460,7 @@ function card_bio(card_obj, cost)
 	{
 		name = "Sailor"
 		stats = "ATK 1   HP 1"
-		text = "Moves: 1 row forward each battle.\nAttacks: an enemy right in front of it\n(instead of moving). Waits behind your own figures."
+		text = "Moves: 1 space straight forward each battle.\nAttacks: if an enemy is right in front of it,\nit attacks instead of moving. If one of your\nown figures is in front, it waits."
 	}
 	else if (card_obj == CardJumper_obj)
 	{
@@ -412,19 +478,19 @@ function card_bio(card_obj, cost)
 	{
 		name = "Runner"
 		stats = "ATK 2   HP 2"
-		text = "Moves: 2 spaces each battle (the 2nd step only\ngoes into an empty space). Attacks: like a Sailor.\nSpecial: blocked on the row before the enemy's\nback row, it finishes the lane anyway."
+		text = "Moves: 2 spaces straight forward each battle\n(the 2nd step only into an empty space).\nAttacks: an enemy right in front of it, instead of moving.\nSpecial: blocked on the row before the enemy's\nback row, it finishes the lane anyway."
 	}
 	else if (card_obj == CardSwordsman_obj)
 	{
 		name = "Swordsman"
 		stats = "ATK 2   HP 1"
-		text = "Moves: like a Sailor.\nAttacks: with an enemy in front, it hits BOTH\nspaces ahead. Enemies take full damage,\nyour own figures take half."
+		text = "Moves: 1 space straight forward each battle.\nAttacks: with an enemy right in front, it hits BOTH\nspaces ahead. Enemies take full damage,\nyour own figures take half."
 	}
 	else if (card_obj == CardSlave_obj)
 	{
 		name = "Slave"
 		stats = "ATK 0   HP 1"
-		text = "Enslaved people were forced into labor and traded\nacross the Indian Ocean world.\nMoves: like a Sailor. Never attacks:\nit can only block and fill lanes."
+		text = "Enslaved people were forced into labor and traded\nacross the Indian Ocean world.\nMoves: 1 space straight forward each battle.\nNever attacks: it can only block and fill lanes."
 	}
 	return name + "   (Cost: " + string(cost) + " units)\n" + stats + "\n" + text
 }

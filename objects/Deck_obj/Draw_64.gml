@@ -4,8 +4,8 @@
 // "?" button, top right
 var gw = display_get_gui_width()
 var gh = display_get_gui_height()
-var gmx = device_mouse_x_to_gui(0)
-var gmy = device_mouse_y_to_gui(0)
+var gmx = gui_mouse_x()
+var gmy = gui_mouse_y()
 if (global.Winner == 0)
 {
 	var qx = gw - help_btn_size - 20
@@ -59,9 +59,34 @@ else if (global.HelpOpen)
 }
 else if (tutorial_step >= 0 && global.Winner == 0)
 {
-	// China tutorial prompt at the top of the screen
+	// China tutorial: dim everything except the highlighted area, outline it, then the prompt box
+	var spot = tutorial_spot()
+	draw_set_alpha(0.6)
+	draw_set_color(c_black)
+	if (spot == undefined) draw_rectangle(0, 0, gw, gh, false)
+	else
+	{
+		// Four dark bands around the highlight
+		draw_rectangle(0, 0, gw, spot.y1, false)
+		draw_rectangle(0, spot.y2, gw, gh, false)
+		draw_rectangle(0, spot.y1, spot.x1, spot.y2, false)
+		draw_rectangle(spot.x2, spot.y1, gw, spot.y2, false)
+	}
+	draw_set_alpha(1)
+	if (spot != undefined)
+	{
+		var glow = 0.5 + 0.5 * sin(current_time / 150)
+		draw_set_alpha(0.5 + 0.5 * glow)
+		draw_set_color(c_yellow)
+		draw_rectangle(spot.x1, spot.y1, spot.x2, spot.y2, true)
+		draw_rectangle(spot.x1 - 1, spot.y1 - 1, spot.x2 + 1, spot.y2 + 1, true)
+		draw_rectangle(spot.x1 - 2, spot.y1 - 2, spot.x2 + 2, spot.y2 + 2, true)
+		draw_set_alpha(1)
+	}
+
+	// Prompt box: the text wraps to the box width, and the box is as tall as the text needs
 	var b = tutorial_box()
-	draw_set_alpha(0.9)
+	draw_set_alpha(0.95)
 	draw_set_color(make_color_rgb(60, 40, 20))
 	draw_rectangle(b.x1, b.y1, b.x2, b.y2, false)
 	draw_set_alpha(1)
@@ -72,24 +97,24 @@ else if (tutorial_step >= 0 && global.Winner == 0)
 	draw_set_color(c_yellow)
 	draw_text(b.x1 + 14, b.y1 + 8, "TUTORIAL  " + string(tutorial_step + 1) + " / " + string(array_length(tutorial_steps)))
 	draw_set_color(c_white)
-	draw_text_transformed(b.x1 + 14, b.y1 + 28, tutorial_steps[tutorial_step].text, 1.2, 1.2, 0)
+	draw_text_ext_transformed(b.x1 + 14, b.y1 + 30, tutorial_steps[tutorial_step].text, -1, b.wrap, tutorial_text_scale, tutorial_text_scale, 0)
 
-	var names = ["next", "skip"]
+	// Buttons: Skip always, Next only on steps that wait for it
 	var over = tutorial_hit(gmx, gmy)
 	draw_set_halign(fa_center)
 	draw_set_valign(fa_middle)
-	for (var i = 0; i < 2; i++)
+	var names = tutorial_has_next() ? ["next", "skip"] : ["skip"]
+	for (var i = 0; i < array_length(names); i++)
 	{
 		var r = tutorial_button(names[i])
-		if (i == 0) draw_set_color(over == "next" ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
+		if (names[i] == "next") draw_set_color(over == "next" ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
 		else draw_set_color(over == "skip" ? make_color_rgb(110, 80, 40) : make_color_rgb(70, 50, 30))
 		draw_rectangle(r.x1, r.y1, r.x2, r.y2, false)
 		draw_set_color(c_white)
 		draw_rectangle(r.x1, r.y1, r.x2, r.y2, true)
-		draw_text((r.x1 + r.x2) / 2, (r.y1 + r.y2) / 2, (i == 0) ? "Next" : "Skip tutorial")
+		draw_text((r.x1 + r.x2) / 2, (r.y1 + r.y2) / 2, (names[i] == "next") ? "Next" : "Skip tutorial")
 	}
-}
-else if (global.Winner != 0)
+}else if (global.Winner != 0)
 {
 	var cx = gw / 2
 	var cy = gh / 2

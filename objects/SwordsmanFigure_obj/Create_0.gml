@@ -6,6 +6,6 @@ event_inherited()
 attack = 2
 hp = 1
 
-// Moves like the Sailor. When an enemy is right in front of it, it strikes BOTH spaces
+// Moves 1 space straight forward each battle. When an enemy is right in front of it, it strikes BOTH spaces
 // in front: enemies take its full attack, your own figures take half. See advance in FigureParent_obj.
 cleaves = true

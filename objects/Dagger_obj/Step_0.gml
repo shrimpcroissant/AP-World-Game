@@ -8,7 +8,7 @@ switch (state)
 		x = home_x
 		y = home_y
 		image_angle = 0
-		if (global.PlayerTurn && global.Winner == 0 && mouse_check_button_pressed(mb_left) && mouse_on_dagger())
+		if (global.PlayerTurn && global.Winner == 0 && mouse_check_button_pressed(mb_left) && mouse_on_dagger() && tutorial_allows("dagger"))
 		{
 			state = "aiming"
 			global.DaggerAiming = true

@@ -1,3 +1,6 @@
+// Website version: fill the browser window without cropping (see fit_to_browser in Items_scr)
+fit_to_browser()
+
 x = mouse_x
 y = mouse_y
 depth = -2000   // the cursor draws on top of everything, including the pause menu

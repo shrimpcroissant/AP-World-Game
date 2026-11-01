@@ -94,9 +94,11 @@ if (global.HelpOpen)
 	exit
 }
 
-// China tutorial prompts: each step moves on when you do what it says, or with Next
+// China tutorial: each step moves on when you do what it says, or with Next.
+// Only the step's own actions work (global.TutorialAllow, see tutorial_allows in Items_scr).
 if (tutorial_step >= 0 && global.Winner == 0)
 {
+	global.TutorialAllow = tutorial_steps[tutorial_step].allow
 	// Slower enemy turn and battle while learning, so you can follow what happens
 	with (EnemyAI_obj) think_delay = 36
 
@@ -111,19 +113,24 @@ if (tutorial_step >= 0 && global.Winner == 0)
 	}
 	if (!input_blocked() && mouse_check_button_pressed(mb_left))
 	{
-		var hit = tutorial_hit(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0))
+		var hit = tutorial_hit(gui_mouse_x(), gui_mouse_y())
 		if (hit != "") block_input_briefly()   // clicks on the prompt box don't reach the board
 		if (hit == "next") done = true
 		else if (hit == "skip")
 		{
 			tutorial_step = -1
 			global.TutorialShown = true
+			global.TutorialAllow = "all"
 			done = false
 		}
 	}
 	if (done) tutorial_advance()
 }
-else with (EnemyAI_obj) think_delay = 12
+else
+{
+	global.TutorialAllow = "all"
+	with (EnemyAI_obj) think_delay = 12
+}
 // Playtest "Auto win": lights the enemy's lanes one after another (a quick, sure win)
 if (auto_win_timer >= 0)
 {
@@ -193,7 +200,7 @@ if (!global.PlayerTurn || global.DaggerAiming) exit
 // Click the deck to draw a card, once per turn
 if (mouse_check_button_pressed(mb_left))
 {
-	if (point_in_rectangle(mouse_x, mouse_y, x - pile_width / 2, y - pile_height / 2, x + pile_width / 2, y + pile_height / 2))
+	if (tutorial_allows("draw") && point_in_rectangle(mouse_x, mouse_y, x - pile_width / 2, y - pile_height / 2, x + pile_width / 2, y + pile_height / 2))
 	{
 		if (draw_skipped)
 		{

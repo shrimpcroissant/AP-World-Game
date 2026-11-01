@@ -562,7 +562,7 @@ help_button_hit = function()
 {
 	var bx = display_get_gui_width() - help_btn_size - 20
 	var by = 20
-	return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), bx, by, bx + help_btn_size, by + help_btn_size)
+	return point_in_rectangle(gui_mouse_x(), gui_mouse_y(), bx, by, bx + help_btn_size, by + help_btn_size)
 }
 
 // story_open = true means the panel is showing story_shown instead of help_text
@@ -598,21 +598,27 @@ close_help = function()
 var fights_before = variable_global_exists("FightsWon") ? global.FightsWon : 0
 if (!variable_global_exists("TutorialShown")) global.TutorialShown = false
 
-// ---- China tutorial ----
-// The first fight walks you through your first turn with short prompts at the top of the
-// screen. Each step moves on when you do what it says (wait), or with its Next button.
-// "Skip tutorial" ends it. At the end "How to play" opens once with the full rules.
+// ---- China tutorial (scripted) ----
+// The first fight walks you through your first turn one step at a time. Each step:
+//   wait  = what moves it on ("draw", "place", "end", "battle" happen by themselves; "next" = the Next button)
+//   spot  = what gets highlighted ("deck", "hand", "tiles", "token", "board", "lights", "dagger")
+//   allow = the only actions that work during the step (see tutorial_allows in Items_scr)
+// Everything outside the highlight is dimmed. "Skip tutorial" ends it. The last step points out the
+// ? button for How to Play (it isn't opened automatically).
 tutorial_steps = [
-	{ wait: "draw",   text: "Welcome aboard! Your crew is at the bottom, the enemy crew at the top.\nClick your deck (bottom right) to draw cards. Drawing is free, once per turn." },
-	{ wait: "place",  text: "Placing a card costs units (shown under your deck).\nClick a card in your hand, then a glowing tile on your front row." },
-	{ wait: "end",    text: "Place more figures if you have units left.\nWhen you're done, end your turn with the token left of the ship (or Space)." },
-	{ wait: "battle", text: "Battle! The enemy places its figures, then every figure moves forward\nby itself and attacks the enemy in front of it. Watch the board." },
-	{ wait: "next",   text: "Get a figure to the far end of a lane to turn its light at the top green.\nTurn 3 of the 4 green to win. The enemy needs all 4 of yours." },
-	{ wait: "next",   text: "The Dagger (next to your deck) removes one of your own figures on your\nfirst two rows to free up a spot. Hover anything to see what it does." },
-	{ wait: "next",   text: "Cards only stay in your hand for 3 turns, so use them.\nPress Next for the full rules. The ? button (top right) shows them any time." }
+	{ wait: "draw",   spot: "deck",   allow: "draw",       text: "Welcome aboard! Your crew is at the bottom, the enemy crew at the top. Click your deck to draw cards. Drawing is free, once per turn." },
+	{ wait: "next",   spot: "units",  allow: "",           text: "These are your UNITS, what you spend to place cards. Each card costs units. You get 4 a turn, 1 more on turn 2 and 2 more from turn 3 on, plus 1 for each lane where you have more figures than the enemy. Unused units don't carry over." },
+	{ wait: "next",   spot: "bios",   allow: "",           text: "Hover over a card to read its bio: its cost, attack and health, how it moves and how it attacks. Try it now, then press Next." },
+	{ wait: "place",  spot: "hand",   allow: "place",      text: "Now place one. Click a card in your hand, then a glowing tile on your front row." },
+	{ wait: "end",    spot: "token",  allow: "place,end",  text: "You can place more figures if you have units left. When you're done, click the token to end your turn (or press Space)." },
+	{ wait: "battle", spot: "board",  allow: "",           text: "Battle! The enemy places its figures, then every figure moves forward by itself and attacks the enemy in front of it. Watch the board." },
+	{ wait: "next",   spot: "lights", allow: "",           text: "Get a figure to the far end of a lane to turn that lane's light green. Turn 3 of these 4 green to win. The enemy needs all 4 of yours." },
+	{ wait: "next",   spot: "dagger", allow: "",           text: "The Dagger removes one of your own figures on your first two rows, to free up a spot. Hover anything to see what it does." },
+	{ wait: "next",   spot: "help",   allow: "",           text: "Cards only stay in your hand for 3 turns, so use them. If you ever forget a rule, the ? button up here shows How to Play. Good luck, captain!" }
 ]
 tutorial_step = (fights_before == 0 && !global.TutorialShown) ? 0 : -1
 tutorial_figs = 0   // your figures on the board when the current step started
+global.TutorialAllow = "all"
 
 // How many of your figures are on the board
 player_figure_count = function()
@@ -622,12 +628,127 @@ player_figure_count = function()
 	return n
 }
 
-// The prompt box and its buttons, in GUI coordinates
+// Room position -> GUI position (the pop-up layer can be scaled and shifted from the room)
+room_to_gui_x = function(rx)
+{
+	if (view_enabled && view_visible[0]) return (rx - camera_get_view_x(view_camera[0])) * display_get_gui_width() / camera_get_view_width(view_camera[0])
+	return rx * display_get_gui_width() / room_width
+}
+room_to_gui_y = function(ry)
+{
+	if (view_enabled && view_visible[0]) return (ry - camera_get_view_y(view_camera[0])) * display_get_gui_height() / camera_get_view_height(view_camera[0])
+	return ry * display_get_gui_height() / room_height
+}
+
+// The highlighted area for the current step, in GUI coordinates, or undefined for none
+tutorial_spot = function()
+{
+	if (tutorial_step < 0) return undefined
+	var what = tutorial_steps[tutorial_step].spot
+	// While placing, once a card is picked the highlight moves to the tiles you can place it on
+	if (what == "hand" && tutorial_steps[tutorial_step].wait == "place" && instance_exists(global.SelectedCard)) what = "tiles"
+	var x1 = infinity
+	var y1 = infinity
+	var x2 = -infinity
+	var y2 = -infinity
+	switch (what)
+	{
+		case "deck":
+			var half = max(pile_width / 2, 85)   // wide enough for the units text under the deck
+			x1 = x - half; y1 = y - pile_height / 2
+			x2 = x + half; y2 = y + pile_height / 2 + 30
+			break
+		case "hand":
+			with (CardParent_obj)
+			{
+				if (!in_hand) continue
+				var cw = (sprite_get_bbox_right(sprite_index) - sprite_get_bbox_left(sprite_index) + 1) * card_scale
+				var ch = (sprite_get_bbox_bottom(sprite_index) - sprite_get_bbox_top(sprite_index) + 1) * card_scale
+				x1 = min(x1, rest_x - cw / 2); x2 = max(x2, rest_x + cw / 2)
+				y1 = min(y1, rest_y - ch - 30); y2 = max(y2, rest_y)
+			}
+			break
+		case "tiles":
+			with (Tile_obj)
+			{
+				if (y != 452) continue
+				x1 = min(x1, bbox_left); x2 = max(x2, bbox_right)
+				y1 = min(y1, bbox_top); y2 = max(y2, bbox_bottom)
+			}
+			break
+		case "board":
+			with (Tile_obj) { x1 = min(x1, bbox_left); x2 = max(x2, bbox_right); y1 = min(y1, bbox_top); y2 = max(y2, bbox_bottom) }
+			with (LaneEndLight_obj) { x1 = min(x1, bbox_left); x2 = max(x2, bbox_right); y1 = min(y1, bbox_top); y2 = max(y2, bbox_bottom) }
+			break
+		case "units":
+			// The units text under the deck
+			x1 = x - 85; x2 = x + 85
+			y1 = y + pile_height / 2; y2 = y + pile_height / 2 + 34
+			break
+		case "bios":
+			// The hand, plus the space above it where a card's bio pops up
+			with (CardParent_obj)
+			{
+				if (!in_hand) continue
+				var bw2 = (sprite_get_bbox_right(sprite_index) - sprite_get_bbox_left(sprite_index) + 1) * card_scale
+				var bh2 = (sprite_get_bbox_bottom(sprite_index) - sprite_get_bbox_top(sprite_index) + 1) * card_scale
+				x1 = min(x1, rest_x - bw2 / 2 - 140); x2 = max(x2, rest_x + bw2 / 2 + 140)
+				y1 = min(y1, rest_y - bh2 - 260); y2 = max(y2, rest_y)
+			}
+			break
+		case "lights":
+			with (LaneEndLight_obj)
+			{
+				if (watch_team != 1) continue
+				x1 = min(x1, bbox_left); x2 = max(x2, bbox_right)
+				y1 = min(y1, bbox_top); y2 = max(y2, bbox_bottom)
+			}
+			break
+		case "token":
+			with (Token_obj) { x1 = min(x1, bbox_left); x2 = max(x2, bbox_right); y1 = min(y1, bbox_top); y2 = max(y2, bbox_bottom + 36) }   // includes "End turn (Space)"
+			break
+		case "dagger":
+			with (Dagger_obj)
+			{
+				x1 = min(x1, home_x - abs(sprite_width) / 2); x2 = max(x2, home_x + abs(sprite_width) / 2)
+				y1 = min(y1, home_y - abs(sprite_height) / 2); y2 = max(y2, home_y + abs(sprite_height) / 2 + 20)
+			}
+			break
+	}
+	// The ? button is on the pop-up layer already (top right), so it's returned as it is
+	if (what == "help")
+	{
+		var hx = display_get_gui_width() - help_btn_size - 20
+		return { x1: hx - 8, y1: 12, x2: hx + help_btn_size + 8, y2: 20 + help_btn_size + 8 }
+	}
+	if (x1 == infinity) return undefined
+	var pad = 8
+	return { x1: room_to_gui_x(x1) - pad, y1: room_to_gui_y(y1) - pad, x2: room_to_gui_x(x2) + pad, y2: room_to_gui_y(y2) + pad }
+}
+
+// The prompt box, in GUI coordinates. Its height fits the wrapped text, and it sits at the top
+// of the screen unless that would cover the highlight, then just below the highlight instead.
+tutorial_text_scale = 1.2
 tutorial_box = function()
 {
-	var w = 780
+	var w = min(780, display_get_gui_width() - 40)
+	var wrap = (w - 28) / tutorial_text_scale
+	var th = string_height_ext(tutorial_steps[tutorial_step].text, -1, wrap) * tutorial_text_scale
+	var h = 30 + th + 54
 	var x1 = display_get_gui_width() / 2 - w / 2
-	return { x1: x1, y1: 16, x2: x1 + w, y2: 16 + 130 }
+	var y1 = 16
+	var spot = tutorial_spot()
+	if (spot != undefined && spot.y1 < y1 + h + 8 && spot.y2 > y1)
+	{
+		y1 = spot.y2 + 16
+		if (y1 + h > display_get_gui_height() - 8) y1 = max(8, spot.y1 - h - 16)   // no room below: go above
+	}
+	return { x1: x1, y1: y1, x2: x1 + w, y2: y1 + h, wrap: wrap }
+}
+// Next only shows on steps that wait for it; the action steps move on when you do the action
+tutorial_has_next = function()
+{
+	return tutorial_steps[tutorial_step].wait == "next"
 }
 tutorial_button = function(which)
 {
@@ -637,12 +758,13 @@ tutorial_button = function(which)
 }
 tutorial_hit = function(mx, my)
 {
-	var names = ["next", "skip"]
-	for (var i = 0; i < 2; i++)
+	if (tutorial_has_next())
 	{
-		var r = tutorial_button(names[i])
-		if (point_in_rectangle(mx, my, r.x1, r.y1, r.x2, r.y2)) return names[i]
+		var r = tutorial_button("next")
+		if (point_in_rectangle(mx, my, r.x1, r.y1, r.x2, r.y2)) return "next"
 	}
+	var s = tutorial_button("skip")
+	if (point_in_rectangle(mx, my, s.x1, s.y1, s.x2, s.y2)) return "skip"
 	var b = tutorial_box()
 	if (point_in_rectangle(mx, my, b.x1, b.y1, b.x2, b.y2)) return "box"
 	return ""
@@ -657,10 +779,9 @@ tutorial_advance = function()
 	{
 		tutorial_step = -1
 		global.TutorialShown = true
-		open_help(true)   // the full rules once, with the hold-to-continue bar
+		global.TutorialAllow = "all"   // How to Play isn't forced open; the last step points to the ? button
 	}
 }
-
 // Story screen before this fight, once per game (so not again on "Retry this stop")
 var story_key = story_before_fight(fights_before)
 if (story_first_time(story_key))
@@ -682,7 +803,7 @@ lose_button = function(which)
 mouse_on_lose_button = function(which)
 {
 	var b = lose_button(which)
-	return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), b.x1, b.y1, b.x2, b.y2)
+	return point_in_rectangle(gui_mouse_x(), gui_mouse_y(), b.x1, b.y1, b.x2, b.y2)
 }
 
 // Debug prints (see dbg in Items_scr)
