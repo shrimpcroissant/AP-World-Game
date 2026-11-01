@@ -209,7 +209,7 @@ dumb_tile = function(tiles)
 }
 
 // ---- Difficulty (picked on the start screen, see difficulty() in Items_scr) ----
-// Easy: very easy. 2 units a turn to start with, 3 cards in its starting hand, 2 turns in 3 it
+// Easy: almost a sure win. 1 unit a turn to start with, 3 cards in its starting hand, most turns it
 // stops after one card, and it puts figures in the lanes away from yours instead of blocking you.
 // Normal: everything above as it is.
 // Hard: 5 units a turn to start with, 1 more card in its starting hand,
@@ -217,9 +217,9 @@ dumb_tile = function(tiles)
 switch (difficulty())
 {
 	case 0:
-		units_per_turn = 2
+		units_per_turn = 1
 		starting_hand = min(starting_hand, 3)
-		hold_back_chance = 0.65
+		hold_back_chance = 0.85
 		choose_tile = dumb_tile
 		break
 	case 2:

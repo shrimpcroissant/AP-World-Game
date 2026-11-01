@@ -139,6 +139,7 @@ global.DaggerAiming = false
 
 // Units pay for cards. You refill every turn and unused units don't carry over.
 units_per_turn = 4
+if (difficulty() == 0 && !is_boss_fight()) units_per_turn = 5   // Easy: 1 extra unit a turn
 global.Units = units_per_turn
 
 // Units refilled at the start of your turn: units_per_turn, plus 1 more on each of the
