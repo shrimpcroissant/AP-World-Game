@@ -80,7 +80,8 @@ if (global.PlayerTurn && !global.HasDrawn && global.Winner == 0)
 	draw_set_halign(fa_center)
 	draw_set_valign(fa_top)
 	draw_set_color(c_white)
-	draw_text(x, y + 20, "Click to draw")
+	// Wraps onto two lines so it stays inside the deck box
+	draw_text_ext(x, y + 14, "Click to draw", -1, pile_width - 16)
 }
 
 draw_set_color(c_white)

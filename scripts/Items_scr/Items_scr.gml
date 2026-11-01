@@ -398,6 +398,12 @@ function block_input_briefly()
 function fit_to_browser()
 {
 	if (os_browser == browser_not_a_browser) return;
+
+	// The game is drawn at an in-between scale (like 0.75 or 1.33) to fit the window. Plain
+	// nearest-pixel drawing then doubles some pixel rows of letters and drops others, which makes
+	// text look mangled, so smooth the scaling instead. (Set every step: it's a global draw setting.)
+	gpu_set_texfilter(true)
+
 	var bw = max(1, browser_width)
 	var bh = max(1, browser_height)
 	// Nothing changed? Mouse_obj's Create sets global.FitDirty on every room start, including a
