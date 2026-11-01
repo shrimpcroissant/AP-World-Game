@@ -19,7 +19,7 @@ for (var i = 0; i < array_length(stock); i++)
 		draw_sprite_fit(info.sprite, cx, cy - 8, cell - 50, 0.3)
 		draw_set_valign(fa_middle)
 		draw_set_color(c_white)
-		draw_text_transformed(cx, cy, "SOLD", 2, 2, 0)
+		draw_text_transformed_s(cx, cy, "SOLD", 2, 2, 0)
 		continue
 	}
 
@@ -31,9 +31,9 @@ for (var i = 0; i < array_length(stock); i++)
 	var can_buy = global.Money >= info.price && array_length(global.Items) < item_capacity()
 	draw_set_valign(fa_bottom)
 	draw_set_color(c_black)
-	draw_text_transformed(cx + 1, cy + cell / 2 - 5, string(info.price) + " coins", 1.5, 1.5, 0)
+	draw_text_transformed_s(cx + 1, cy + cell / 2 - 5, string(info.price) + " coins", 1.5, 1.5, 0)
 	draw_set_color(can_buy ? c_yellow : make_color_rgb(150, 150, 150))
-	draw_text_transformed(cx, cy + cell / 2 - 6, string(info.price) + " coins", 1.5, 1.5, 0)
+	draw_text_transformed_s(cx, cy + cell / 2 - 6, string(info.price) + " coins", 1.5, 1.5, 0)
 }
 
 // Coins and message, top left
@@ -42,9 +42,9 @@ draw_set_valign(fa_top)
 draw_set_color(c_black)
 draw_rectangle(20, 20, 330, 110, false)
 draw_set_color(c_yellow)
-draw_text_transformed(32, 28, "Coins: " + string(global.Money), 2, 2, 0)
+draw_text_transformed_s(32, 28, "Coins: " + string(global.Money), 2, 2, 0)
 draw_set_color(c_white)
-draw_text_transformed(32, 68, "Items: " + string(array_length(global.Items)) + " / " + string(item_capacity()), 1.5, 1.5, 0)
+draw_text_transformed_s(32, 68, "Items: " + string(array_length(global.Items)) + " / " + string(item_capacity()), 1.5, 1.5, 0)
 
 // Your bag, under the coins
 for (var b = 0; b < item_capacity(); b++)
@@ -64,7 +64,7 @@ if (message_timer > 0)
 {
 	draw_set_alpha(min(1, message_timer / 30))
 	draw_set_color(c_white)
-	draw_text_transformed(32, 196, message, 1.5, 1.5, 0)
+	draw_text_transformed_s(32, 196, message, 1.5, 1.5, 0)
 	draw_set_alpha(1)
 }
 
@@ -76,7 +76,7 @@ draw_set_color(c_white)
 draw_rectangle(btn_x, btn_y, btn_x + btn_w, btn_y + btn_h, true)
 draw_set_halign(fa_center)
 draw_set_valign(fa_middle)
-draw_text_transformed(btn_x + btn_w / 2, btn_y + btn_h / 2, "Set sail (Space)", 1.5, 1.5, 0)
+draw_text_transformed_s(btn_x + btn_w / 2, btn_y + btn_h / 2, "Set sail (Space)", 1.5, 1.5, 0)
 
 // Description of the hovered item
 if (hover != -1 && !stock[hover].sold)

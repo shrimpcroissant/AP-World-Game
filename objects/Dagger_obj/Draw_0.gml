@@ -5,10 +5,10 @@ draw_set_halign(fa_center)
 draw_set_valign(fa_top)
 if (state == "idle")
 {
-	draw_text(home_x, home_y + sprite_height / 2 + 6, "Dagger")
+	draw_text_s(home_x, home_y + sprite_height / 2 + 6, "Dagger")
 }
 else if (state == "aiming")
 {
-	draw_text(x, y + sprite_height / 2 + 6, "Click your figure")
+	draw_text_s(x, y + sprite_height / 2 + 6, "Click your figure")
 }
 draw_set_halign(fa_left)

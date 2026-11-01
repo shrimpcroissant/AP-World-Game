@@ -311,7 +311,7 @@ function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac, show_icons = false
 	draw_set_halign(fa_center)
 	draw_set_valign(fa_top)
 	draw_set_color(c_white)
-	draw_text_ext_transformed(px + pw / 2, py + 40 * k, text, -1, wrap, ts, ts, 0)
+	draw_text_ext_transformed_s(px + pw / 2, py + 40 * k, text, -1, wrap, ts, ts, 0)
 	if (show_icons) draw_credit_icons(px + pw / 2, py + 40 * k + th + 16 * k, k)
 	draw_hold_bar(px + pw / 2, py + ph - 70 * k, 300 * k, k, hold_frac)
 	draw_set_color(c_white)
@@ -340,7 +340,7 @@ function draw_credit_icons(cx, top, k)
 				draw_roundrect_ext(ix - r + 1, iy - r + 1, ix + r - 1, iy + r - 1, 10 * k, 10 * k, true)
 				draw_set_halign(fa_center)
 				draw_set_valign(fa_middle)
-				draw_text_transformed(ix, iy + 1, "G", 2 * k, 2 * k, 0)
+				draw_text_transformed_s(ix, iy + 1, "G", 2 * k, 2 * k, 0)
 				break
 			case 1:
 				// GitHub: a ring with code brackets
@@ -348,7 +348,7 @@ function draw_credit_icons(cx, top, k)
 				draw_circle(ix, iy, r - 1, true)
 				draw_set_halign(fa_center)
 				draw_set_valign(fa_middle)
-				draw_text_transformed(ix, iy, "</>", 1.3 * k, 1.3 * k, 0)
+				draw_text_transformed_s(ix, iy, "</>", 1.3 * k, 1.3 * k, 0)
 				break
 			case 2:
 				// Claude: a coral starburst
@@ -363,11 +363,40 @@ function draw_credit_icons(cx, top, k)
 		draw_set_color(make_color_rgb(220, 190, 120))
 		draw_set_halign(fa_center)
 		draw_set_valign(fa_top)
-		draw_text_transformed(ix, iy + r + 8 * k, names[i], 1.1 * k, 1.1 * k, 0)
+		draw_text_transformed_s(ix, iy + r + 8 * k, names[i], 1.1 * k, 1.1 * k, 0)
 	}
 	draw_set_color(c_white)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
+}
+
+// ---- Text drawing ----
+// Every draw_text call in the game goes through these. On the website the game is scaled to fit
+// the window; there the text alone is drawn with smoothing so letters don't come out mangled,
+// while sprites stay crisp nearest-pixel. Elsewhere they're the plain draw_text functions.
+function text_smooth_on()
+{
+	if (variable_global_exists("SmoothText") && global.SmoothText) gpu_set_texfilter(true)
+}
+function text_smooth_off()
+{
+	if (variable_global_exists("SmoothText") && global.SmoothText) gpu_set_texfilter(false)
+}
+function draw_text_s(tx, ty, str)
+{
+	text_smooth_on(); draw_text(tx, ty, str); text_smooth_off()
+}
+function draw_text_transformed_s(tx, ty, str, xs, ys, ang)
+{
+	text_smooth_on(); draw_text_transformed(tx, ty, str, xs, ys, ang); text_smooth_off()
+}
+function draw_text_ext_s(tx, ty, str, sep, w)
+{
+	text_smooth_on(); draw_text_ext(tx, ty, str, sep, w); text_smooth_off()
+}
+function draw_text_ext_transformed_s(tx, ty, str, sep, w, xs, ys, ang)
+{
+	text_smooth_on(); draw_text_ext_transformed(tx, ty, str, sep, w, xs, ys, ang); text_smooth_off()
 }
 
 // ---- Debug prints ----
@@ -453,10 +482,10 @@ function fit_to_browser()
 {
 	if (os_browser == browser_not_a_browser) return;
 
-	// The game is drawn at an in-between scale (like 0.75 or 1.33) to fit the window. Plain
-	// nearest-pixel drawing then doubles some pixel rows of letters and drops others, which makes
-	// text look mangled, so smooth the scaling instead. (Set every step: it's a global draw setting.)
-	gpu_set_texfilter(true)
+	// The game is drawn at an in-between scale (like 0.75 or 1.33) to fit the window. Nearest-pixel
+	// drawing keeps the pixel art crisp, but mangles small text, so text (only) is smoothed:
+	// see draw_text_s and friends below.
+	global.SmoothText = true
 
 	var bw = max(1, browser_width)
 	var bh = max(1, browser_height)
@@ -536,7 +565,7 @@ function draw_hold_bar(cx, y, w, k, frac)
 	draw_set_valign(fa_top)
 	draw_set_color(c_white)
 	draw_set_alpha(0.65 + 0.35 * sin(current_time / 200))
-	draw_text_transformed(cx, y + h + 8 * k, "Hold click or Space to continue", 1.2 * k, 1.2 * k, 0)
+	draw_text_transformed_s(cx, y + h + 8 * k, "Hold click or Space to continue", 1.2 * k, 1.2 * k, 0)
 	draw_set_alpha(1)
 }
 // The bio shown when you hover a card in your hand. cost is passed in because it can change
@@ -668,5 +697,5 @@ function draw_info_box(px, py, text)
 	draw_rectangle(px, py, px + w, py + h, true)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
-	draw_text(px + 8, py + 6, text)
+	draw_text_s(px + 8, py + 6, text)
 }

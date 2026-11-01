@@ -17,7 +17,7 @@ if (instance_exists(EnemyAI_obj) && EnemyAI_obj.blocked_lane_turns > 0)
 	draw_set_halign(fa_center)
 	draw_set_valign(fa_bottom)
 	draw_set_color(c_white)
-	draw_text(lx, 160, "Blocked: " + string(EnemyAI_obj.blocked_lane_turns))
+	draw_text_s(lx, 160, "Blocked: " + string(EnemyAI_obj.blocked_lane_turns))
 }
 
 // While aiming the Zebra, light up the lane under the mouse
@@ -59,7 +59,7 @@ for (var i = 0; i < 4; i++)
 			draw_set_halign(fa_center)
 			draw_set_valign(fa_bottom)
 			draw_set_color(c_lime)
-			draw_text(sx, sy + half - 2, "1 card")
+			draw_text_s(sx, sy + half - 2, "1 card")
 		}
 	}
 }
@@ -68,15 +68,15 @@ for (var i = 0; i < 4; i++)
 draw_set_halign(fa_center)
 draw_set_valign(fa_bottom)
 draw_set_color(c_white)
-draw_text(slot_x[0], slot_y[0] - half - 4, "Items")
-draw_text(slot_x[2], slot_y[2] - half - 4, "Items")
+draw_text_s(slot_x[0], slot_y[0] - half - 4, "Items")
+draw_text_s(slot_x[2], slot_y[2] - half - 4, "Items")
 draw_set_valign(fa_top)
 draw_set_color(c_yellow)
-draw_text_transformed(slot_x[0], slot_y[1] + half + 8, "Coins: " + string(global.Money), 1.5, 1.5, 0)
+draw_text_transformed_s(slot_x[0], slot_y[1] + half + 8, "Coins: " + string(global.Money), 1.5, 1.5, 0)
 if (global.PepperTurns > 0)
 {
 	draw_set_color(c_orange)
-	draw_text(slot_x[0], slot_y[1] + half + 34, "Pepper: +1 unit for " + string(global.PepperTurns) + " more turns")
+	draw_text_s(slot_x[0], slot_y[1] + half + 34, "Pepper: +1 unit for " + string(global.PepperTurns) + " more turns")
 }
 
 // Aiming hint by the mouse
@@ -89,7 +89,7 @@ if (global.ItemAiming != "")
 	else if (aim_target == "enemy") hint = "Click an enemy figure"
 	else if (aim_target == "lane") hint = "Click a lane to block"
 	draw_set_color(c_lime)
-	draw_text(mouse_x, mouse_y + 20, hint + " (right-click to cancel)")
+	draw_text_s(mouse_x, mouse_y + 20, hint + " (right-click to cancel)")
 }
 
 // Description of the hovered item

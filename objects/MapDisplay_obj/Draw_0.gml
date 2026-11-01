@@ -106,9 +106,9 @@ for (var i = 0; i < array_length(global.Stops); i++)
 	}
 	// Name under the marker, with a dark shadow so it reads on land and sea
 	draw_set_color(c_black)
-	draw_text_transformed(mx + 1, my + r + 4 * k + 1, label, 1.2 * k, 1.2 * k, 0)
+	draw_text_transformed_s(mx + 1, my + r + 4 * k + 1, label, 1.2 * k, 1.2 * k, 0)
 	draw_set_color(c_white)
-	draw_text_transformed(mx, my + r + 4 * k, label, 1.2 * k, 1.2 * k, 0)
+	draw_text_transformed_s(mx, my + r + 4 * k, label, 1.2 * k, 1.2 * k, 0)
 }
 
 // ---- Message at the bottom ----
@@ -133,7 +133,7 @@ draw_set_color(c_black)
 draw_rectangle(tx - w / 2, ty - h, tx + w / 2, ty + 8 * k, false)
 draw_set_alpha(pulse)
 draw_set_color(c_white)
-draw_text_transformed(tx, ty, text, 2 * k, 2 * k, 0)
+draw_text_transformed_s(tx, ty, text, 2 * k, 2 * k, 0)
 draw_set_alpha(1)
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)

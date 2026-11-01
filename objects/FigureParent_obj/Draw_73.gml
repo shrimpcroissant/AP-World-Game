@@ -31,7 +31,7 @@ if (hovered)
 
 	draw_set_color(c_white)
 	draw_set_alpha(pulse)
-	draw_text(tx, ty, text)
+	draw_text_s(tx, ty, text)
 	draw_set_alpha(1)
 
 	ty -= h + 4   // put DEATH above the stats box
@@ -42,9 +42,9 @@ if (hovered && global.PlayerTurn && predicted_death)
 {
 	draw_set_alpha(pulse)
 	draw_set_color(c_black)
-	draw_text_transformed(tx + 1, ty + 1, "DEATH", 1.5, 1.5, 0)
+	draw_text_transformed_s(tx + 1, ty + 1, "DEATH", 1.5, 1.5, 0)
 	draw_set_color(c_red)
-	draw_text_transformed(tx, ty, "DEATH", 1.5, 1.5, 0)
+	draw_text_transformed_s(tx, ty, "DEATH", 1.5, 1.5, 0)
 	draw_set_alpha(1)
 }
 

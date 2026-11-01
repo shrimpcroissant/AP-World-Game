@@ -19,7 +19,7 @@ for (var i = 0; i < 3; i++)
 	draw_rectangle(b.x1, b.y1, b.x2, b.y2, false)
 	draw_set_color(c_white)
 	draw_rectangle(b.x1, b.y1, b.x2, b.y2, true)
-	draw_text_transformed((b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, names[i], 0.5, 0.5, 0)
+	draw_text_transformed_s((b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, names[i], 0.5, 0.5, 0)
 }
 draw_set_color(c_white)
 draw_set_halign(fa_left)
