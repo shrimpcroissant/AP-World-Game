@@ -61,5 +61,11 @@ light_up = function()
 	if (side == 1) needed = total - 1
 	if (side == -1 && is_boss_fight()) needed = total - 1   // the final boss only needs 3 of yours
 	dbg("Light lit: " + ((side == 1) ? "enemy end (top)" : "your end (bottom)") + " lane x=" + string(lane_x) + ", " + string(green) + "/" + string(total) + " green, " + string(needed) + " needed")
-	if (green >= needed && global.Winner == 0) global.Winner = side
+	if (green >= needed && global.Winner == 0)
+	{
+		// The final boss is designed to be lost: lighting 3 of its lanes (about to win) ends the fight
+		// in the scripted loss ("Ope!") instead, so it's impossible to win
+		if (side == 1 && is_boss_fight()) { global.BossOpe = true; global.Winner = -1 }
+		else global.Winner = side
+	}
 }

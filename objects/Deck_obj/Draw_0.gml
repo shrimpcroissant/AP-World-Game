@@ -2,7 +2,7 @@
 // and any reminder text just above it
 
 // Playtest "Auto win" button (see debug_tools in the Create event)
-if (debug_tools && global.Winner == 0)
+if (debug_tools && global.Winner == 0 && !is_boss_fight())   // no Auto win in the final fight
 {
 	var hover_btn = point_in_rectangle(mouse_x, mouse_y, debug_btn_x, debug_btn_y, debug_btn_x + debug_btn_w, debug_btn_y + debug_btn_h)
 	draw_set_color(hover_btn ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))

@@ -180,6 +180,16 @@ else if (global.Winner != 0)
 		draw_set_color(c_white)
 		draw_text_transformed_s(cx, cy + 80, "Click to continue", 1.5, 1.5, 0)
 	}
+	else if (is_boss_fight())
+	{
+		// Final fight: always lost (it's scripted), then on to the ending. No Retry.
+		draw_set_color(c_red)
+		draw_text_transformed_s(cx, cy - 60, global.BossOpe ? "Ope!" : "Defeated!", 4, 4, 0)
+		draw_set_color(c_white)
+		var why = global.BossOpe ? "It looked like you were going to win, but... you did not." : "The enemy fleet overwhelms you."
+		draw_text_transformed_s(cx, cy + 10, why, 1.6, 1.6, 0)
+		draw_text_transformed_s(cx, cy + 80, "Click to continue", 1.5, 1.5, 0)
+	}
 	else
 	{
 		draw_set_color(c_red)

@@ -100,12 +100,73 @@ function item_info_base(kind)
 // then back to the menu. Replace the placeholder text with the real text.
 function ending_text()
 {
-	return "[ENDING TEXT GOES HERE: what happens after you reach the coast of Iraq.]"
+	return "You fought your way to the coast of Iraq, but this was never a battle you could win. By 1433 the treasure voyages were over. The Xuande emperor's court was dominated by Confucian officials who saw the fleets as ruinously expensive and the foreign tribute as little reward. The Ming capital had moved to Beijing, and the real danger lay to the north, where Mongol raiders demanded the empire's money and soldiers. Zheng He died on or around the last voyage, and no admiral replaced him. The great ships were left to rot and the court turned inward. The Indian Ocean trade you fought for kept flowing, but under Arab, Indian, and later Portuguese ships, and not under the Ming flag. History had already ended your voyage."
 }
 
-function credits_text()
+// The credits: the bullet lines (left-aligned, each its own bullet) between the title and the thanks
+function credits_lines()
 {
-	return "MONSOON ROUTE\n\nArt, Design, Mechanics, and Content by Jack Dean\nCode written by Claude (Anthropic's AI),\ndirected and tested by Jack Dean\nBuilt in GameMaker Studio\nHosted on GitHub\n\nThanks for playing!"
+	return [
+		"Art, Design, Mechanics, and Content by Jack Dean.",
+		"Code written by Claude (Anthropic's AI), directed and tested by Jack Dean.",
+		"Built in GameMaker Studio.",
+		"Hosted on GitHub."
+	]
+}
+
+// The credits box: title, bullet list (wrapped lines indent under their own bullet),
+// "Thanks for playing!", the tool icons, then the hold-to-continue bar
+function draw_credits_panel(ax, ay, aw, ah, k, hold_frac)
+{
+	draw_set_alpha(0.75)
+	draw_set_color(c_black)
+	draw_rectangle(ax, ay, ax + aw, ay + ah, false)
+	draw_set_alpha(1)
+
+	var ts = 1.6 * k
+	var wrap = 430                      // bullet text wrap width before scaling
+	var lines = credits_lines()
+	var list_h = 0
+	for (var i = 0; i < array_length(lines); i++) list_h += string_height_ext(lines[i], -1, wrap) * ts + 6 * k
+	var title_h = string_height("M") * ts
+	var pw = wrap * ts + 120 * k
+	var ph = 40 * k + title_h + 24 * k + list_h + 24 * k + title_h + 40 * k + 70 * k + 90 * k
+	var px = ax + aw / 2 - pw / 2
+	var py = ay + ah / 2 - ph / 2
+	draw_set_color(make_color_rgb(60, 40, 20))
+	draw_rectangle(px, py, px + pw, py + ph, false)
+	draw_set_color(make_color_rgb(220, 190, 120))
+	draw_rectangle(px, py, px + pw, py + ph, true)
+	draw_rectangle(px + 3, py + 3, px + pw - 3, py + ph - 3, true)
+
+	var cy = py + 40 * k
+	draw_set_color(c_white)
+	draw_set_halign(fa_center)
+	draw_set_valign(fa_top)
+	draw_text_transformed_s(px + pw / 2, cy, "MONSOON ROUTE", ts, ts, 0)
+	cy += title_h + 24 * k
+
+	// Bullets: a dot, then the text left-aligned; wrapped lines line up under the text
+	var lx = px + 50 * k
+	draw_set_halign(fa_left)
+	for (var i = 0; i < array_length(lines); i++)
+	{
+		draw_set_color(make_color_rgb(220, 190, 120))
+		draw_circle(lx, cy + title_h / 2, 4 * k, false)
+		draw_set_color(c_white)
+		draw_text_ext_transformed_s(lx + 16 * k, cy, lines[i], -1, wrap, ts, ts, 0)
+		cy += string_height_ext(lines[i], -1, wrap) * ts + 6 * k
+	}
+	cy += 24 * k
+	draw_set_halign(fa_center)
+	draw_text_transformed_s(px + pw / 2, cy, "Thanks for playing!", ts, ts, 0)
+	cy += title_h + 40 * k   // extra room above the icons
+
+	draw_credit_icons(px + pw / 2, cy, k)
+	draw_hold_bar(px + pw / 2, py + ph - 70 * k, 300 * k, k, hold_frac)
+	draw_set_color(c_white)
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
 }
 
 // ---- Difficulty ----
@@ -332,7 +393,14 @@ function draw_credit_icons(cx, top, k)
 		var ix = cx + (i - 1) * gap
 		var iy = top + r
 		draw_set_color(c_white)
-		switch (i)
+		// The real logos (sprites); the drawn marks below are only a fallback
+		var logo = asset_get_index(["LogoGameMaker_spr", "LogoGitHub_spr", "LogoClaude_spr"][i])
+		if (logo != -1)
+		{
+			var ls = (2 * r) / sprite_get_width(logo)
+			draw_sprite_ext(logo, 0, ix, iy, ls, ls, 0, c_white, 1)
+		}
+		else switch (i)
 		{
 			case 0:
 				// GameMaker: a rounded tile with a bold G

@@ -23,7 +23,14 @@ if (global.Winner == 0)
 			if (lit) bottom_lit += 1
 		}
 	}
-	if (top_total > 0 && top_lit >= top_total - 1) global.Winner = 1
+	if (top_total > 0 && top_lit >= top_total - 1)
+	{
+		// The final boss can't be beaten: being about to win ends it in the scripted loss ("Ope!")
+		if (is_boss_fight()) { global.BossOpe = true; global.Winner = -1 }
+		else global.Winner = 1
+	}
+	// Final boss turn cap: after 25 of your turns the enemy overwhelms you
+	else if (is_boss_fight() && player_turn > 25) global.Winner = -1
 	else if (bottom_total > 0 && bottom_lit >= bottom_total - (is_boss_fight() ? 1 : 0)) global.Winner = -1
 }
 
@@ -56,6 +63,12 @@ if (global.Winner != 0)
 			var shop = shop_after_fight(global.FightsWon)
 			if (shop != "") go_to_shop(shop, false)
 			else go_to_map()
+		}
+		else if (is_boss_fight())
+		{
+			// The final fight always ends here: straight to the ending text, then the credits (on the map)
+			global.FightsWon = array_length(route_stops())
+			go_to_map()
 		}
 		else if (mouse_on_lose_button("retry"))
 		{
@@ -204,7 +217,7 @@ if (input_blocked()) exit
 
 // Playtest shortcut: the "Auto win" button (or F2) plays out a quick win.
 // Turn it off for the real game with debug_tools = false in Deck_obj's Create event.
-if (debug_tools)
+if (debug_tools && !is_boss_fight())   // no Auto win in the final fight
 {
 	var auto_win = keyboard_check_pressed(vk_f2)
 	if (mouse_check_button_pressed(mb_left) && point_in_rectangle(mouse_x, mouse_y, debug_btn_x, debug_btn_y, debug_btn_x + debug_btn_w, debug_btn_y + debug_btn_h)) auto_win = true
