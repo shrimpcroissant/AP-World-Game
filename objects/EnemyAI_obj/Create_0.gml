@@ -184,16 +184,43 @@ smart_tile = function(tiles)
 	return best[irandom(array_length(best) - 1)]
 }
 
+// Easy bot placement: the opposite of smart_tile, it avoids the lanes where your figures are
+// (so it never blocks you)
+dumb_tile = function(tiles)
+{
+	var best = []
+	var best_score = 1000000
+	for (var i = 0; i < array_length(tiles); i++)
+	{
+		var lane_x = tiles[i].x
+		var lane_score = 0
+		with (FigureParent_obj)
+		{
+			if (x == lane_x && team == 1) lane_score += 1 + rows_from_home(y)
+		}
+		if (lane_score < best_score)
+		{
+			best_score = lane_score
+			best = [tiles[i]]
+		}
+		else if (lane_score == best_score) array_push(best, tiles[i])
+	}
+	return best[irandom(array_length(best) - 1)]
+}
+
 // ---- Difficulty (picked on the start screen, see difficulty() in Items_scr) ----
-// Easy: 3 units a turn to start with, and 1 turn in 4 it stops after one card.
+// Easy: very easy. 2 units a turn to start with, 3 cards in its starting hand, 2 turns in 3 it
+// stops after one card, and it puts figures in the lanes away from yours instead of blocking you.
 // Normal: everything above as it is.
 // Hard: 5 units a turn to start with, 1 more card in its starting hand,
 // and it places figures to block the lanes you're winning.
 switch (difficulty())
 {
 	case 0:
-		units_per_turn = 3
-		hold_back_chance = 0.25
+		units_per_turn = 2
+		starting_hand = min(starting_hand, 3)
+		hold_back_chance = 0.65
+		choose_tile = dumb_tile
 		break
 	case 2:
 		units_per_turn = 5
