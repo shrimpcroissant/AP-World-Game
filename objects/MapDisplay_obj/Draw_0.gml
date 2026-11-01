@@ -141,7 +141,7 @@ draw_set_valign(fa_top)
 // ---- The ending: ted's closing text, then the credits, then the menu ----
 if (done && ending_stage == 0) ending_stage = 1
 if (ending_stage == 1) draw_story_panel(ax, ay, aw, ah, k, ending_text(), hold)
-if (ending_stage == 2) draw_story_panel(ax, ay, aw, ah, k, credits_text(), hold)
+if (ending_stage == 2) draw_story_panel(ax, ay, aw, ah, k, credits_text(), hold, true)   // with the tool icons
 // The detour story screen, over the map
 if (story_showing) draw_story_panel(ax, ay, aw, ah, k, story_text("detour"), hold)
 

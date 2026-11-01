@@ -105,7 +105,7 @@ function ending_text()
 
 function credits_text()
 {
-	return "MONSOON ROUTE\n\nArt, Design, and Content by Jack Dean\nCode and Mechanics by Jack Dean and Claude\n\nThanks for playing!"
+	return "MONSOON ROUTE\n\nArt, Design, Mechanics, and Content by Jack Dean\nCode written by Claude (Anthropic's AI),\ndirected and tested by Jack Dean\nBuilt in GameMaker Studio\nHosted on GitHub\n\nThanks for playing!"
 }
 
 // ---- Difficulty ----
@@ -285,7 +285,8 @@ function story_first_time(key)
 // Draws a story screen: dims the whole area, then a framed box with the text wrapped to fit,
 // and the hold-to-continue bar (hold_frac 0 to 1).
 // (ax, ay, aw, ah) is the area to cover, k scales the text (1 = normal size).
-function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac)
+// show_icons = true adds the row of tool icons (credits screen only, see draw_credit_icons)
+function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac, show_icons = false)
 {
 	draw_set_alpha(0.75)
 	draw_set_color(c_black)
@@ -297,7 +298,8 @@ function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac)
 	var tw = string_width_ext(text, -1, wrap) * ts
 	var th = string_height_ext(text, -1, wrap) * ts
 	var pw = max(tw, 320 * k) + 80 * k
-	var ph = th + 130 * k
+	var icons_h = show_icons ? 90 * k : 0   // room for the icon row between the text and the hold bar
+	var ph = th + 130 * k + icons_h
 	var px = ax + aw / 2 - pw / 2
 	var py = ay + ah / 2 - ph / 2
 	draw_set_color(make_color_rgb(60, 40, 20))
@@ -310,7 +312,59 @@ function draw_story_panel(ax, ay, aw, ah, k, text, hold_frac)
 	draw_set_valign(fa_top)
 	draw_set_color(c_white)
 	draw_text_ext_transformed(px + pw / 2, py + 40 * k, text, -1, wrap, ts, ts, 0)
+	if (show_icons) draw_credit_icons(px + pw / 2, py + 40 * k + th + 16 * k, k)
 	draw_hold_bar(px + pw / 2, py + ph - 70 * k, 300 * k, k, hold_frac)
+	draw_set_color(c_white)
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
+}
+
+// The row of small icons on the credits screen for the tools the game was made with.
+// Simple marks drawn in code (no logo image files), each with its name underneath.
+// cx = center of the row, top = top of the icons, k = scale.
+function draw_credit_icons(cx, top, k)
+{
+	var names = ["GameMaker", "GitHub", "Claude"]
+	var gap = 120 * k
+	var r = 18 * k   // icon radius
+	for (var i = 0; i < 3; i++)
+	{
+		var ix = cx + (i - 1) * gap
+		var iy = top + r
+		draw_set_color(c_white)
+		switch (i)
+		{
+			case 0:
+				// GameMaker: a rounded tile with a bold G
+				draw_roundrect_ext(ix - r, iy - r, ix + r, iy + r, 10 * k, 10 * k, true)
+				draw_roundrect_ext(ix - r + 1, iy - r + 1, ix + r - 1, iy + r - 1, 10 * k, 10 * k, true)
+				draw_set_halign(fa_center)
+				draw_set_valign(fa_middle)
+				draw_text_transformed(ix, iy + 1, "G", 2 * k, 2 * k, 0)
+				break
+			case 1:
+				// GitHub: a ring with code brackets
+				draw_circle(ix, iy, r, true)
+				draw_circle(ix, iy, r - 1, true)
+				draw_set_halign(fa_center)
+				draw_set_valign(fa_middle)
+				draw_text_transformed(ix, iy, "</>", 1.3 * k, 1.3 * k, 0)
+				break
+			case 2:
+				// Claude: a coral starburst
+				draw_set_color(make_color_rgb(217, 119, 87))
+				for (var a = 0; a < 360; a += 30)
+				{
+					var len = (a mod 60 == 0) ? r : r * 0.7
+					draw_line_width(ix, iy, ix + lengthdir_x(len, a), iy + lengthdir_y(len, a), 3 * k)
+				}
+				break
+		}
+		draw_set_color(make_color_rgb(220, 190, 120))
+		draw_set_halign(fa_center)
+		draw_set_valign(fa_top)
+		draw_text_transformed(ix, iy + r + 8 * k, names[i], 1.1 * k, 1.1 * k, 0)
+	}
 	draw_set_color(c_white)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
