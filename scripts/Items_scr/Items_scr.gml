@@ -100,7 +100,7 @@ function item_info_base(kind)
 // then back to the menu. Replace the placeholder text with the real text.
 function ending_text()
 {
-	return "You fought your way to the coast of Iraq, but this was never a battle you could win. By 1433 the treasure voyages were over. The Xuande emperor's court was dominated by Confucian officials who saw the fleets as ruinously expensive and the foreign tribute as little reward. The Ming capital had moved to Beijing, and the real danger lay to the north, where Mongol raiders demanded the empire's money and soldiers. Zheng He died on or around the last voyage, and no admiral replaced him. The great ships were left to rot and the court turned inward. The Indian Ocean trade you fought for kept flowing, but under Arab, Indian, and later Portuguese ships, and not under the Ming flag. History had already ended your voyage."
+	return "It turns out that the criminals at Mogadishu got in contact with the attackers in the coast of Iraq and told them when you would arrive, letting them plan their attack. You were destined to lose."
 }
 
 // The credits: the bullet lines (left-aligned, each its own bullet) between the title and the thanks
