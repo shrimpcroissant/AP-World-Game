@@ -585,8 +585,22 @@ open_help = function(first_time = false)
 	hold = 0
 }
 
+// China, first time: the story screen is followed by How to Play (also hold to continue),
+// then the tutorial starts
+help_after_story = false
+hold_release = false   // true = wait for the button/Space to be let go before the hold bar can fill
+
 close_help = function()
 {
+	if (story_open && help_after_story)
+	{
+		story_open = false
+		help_after_story = false
+		needs_hold = true
+		hold = 0
+		hold_release = true
+		return
+	}
 	story_open = false
 	global.HelpOpen = false
 	hold = 0
@@ -611,7 +625,7 @@ tutorial_steps = [
 	{ wait: "next",   spot: "bios",   allow: "",           text: "Hover over a card to read its bio: its cost, attack and health, how it moves and how it attacks. Try it now, then press Next." },
 	{ wait: "place",  spot: "hand",   allow: "place",      text: "Now place one. Click a card in your hand, then a glowing tile on your front row." },
 	{ wait: "end",    spot: "token",  allow: "place,end",  text: "You can place more figures if you have units left. When you're done, click the token to end your turn (or press Space)." },
-	{ wait: "battle", spot: "board",  allow: "",           text: "Battle! The enemy places its figures, then every figure moves forward by itself and attacks the enemy in front of it. Watch the board." },
+	{ wait: "battle", spot: "board",  allow: "",           text: "Battle! First the enemy draws and places its figures. Then each side's figures act one at a time: each one moves forward, or attacks an enemy right in front of it. Click the play button to watch it unfold." },
 	{ wait: "next",   spot: "lights", allow: "",           text: "Get a figure to the far end of a lane to turn that lane's light green. Turn 3 of these 4 green to win. The enemy needs all 4 of yours." },
 	{ wait: "next",   spot: "dagger", allow: "",           text: "The Dagger removes one of your own figures on your first two rows, to free up a spot. Hover anything to see what it does." },
 	{ wait: "next",   spot: "help",   allow: "",           text: "Cards only stay in your hand for 3 turns, so use them. If you ever forget a rule, the ? button up here shows How to Play. Good luck, captain!" }
@@ -619,6 +633,9 @@ tutorial_steps = [
 tutorial_step = (fights_before == 0 && !global.TutorialShown) ? 0 : -1
 tutorial_figs = 0   // your figures on the board when the current step started
 global.TutorialAllow = "all"
+global.TutorialPhaseMode = false
+global.TutorialReleased = []
+global.TutorialLanesOpen = false
 
 // How many of your figures are on the board
 player_figure_count = function()
@@ -746,14 +763,35 @@ tutorial_box = function()
 	return { x1: x1, y1: y1, x2: x1 + w, y2: y1 + h, wrap: wrap }
 }
 // Next only shows on steps that wait for it; the action steps move on when you do the action
+// The battle step also has Next, but it stays disabled until the battle is over
 tutorial_has_next = function()
 {
-	return tutorial_steps[tutorial_step].wait == "next"
+	var w = tutorial_steps[tutorial_step].wait
+	return w == "next" || w == "battle"
+}
+tutorial_next_enabled = function()
+{
+	return tutorial_steps[tutorial_step].wait != "battle" || global.PlayerTurn
+}
+// No Skip on the last step
+tutorial_has_skip = function()
+{
+	return tutorial_step < array_length(tutorial_steps) - 1
+}
+// The play button only exists on the battle step, and only works while the enemy waits at a phase
+tutorial_has_play = function()
+{
+	return tutorial_steps[tutorial_step].wait == "battle"
+}
+tutorial_play_enabled = function()
+{
+	return tutorial_has_play() && instance_exists(EnemyAI_obj) && EnemyAI_obj.timer <= 0 && tutorial_phase_waiting(EnemyAI_obj.state)
 }
 tutorial_button = function(which)
 {
 	var b = tutorial_box()
 	if (which == "next") return { x1: b.x2 - 130, y1: b.y2 - 44, x2: b.x2 - 12, y2: b.y2 - 10 }
+	if (which == "play") return { x1: b.x1 + 14, y1: b.y2 - 44, x2: b.x1 + 48, y2: b.y2 - 10 }
 	return { x1: b.x2 - 290, y1: b.y2 - 44, x2: b.x2 - 142, y2: b.y2 - 10 }
 }
 tutorial_hit = function(mx, my)
@@ -763,8 +801,16 @@ tutorial_hit = function(mx, my)
 		var r = tutorial_button("next")
 		if (point_in_rectangle(mx, my, r.x1, r.y1, r.x2, r.y2)) return "next"
 	}
-	var s = tutorial_button("skip")
-	if (point_in_rectangle(mx, my, s.x1, s.y1, s.x2, s.y2)) return "skip"
+	if (tutorial_has_skip())
+	{
+		var s = tutorial_button("skip")
+		if (point_in_rectangle(mx, my, s.x1, s.y1, s.x2, s.y2)) return "skip"
+	}
+	if (tutorial_has_play())
+	{
+		var p = tutorial_button("play")
+		if (point_in_rectangle(mx, my, p.x1, p.y1, p.x2, p.y2)) return "play"
+	}
 	var b = tutorial_box()
 	if (point_in_rectangle(mx, my, b.x1, b.y1, b.x2, b.y2)) return "box"
 	return ""
@@ -789,6 +835,7 @@ if (story_first_time(story_key))
 	story_open = true
 	story_shown = story_text(story_key)
 	open_help(true)
+	help_after_story = (tutorial_step == 0)
 }
 // Buttons on the lose screen, in GUI coordinates (centered on the screen)
 lose_button = function(which)

@@ -343,6 +343,36 @@ function tutorial_allows(action)
 	return string_pos(action, global.TutorialAllow) > 0
 }
 
+// Tutorial step 6 plays the enemy's turn one phase at a time. EnemyAI_obj waits at the start of
+// each of these states until the player presses the play button (Deck_obj adds the state to
+// global.TutorialReleased). Only while global.TutorialPhaseMode is on (tutorial steps 5 and 6).
+function tutorial_phase_list()
+{
+	return ["draw", "play", "move", "move_second", "lanes"]
+}
+
+function tutorial_phase_waiting(state)
+{
+	if (!variable_global_exists("TutorialPhaseMode") || !global.TutorialPhaseMode) return false
+	if (!array_contains(tutorial_phase_list(), state)) return false
+	return !array_contains(global.TutorialReleased, state)
+}
+
+// What the next phase does, for the label next to the play button
+function tutorial_phase_label(state)
+{
+	var you_first = (global.FirstSide == 1)
+	switch (state)
+	{
+		case "draw":        return "Next: the enemy draws cards"
+		case "play":        return "Next: the enemy places its figures"
+		case "move":        return you_first ? "Next: YOUR figures act first (front ones first)" : "Next: ENEMY figures act first (front ones first)"
+		case "move_second": return you_first ? "Next: the ENEMY figures act" : "Next: YOUR figures act"
+		case "lanes":       return "Next: check if anyone reached the far end"
+	}
+	return ""
+}
+
 // ---- Pop-ups and input ----
 // True while a pop-up or the pause menu is open, and for a moment after one closes,
 // so the click (or Space) that closes it doesn't also play a card, place a figure, etc.

@@ -1,3 +1,6 @@
+// Tutorial step 6: lights wait for the "check the lane ends" phase (see EnemyAI_obj "lanes")
+if (variable_global_exists("TutorialPhaseMode") && global.TutorialPhaseMode && !global.TutorialLanesOpen) exit
+
 // Did an opposing figure reach this end of the lane?
 var fig = instance_position(lane_x, watch_row_y, FigureParent_obj)
 if (fig == noone || fig.team != watch_team) exit

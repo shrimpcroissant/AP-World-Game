@@ -99,22 +99,55 @@ else if (tutorial_step >= 0 && global.Winner == 0)
 	draw_set_color(c_white)
 	draw_text_ext_transformed(b.x1 + 14, b.y1 + 30, tutorial_steps[tutorial_step].text, -1, b.wrap, tutorial_text_scale, tutorial_text_scale, 0)
 
-	// Buttons: Skip always, Next only on steps that wait for it
+	// Buttons: Skip (not on the last step), Next on steps that wait for it (greyed out during the
+	// battle until it's over), and on the battle step a play button with what the next phase does
 	var over = tutorial_hit(gmx, gmy)
 	draw_set_halign(fa_center)
 	draw_set_valign(fa_middle)
-	var names = tutorial_has_next() ? ["next", "skip"] : ["skip"]
+	var names = []
+	if (tutorial_has_next()) array_push(names, "next")
+	if (tutorial_has_skip()) array_push(names, "skip")
 	for (var i = 0; i < array_length(names); i++)
 	{
 		var r = tutorial_button(names[i])
-		if (names[i] == "next") draw_set_color(over == "next" ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
+		if (names[i] == "next")
+		{
+			if (!tutorial_next_enabled()) draw_set_color(make_color_rgb(55, 55, 55))
+			else draw_set_color(over == "next" ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
+		}
 		else draw_set_color(over == "skip" ? make_color_rgb(110, 80, 40) : make_color_rgb(70, 50, 30))
 		draw_rectangle(r.x1, r.y1, r.x2, r.y2, false)
-		draw_set_color(c_white)
+		draw_set_color((names[i] == "next" && !tutorial_next_enabled()) ? c_gray : c_white)
 		draw_rectangle(r.x1, r.y1, r.x2, r.y2, true)
 		draw_text((r.x1 + r.x2) / 2, (r.y1 + r.y2) / 2, (names[i] == "next") ? "Next" : "Skip tutorial")
 	}
-}else if (global.Winner != 0)
+	if (tutorial_has_play())
+	{
+		var pb = tutorial_button("play")
+		var can_play = tutorial_play_enabled()
+		if (!can_play) draw_set_color(make_color_rgb(55, 55, 55))
+		else draw_set_color(over == "play" ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
+		draw_rectangle(pb.x1, pb.y1, pb.x2, pb.y2, false)
+		draw_set_color(can_play ? c_white : c_gray)
+		draw_rectangle(pb.x1, pb.y1, pb.x2, pb.y2, true)
+		// Right-facing triangle
+		var cx = (pb.x1 + pb.x2) / 2
+		var cy = (pb.y1 + pb.y2) / 2
+		draw_triangle(cx - 6, cy - 9, cx - 6, cy + 9, cx + 9, cy, false)
+
+		// What happens next (or what's happening now)
+		var label = ""
+		if (global.PlayerTurn) label = "Battle over! Press Next."
+		else if (can_play) label = tutorial_phase_label(EnemyAI_obj.state)
+		else label = "Playing..."
+		draw_set_halign(fa_left)
+		draw_set_valign(fa_middle)
+		draw_set_color(can_play ? c_yellow : c_white)
+		var label_w = tutorial_button("skip").x1 - pb.x2 - 20
+		draw_text_ext(pb.x2 + 10, cy, label, -1, label_w)
+	}
+}
+else if (global.Winner != 0)
 {
 	var cx = gw / 2
 	var cy = gh / 2

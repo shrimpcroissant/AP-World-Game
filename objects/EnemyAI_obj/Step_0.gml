@@ -9,6 +9,9 @@ if (timer > 0)
 	exit
 }
 
+// Tutorial step 6: wait at the start of each phase until the player presses play (see Deck_obj)
+if (tutorial_phase_waiting(state)) exit
+
 switch (state)
 {
 	case "draw":
@@ -68,6 +71,14 @@ switch (state)
 		dbg_time("battle, second side", t_move2, 2)
 		dbg("Battle: side " + string(-global.FirstSide) + " moved, figures left " + string(instance_number(FigureParent_obj)))
 		global.FirstSide *= -1
+		// In the tutorial the lane-end check is its own phase; otherwise the lights check every frame
+		state = (variable_global_exists("TutorialPhaseMode") && global.TutorialPhaseMode) ? "lanes" : "end"
+		timer = think_delay
+		break
+
+	case "lanes":
+		// Tutorial only: the lane lights may now check for figures that reached the far end
+		global.TutorialLanesOpen = true
 		state = "end"
 		timer = think_delay
 		break

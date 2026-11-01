@@ -86,7 +86,10 @@ if (global.HelpOpen)
 {
 	if (needs_hold)
 	{
-		if (mouse_check_button(mb_left) || keyboard_check(vk_space)) hold += delta_time / 1000000
+		var holding = mouse_check_button(mb_left) || keyboard_check(vk_space)
+		// Coming straight from the story screen: let go first, so one long hold can't skip both
+		if (hold_release) { if (!holding) hold_release = false }
+		else if (holding) hold += delta_time / 1000000
 		else hold = 0
 		if (hold >= hold_needed) close_help()
 	}
@@ -99,6 +102,16 @@ if (global.HelpOpen)
 if (tutorial_step >= 0 && global.Winner == 0)
 {
 	global.TutorialAllow = tutorial_steps[tutorial_step].allow
+
+	// Steps 5-6: the enemy's turn waits at each phase for the play button (see tutorial_phase_waiting).
+	// Ending your turn in step 5 starts a fresh set of phases.
+	var phase_step = (tutorial_steps[tutorial_step].wait == "end" || tutorial_steps[tutorial_step].wait == "battle")
+	if (phase_step && !global.TutorialPhaseMode)
+	{
+		global.TutorialReleased = []
+		global.TutorialLanesOpen = false
+	}
+	global.TutorialPhaseMode = phase_step
 	// Slower enemy turn and battle while learning, so you can follow what happens
 	with (EnemyAI_obj) think_delay = 36
 
@@ -109,13 +122,18 @@ if (tutorial_step >= 0 && global.Winner == 0)
 		case "draw":   done = global.HasDrawn; break
 		case "place":  done = player_figure_count() > tutorial_figs; break
 		case "end":    done = !global.PlayerTurn; break
-		case "battle": done = global.PlayerTurn; break
+		case "battle": done = false; break   // Next (enabled once the battle is over) moves it on
 	}
 	if (!input_blocked() && mouse_check_button_pressed(mb_left))
 	{
 		var hit = tutorial_hit(gui_mouse_x(), gui_mouse_y())
 		if (hit != "") block_input_briefly()   // clicks on the prompt box don't reach the board
-		if (hit == "next") done = true
+		if (hit == "next" && tutorial_next_enabled()) done = true
+		else if (hit == "play" && tutorial_play_enabled())
+		{
+			// Let the enemy run the phase it's waiting at
+			array_push(global.TutorialReleased, EnemyAI_obj.state)
+		}
 		else if (hit == "skip")
 		{
 			tutorial_step = -1
@@ -129,6 +147,7 @@ if (tutorial_step >= 0 && global.Winner == 0)
 else
 {
 	global.TutorialAllow = "all"
+	global.TutorialPhaseMode = false
 	with (EnemyAI_obj) think_delay = 12
 }
 // Playtest "Auto win": lights the enemy's lanes one after another (a quick, sure win)
