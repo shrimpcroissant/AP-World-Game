@@ -26,19 +26,17 @@ if (global.HelpOpen && story_open)
 }
 else if (global.HelpOpen)
 {
-	// "How to play" panel: text wrapped to fit, shrunk if the screen is short
+	// "How to play" panel: text wrapped to fit, shrunk if the screen is short (see help_layout)
 	draw_set_alpha(0.6)
 	draw_set_color(c_black)
 	draw_rectangle(0, 0, gw, gh, false)
 	draw_set_alpha(1)
 
-	var wrap = 780
-	var th = string_height_ext(help_text, -1, wrap)
-	var ts = min(1.3, (gh - 170) / th)   // text size
-	var pw = string_width_ext(help_text, -1, wrap) * ts + 60
-	var ph = th * ts + 50 + 60
-	var px = gw / 2 - pw / 2
-	var py = gh / 2 - ph / 2
+	var lay = help_layout()
+	var px = lay.px
+	var py = lay.py
+	var pw = lay.pw
+	var ph = lay.ph
 	draw_set_color(make_color_rgb(60, 40, 20))
 	draw_rectangle(px, py, px + pw, py + ph, false)
 	draw_set_color(make_color_rgb(220, 190, 120))
@@ -47,7 +45,20 @@ else if (global.HelpOpen)
 	draw_set_color(c_white)
 	draw_set_halign(fa_left)
 	draw_set_valign(fa_top)
-	draw_text_ext_transformed_s(px + 30, py + 25, help_text, -1, wrap, ts, ts, 0)
+	draw_text_ext_transformed_s(px + 30, py + 25, help_text, -1, lay.wrap, lay.ts, lay.ts, 0)
+
+	// Rulebook link (opens the website's illustrated rulebook in a new tab)
+	var lnk = lay.link
+	var over_link = help_link_hit()
+	draw_set_color(over_link ? make_color_rgb(60, 130, 60) : make_color_rgb(40, 90, 40))
+	draw_rectangle(lnk.x1, lnk.y1, lnk.x2, lnk.y2, false)
+	draw_set_color(c_white)
+	draw_rectangle(lnk.x1, lnk.y1, lnk.x2, lnk.y2, true)
+	draw_set_halign(fa_center)
+	draw_set_valign(fa_middle)
+	draw_text_transformed_s((lnk.x1 + lnk.x2) / 2, (lnk.y1 + lnk.y2) / 2, "Open the full illustrated rulebook (new tab)", 1.1, 1.1, 0)
+	draw_set_halign(fa_left)
+	draw_set_valign(fa_top)
 	if (needs_hold) draw_hold_bar(gw / 2, py + ph - 70, 300, 1, hold / hold_needed)
 	else
 	{

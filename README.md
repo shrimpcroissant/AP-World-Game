@@ -4,6 +4,8 @@ A lane-battle card game set on the Indian Ocean trade routes of the early 1400s,
 
 **Play it in your browser:** https://shrimpcroissant.github.io/AP-World-Game/
 
+**Read the illustrated rulebook:** https://shrimpcroissant.github.io/AP-World-Game/rulebook.html
+
 It's 1410. You captain a Ming treasure-fleet voyage from China to the coast of Iraq, stopping at the great trading ports of the Indian Ocean world on the way. Pirates and rivals stand between you and every port, so each stop is a battle.
 
 ## How it plays
@@ -24,4 +26,4 @@ Includes a step-by-step tutorial, three difficulty levels, and story screens for
 
 ## Built with
 
-GameMaker (HTML5 export). The playable web build lives in the `docs` folder and is served by GitHub Pages.
+GameMaker (HTML5 export). The playable web build and the rulebook page (`docs/rulebook.html`) live in the `docs` folder and are served by GitHub Pages.

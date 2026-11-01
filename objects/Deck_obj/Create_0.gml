@@ -534,28 +534,31 @@ auto_win_timer = -1
 // or the "How to play" text. "?" (top right) opens "How to play" any time.
 global.HelpOpen = false
 help_unpause = false   // closing waits one frame so the closing click doesn't also play a card
-help_text =
-	"HOW TO PLAY\n\n" +
-	"THE BOARD is the decks of two ships side by side as the two crews battle at sea: " +
-	"your crew starts at the bottom, the enemy crew at the top. Each column is a lane.\n\n" +
-	"GOAL: get one of your figures to the far end of a lane to turn that lane's light (at the top) green. " +
-	"Turn 3 of the 4 green to win. The enemy has to turn all 4 of yours (at the bottom) green.\n\n" +
-	"YOUR TURN\n" +
-	"- UNITS (shown under your deck) are what you spend to place cards. Each card costs units. " +
-	"They refill every turn, and you get more as the fight goes on and for each lane where you have more figures.\n" +
-	"- DRAWING is free and optional: click your deck once per turn to draw.\n" +
-	"- To place a figure, click a card, then a glowing tile on your front row.\n" +
-	"- END YOUR TURN with the token (left of the ship) or Space. You can end it without drawing or playing anything.\n" +
-	"- Cards only stay in your hand for 3 turns (orange = last turn).\n\n" +
-	"THE BATTLE: after the enemy places its figures, every figure moves forward by itself " +
-	"and attacks the enemy in front of it. Your 2 home rows give +1 HP; the enemy's 2 rows give +1 attack.\n\n" +
-	"THE DAGGER (next to your deck): click it, then one of your own figures on your first two rows, " +
-	"to remove that figure and free up its spot.\n\n" +
-	"COINS AND SHOPS: winning a fight earns coins (more for each light you turned green). " +
-	"Between fights you stop at port shops to spend coins on items. Items sit beside the ship; " +
-	"click one on your turn to use it. Coins are only for shops; units are only for placing cards in a fight.\n\n" +
-	"TIPS: hover cards, figures and items to see what they do. \"DEATH\" means a figure won't survive " +
-	"the next battle. Right-click cancels. Escape pauses."
+help_text = how_to_play_text()   // the text lives in Items_scr so the main menu can show it too
+
+// Where everything in the "How to play" panel goes (used by Draw GUI and by the click check):
+// the text wrapped to fit and shrunk if the screen is short, then the rulebook link button
+help_layout = function()
+{
+	var gw = display_get_gui_width()
+	var gh = display_get_gui_height()
+	var wrap = 780
+	var th = string_height_ext(help_text, -1, wrap)
+	var ts = min(1.3, (gh - 220) / th)
+	var pw = string_width_ext(help_text, -1, wrap) * ts + 60
+	var ph = th * ts + 50 + 60 + 54
+	var px = gw / 2 - pw / 2
+	var py = gh / 2 - ph / 2
+	var lw = 440
+	var ly = py + 25 + th * ts + 16
+	return { px: px, py: py, pw: pw, ph: ph, ts: ts, wrap: wrap,
+		link: { x1: gw / 2 - lw / 2, y1: ly, x2: gw / 2 + lw / 2, y2: ly + 38 } }
+}
+help_link_hit = function()
+{
+	var l = help_layout().link
+	return point_in_rectangle(gui_mouse_x(), gui_mouse_y(), l.x1, l.y1, l.x2, l.y2)
+}
 
 help_btn_size = 50
 help_button_hit = function()
@@ -628,7 +631,7 @@ tutorial_steps = [
 	{ wait: "battle", spot: "board",  allow: "",           text: "Battle! First the enemy draws and places its figures. Then each side's figures act one at a time: each one moves forward, or attacks an enemy right in front of it. Click the play button to watch it unfold." },
 	{ wait: "next",   spot: "lights", allow: "",           text: "Get a figure to the far end of a lane to turn that lane's light green. Turn 3 of these 4 green to win. The enemy needs all 4 of yours." },
 	{ wait: "next",   spot: "dagger", allow: "",           text: "The Dagger removes one of your own figures on your first two rows, to free up a spot. Hover anything to see what it does." },
-	{ wait: "next",   spot: "help",   allow: "",           text: "Cards only stay in your hand for 3 turns, so use them. If you ever forget a rule, the ? button up here shows How to Play. Good luck, captain!" }
+	{ wait: "next",   spot: "help",   allow: "",           text: "Cards only stay in your hand for 3 turns, so use them. If you ever forget a rule, click the ? button up here to open How to Play. It also links to the full illustrated rulebook. Good luck, captain!" }
 ]
 tutorial_step = (fights_before == 0 && !global.TutorialShown) ? 0 : -1
 tutorial_figs = 0   // your figures on the board when the current step started

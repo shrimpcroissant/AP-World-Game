@@ -1,0 +1,649 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><title>Monsoon Route Rulebook</title>
+<meta name="description" content="The complete illustrated rules for Monsoon Route, a lane-battle card game on the Indian Ocean trade routes in 1410.">
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</head><body>
+<style>
+/* Layout: one rulebook column on porcelain white; boards drawn in cobalt (you) and seal red (enemy), examples run left to right as phases */
+:root{
+  --paper:#F5F7FB; --panel:#FFFFFF; --ink:#14213D; --muted:#56627F; --rule:#D3DBEA;
+  --p:#1F4FB8; --pt:rgba(31,79,184,.09); --e:#BF3A2E; --et:rgba(191,58,46,.09);
+  --hit:#B7791F; --go:#2E9E5B; --on:#FFFFFF; --mid:rgba(20,33,61,.025);
+  --f-display:"Alegreya SC", "Palatino Linotype", Georgia, serif;
+  --f-body:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --f-data:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1424; --panel:#151D33; --ink:#E6EBF5; --muted:#9AA6C2; --rule:#2A3552;
+  --p:#6B97F2; --pt:rgba(107,151,242,.13); --e:#EC7265; --et:rgba(236,114,101,.13);
+  --hit:#E4AB52; --go:#4CC27F; --on:#0E1424; --mid:rgba(230,235,245,.03); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1424; --panel:#151D33; --ink:#E6EBF5; --muted:#9AA6C2; --rule:#2A3552;
+  --p:#6B97F2; --pt:rgba(107,151,242,.13); --e:#EC7265; --et:rgba(236,114,101,.13);
+  --hit:#E4AB52; --go:#4CC27F; --on:#0E1424; --mid:rgba(230,235,245,.03); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+main{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(34px,6vw,52px);letter-spacing:.01em}
+h2{font-size:clamp(26px,4vw,34px);display:flex;gap:14px;align-items:baseline}
+h2 .no{font-family:var(--f-data);font-size:15px;color:var(--p);font-weight:500}
+h3{font-size:21px;font-weight:500}
+p{margin:0;max-width:68ch}
+.kicker{font-family:var(--f-data);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header{display:flex;flex-direction:column;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:22px}
+header p{color:var(--muted);font-size:18px}
+section{display:flex;flex-direction:column;gap:18px}
+.stack{display:flex;flex-direction:column;gap:12px}
+ul,ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px;max-width:68ch}
+code,.mono{font-family:var(--f-data);font-size:.86em}
+strong{font-weight:700}
+.you{color:var(--p);font-weight:700}.foe{color:var(--e);font-weight:700}.amb{color:var(--hit);font-weight:700}
+nav ol{columns:2;column-gap:32px;display:block;padding-left:1.4em}
+nav li{margin-bottom:4px}
+nav a{color:var(--ink);text-decoration-color:var(--rule);text-underline-offset:3px}
+nav a:hover{text-decoration-color:var(--p)}
+@media (max-width:560px){nav ol{columns:1}}
+.qa{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--rule)}
+.qa div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:20px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.qa dt{font-weight:700;margin:0}.qa dd{margin:0}
+@media (max-width:640px){.qa div{grid-template-columns:1fr;gap:4px}}
+.rule-box{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--p);padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.rule-box.warn{border-left-color:var(--hit)}
+.rule-box .kicker{color:var(--p)}.rule-box.warn .kicker{color:var(--hit)}
+.example{background:var(--panel);border:1px solid var(--rule);padding:20px;display:flex;flex-direction:column;gap:14px}
+.example>header{border:0;padding:0;gap:4px}
+.example h3 .ex{font-family:var(--f-data);font-size:13px;color:var(--muted);font-weight:400;margin-right:8px}
+.frames{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+figure{margin:0;flex:1 1 210px;max-width:260px;display:flex;flex-direction:column;gap:6px;min-width:0}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:14.5px;line-height:1.4;color:var(--ink)}
+figcaption b{font-family:var(--f-data);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;display:block;color:var(--muted);font-weight:500;margin-bottom:2px}
+.wide{max-width:none;flex-basis:100%}
+.wide svg{max-width:560px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;font-size:15.5px;min-width:100%}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--f-data);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-data);font-size:14px}
+.timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--rule);background:var(--panel)}
+.timeline div{padding:10px 12px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:2px;font-size:14.5px}
+.timeline div:last-child{border-right:0}
+.timeline .b{font-family:var(--f-data);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.timeline .p{background:var(--pt)}.timeline .e{background:var(--et)}
+@media (max-width:560px){.timeline{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline div:nth-child(2){border-right:0}.timeline div:nth-child(-n+2){border-bottom:1px solid var(--rule)}}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:14.5px;align-items:center}
+.legend span{display:inline-flex;gap:8px;align-items:center}
+.legend svg{width:30px;height:22px;flex:none}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.flow div{background:var(--panel);border:1px solid var(--rule);padding:12px;display:flex;flex-direction:column;gap:4px;font-size:15px}
+.flow .k{font-family:var(--f-data);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.flow strong{font-size:17px}
+@media (max-width:640px){.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.steps{counter-reset:s;list-style:none;padding:0;gap:10px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px}
+.steps li::before{content:counter(s);font-family:var(--f-data);font-size:13px;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--e);color:var(--e);display:grid;place-items:center;margin-top:1px}
+.steps.you-steps li::before{border-color:var(--p);color:var(--p)}
+.note{font-size:14.5px;color:var(--muted)}
+.unsure{font-family:var(--f-data);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--hit);border:1px solid var(--hit);padding:1px 6px;border-radius:3px;white-space:nowrap}
+.play{align-self:flex-start;font-family:var(--f-data);font-size:14px;color:var(--on);background:var(--p);padding:8px 14px;border-radius:4px;text-decoration:none}.play:hover{filter:brightness(1.1)}
+footer{border-top:1px solid var(--rule);padding-top:18px;color:var(--muted);font-size:14.5px}
+/* svg */
+.g-cell{fill:none;stroke:var(--rule);stroke-width:1}
+.g-tp{fill:var(--pt)}.g-te{fill:var(--et)}.g-tm{fill:var(--mid)}
+.g-lab{fill:var(--muted);font-family:var(--f-data);font-size:10.5px}
+.g-side{fill:var(--ink);font-family:var(--f-body);font-size:12.5px}
+.g-side2{fill:var(--muted);font-family:var(--f-body);font-size:11.5px}
+.g-light{fill:var(--panel);stroke:var(--muted);stroke-width:1.2}
+.g-light.on{fill:var(--go);stroke:var(--go)}
+.g-tok-p{fill:var(--p)}.g-tok-e{fill:var(--e)}
+.g-letter{fill:var(--on);font-family:var(--f-display);font-weight:700;font-size:16px}
+.g-stat{fill:var(--ink);font-family:var(--f-data);font-size:9.5px}
+.g-ghost{fill:none;stroke:var(--muted);stroke-dasharray:3 3;stroke-width:1.2}
+.g-dead{opacity:.28}
+.g-x{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
+.g-mp{stroke:var(--p);stroke-width:2.4;fill:none}
+.g-me{stroke:var(--e);stroke-width:2.4;fill:none}
+.g-a{stroke:var(--hit);stroke-width:3;fill:none;stroke-dasharray:5 3}
+.g-blk{stroke:var(--muted);stroke-width:1.8;fill:none;stroke-dasharray:2 3}
+.g-hl{fill:none;stroke:var(--hit);stroke-width:2.2}
+.g-fire{fill:var(--hit);opacity:.13}
+.g-badge{fill:var(--panel);stroke:var(--ink);stroke-width:1.2}
+.g-badge-t{fill:var(--ink);font-family:var(--f-data);font-size:10px;font-weight:500}
+.g-note{font-family:var(--f-data);font-size:11px;font-weight:500}
+.g-note.hit{fill:var(--hit)}.g-note.info{fill:var(--muted)}.g-note.go{fill:var(--go)}
+.ah-p{fill:var(--p)}.ah-e{fill:var(--e)}.ah-a{fill:var(--hit)}.ah-b{fill:var(--muted)}
+@media (prefers-reduced-motion:no-preference){a{transition:text-decoration-color .15s}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="mk-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path class="ah-p" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="mk-e" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path class="ah-e" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="mk-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path class="ah-a" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="mk-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path class="ah-b" d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>
+</svg>
+
+<main>
+<header>
+  <span class="kicker">AP World History · Ming treasure fleet card game · Rules as of the Nov 1 build</span>
+  <h1>Monsoon Route Rulebook</h1>
+  <a class="play" href="./">&#9654; Play Monsoon Route in your browser</a>
+  <p>Exactly how a fight works, read straight from the game's code. Every board below is a real situation, played out phase by phase in the order the game resolves it.</p>
+</header>
+
+<nav aria-label="Contents">
+  <ol>
+    <li><a href="#answers">Short answers</a></li>
+    <li><a href="#board">The board</a></li>
+    <li><a href="#turn">Your turn</a></li>
+    <li><a href="#after">What End turn sets off</a></li>
+    <li><a href="#act">How one figure acts</a></li>
+    <li><a href="#order">Order inside a side</a></li>
+    <li><a href="#contact">Who hits first</a></li>
+    <li><a href="#figures">The five figures</a></li>
+    <li><a href="#damage">Damage and death</a></li>
+    <li><a href="#lanes">Reaching the end of a lane</a></li>
+    <li><a href="#enemy">How the enemy plays</a></li>
+    <li><a href="#cards">Cards, units and coins</a></li>
+    <li><a href="#items">Items</a></li>
+    <li><a href="#decks">Decks by stop</a></li>
+  </ol>
+</nav>
+
+<section id="answers">
+  <h2><span class="no">01</span>Short answers</h2>
+  <dl class="qa">
+    <div><dt>When I click End turn, what happens?</dt><dd>The enemy refills its units, draws, and places cards one at a time. Then the battle runs: one whole side acts, then the other side acts. That is the whole round. Then it is your turn again. <a href="#after">Details</a></dd></div>
+    <div><dt>In round 1, do all my figures act before any enemy figure?</dt><dd>Yes. Every one of your figures acts, then every enemy figure. Next round the enemy side goes first. It alternates every End turn.</dd></div>
+    <div><dt>Does movement all happen before attacks?</dt><dd>No. There are no separate move and attack phases. Each figure takes one action when its turn comes, either a move or an attack, and it resolves right away before the next figure acts.</dd></div>
+    <div><dt>Does a figure always attack if it can, and otherwise move?</dt><dd>Each figure looks at exactly one tile: straight ahead (diagonal for a Jumper). Enemy there: it attacks. Empty: it moves in. Your own figure there: it waits. You never steer figures; this is automatic.</dd></div>
+    <div><dt>If my front figure is blocking one behind it, does the front one move first?</dt><dd>Yes. Figures act front-most first, so the front one moves and the one behind steps into the tile it just left, in the same phase. <a href="#ex-1">Example 1</a></dd></div>
+    <div><dt>If I go first and step next to an enemy, did I just walk into a hit?</dt><dd>Yes. Moving uses your action, so the enemy side then hits you. Next round the enemy goes first, so it hits you again before you swing. <a href="#contact">Who hits first</a></dd></div>
+    <div><dt>Do moves happen at once? Who wins a tile two figures want?</dt><dd>Nothing is simultaneous and nothing is random. The first figure to act takes the tile; the later one finds it full and attacks (if it's an enemy) or waits (if it's a friend). <a href="#ex-4">Example 4</a></dd></div>
+    <div><dt>Do attacks happen at once?</dt><dd>One at a time, in the same front-most-first order. Damage lands instantly, and a figure that dies is removed before the next figure acts, so it never gets its own action that round. Defenders never hit back out of turn.</dd></div>
+  </dl>
+</section>
+
+<section id="board">
+  <h2><span class="no">02</span>The board</h2>
+  <p>Four lanes (A to D) and five rows. You place in <strong>row 1</strong> and your figures walk <span class="you">up</span>. The enemy places in <strong>row 5</strong> and its figures walk <span class="foe">down</span>. A lane is a column; figures never leave their lane except the Jumper.</p>
+  <div class="frames"><figure class="wide" id="fig-board"></figure></div>
+  <div class="rule-box">
+    <span class="kicker">Row bonuses are live</span>
+    <p>A figure gets <strong>+1 HP</strong> while standing in its own two home rows and <strong>+1 attack</strong> while standing in the other side's two home rows. The middle row gives nothing. The bonus is recalculated from where the figure stands right now, so it disappears the moment the figure steps out. A wounded figure that is only alive because of its home-row HP dies as soon as it walks into row 3 (<a href="#ex-10">Example 10</a>).</p>
+  </div>
+  <div class="legend" aria-label="Diagram legend">
+    <span><svg viewBox="0 0 30 22"><circle cx="11" cy="11" r="9" class="g-tok-p"/></svg>Your figure</span>
+    <span><svg viewBox="0 0 30 22"><circle cx="11" cy="11" r="9" class="g-tok-e"/></svg>Enemy figure</span>
+    <span><svg viewBox="0 0 30 22"><line x1="2" y1="11" x2="26" y2="11" class="g-mp" marker-end="url(#mk-p)"/></svg>Moves</span>
+    <span><svg viewBox="0 0 30 22"><line x1="2" y1="11" x2="26" y2="11" class="g-a" marker-end="url(#mk-a)"/></svg>Attacks</span>
+    <span><svg viewBox="0 0 30 22"><line x1="2" y1="11" x2="26" y2="11" class="g-blk" marker-end="url(#mk-b)"/></svg>Tries, but blocked</span>
+    <span><svg viewBox="0 0 30 22"><circle cx="11" cy="11" r="9" class="g-badge"/><text x="11" y="14.5" text-anchor="middle" class="g-badge-t">1</text></svg>Order it happens in</span>
+    <span class="mono">2/3</span><span>= attack / HP right now, row bonus included</span>
+  </div>
+  <p class="note">Letters on figures: S Sailor, J Jumper, A Artillery, R Runner, W Swordsman.</p>
+</section>
+
+<section id="turn">
+  <h2><span class="no">03</span>Your turn</h2>
+  <ol class="steps you-steps">
+    <li><span><strong>Units refill.</strong> Turn 1: 4. Turn 2: 5. Turn 3 onward: 6. Plus 1 for every lane you are winning, meaning you have strictly more figures in that lane (any row) than the enemy. Unused units do not carry over.</span></li>
+    <li><span><strong>Draw, if you want.</strong> Click the deck once per turn to draw 1 card plus 1 for every 4 units you have (4 to 7 units: 2 cards; 8 to 11: 3 cards). Drawing stops at 7 cards in hand. You can skip drawing and just play your hand.</span></li>
+    <li><span><strong>Place cards.</strong> Pick a card, then an empty tile in row 1. It costs the card's units. Place as many as your units and empty row 1 tiles allow.</span></li>
+    <li><span><strong>Use items or the Dagger</strong> at any point in your turn (see <a href="#items">Items</a>).</span></li>
+    <li><span><strong>End turn.</strong> Click the token or press Space. From here everything is automatic until your next turn.</span></li>
+  </ol>
+  <p class="note">Hover a figure on your turn to see a <span class="mono">NEXT TURN −X</span> or <span class="mono">DEATH</span> preview. The preview plays out the coming battle with the figures already on the board. It cannot know which cards the enemy is about to place, so it can be wrong when the enemy drops a new figure in front of you.</p>
+</section>
+
+<section id="after">
+  <h2><span class="no">04</span>What End turn sets off</h2>
+  <p>The steps run in this order, each about 0.2 seconds apart (three times slower in the tutorial).</p>
+  <ol class="steps">
+    <li><span><strong>Enemy units refill:</strong> its base (Easy 3, Normal 4, Hard 5, final fight at least 6) plus the same turn ramp you get (+1 on turn 2, +2 from turn 3) plus 1 per lane it is winning. If its deck is empty it skips steps 2 and 3.</span></li>
+    <li><span><strong>Enemy draws</strong> 1 card plus 1 for every 4 units, up to 7 in hand.</span></li>
+    <li><span><strong>Enemy places cards, one per step,</strong> into row 5 until it can't afford a card or row 5 is full. There is no separate enemy End turn; once it can't place, the battle starts. (<a href="#enemy">How it chooses</a>.)</span></li>
+    <li><span><strong>First side acts.</strong> Every figure on that side, one at a time, front-most first.</span></li>
+    <li><span><strong>Second side acts.</strong> Same rules. Lane lights are checked after each side finishes.</span></li>
+    <li><span><strong>Your turn starts.</strong> Who goes first flips for next time.</span></li>
+  </ol>
+  <div class="scroll"><table>
+    <thead><tr><th>Battle</th><th>Acts first</th><th>Acts second</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td class="you">You</td><td class="foe">Enemy</td></tr>
+      <tr><td class="n">2</td><td class="foe">Enemy</td><td class="you">You</td></tr>
+      <tr><td class="n">3</td><td class="you">You</td><td class="foe">Enemy</td></tr>
+      <tr><td class="n">4</td><td class="foe">Enemy</td><td class="you">You</td></tr>
+      <tr><td class="n">…</td><td colspan="2">keeps alternating every End turn</td></tr>
+    </tbody>
+  </table></div>
+  <div class="rule-box warn">
+    <span class="kicker">Back-to-back actions</span>
+    <p>Because the order flips, the side that acted last in one battle also acts first in the next. Read across two battles the sequence is <span class="you">You</span>, <span class="foe">Enemy</span> | <span class="foe">Enemy</span>, <span class="you">You</span> | <span class="you">You</span>, <span class="foe">Enemy</span>. Your only chance to change anything between those two enemy actions is your own turn of placing cards and using items.</p>
+  </div>
+</section>
+
+<section id="act">
+  <h2><span class="no">05</span>How one figure acts</h2>
+  <p>When its turn comes, a figure looks at exactly <strong>one target tile</strong>: the tile straight ahead, or for a Jumper the tile diagonally ahead. What is in that tile decides everything.</p>
+  <div class="flow">
+    <div><span class="k">Target tile is</span><strong>Empty</strong><span>Moves into it.</span></div>
+    <div><span class="k">Target tile is</span><strong>An enemy</strong><span>Attacks it, does not move.</span></div>
+    <div><span class="k">Target tile is</span><strong>Your own figure</strong><span>Waits. Nothing happens.</span></div>
+    <div><span class="k">Target tile is</span><strong>Off the board</strong><span>Nothing happens.</span></div>
+  </div>
+  <ul>
+    <li>One action per figure per battle: a move <em>or</em> an attack, never both.</li>
+    <li>No counter-attacks. A figure that gets hit does not hit back until its own side's phase.</li>
+    <li>Extra steps (Runner, Arabian Horse, Cloth) only happen right after a successful move, only into empty tiles, and never attack.</li>
+    <li>Artillery is the exception: it never walks or attacks normally. See <a href="#figures">The five figures</a>.</li>
+  </ul>
+</section>
+
+<section id="order">
+  <h2><span class="no">06</span>Order inside a side</h2>
+  <p>Within one side, figures act one at a time, <strong>front-most first</strong>: the figure nearest the opponent goes first. For you that means the highest row first. For the enemy it means the lowest row first. Lanes don't matter; only distance forward does.</p>
+  <p class="note">Two figures in the same row: the code does not promise left-to-right or any fixed order between them <span class="unsure">not fixed</span>. It only matters when two same-row figures want the same tile, which in practice means a Jumper.</p>
+
+  <div class="example" id="ex-1">
+    <header><h3><span class="ex">Example 1</span>A column advances together</h3></header>
+    <p>Two of your Sailors stand in lane B, one behind the other, with nothing ahead.</p>
+    <div class="frames" data-ex="1"></div>
+    <p>If the rear Sailor acted first it would see a friend ahead and wait. Front-first ordering is what lets a column march as a block.</p>
+  </div>
+
+  <div class="example" id="ex-2">
+    <header><h3><span class="ex">Example 2</span>The front figure is fighting, so the one behind waits</h3></header>
+    <p>Your front Sailor has an enemy directly ahead. Your second Sailor is behind it.</p>
+    <div class="frames" data-ex="2"></div>
+  </div>
+
+  <div class="example" id="ex-4">
+    <header><h3><span class="ex">Example 4</span>Two of your figures want the same tile</h3></header>
+    <p>A Jumper in A2 is heading right, so its target is B3. A Runner in B1 wants to move 2 tiles: B2, then B3.</p>
+    <div class="frames" data-ex="4"></div>
+    <p>The Jumper is in row 2 and the Runner in row 1, so the Jumper acts first and takes B3. The Runner's extra step finds a friend there and stops. Enemy and player figures can never fight over an empty tile in the same moment either, because the two sides never act at the same time. Whoever's phase comes first takes the tile, and the other side then finds an enemy there and attacks it.</p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2><span class="no">07</span>Who hits first</h2>
+  <p>This is the part that decides most fights. Moving uses up a figure's action, so <strong>the figure that steps into contact never gets to attack that same phase.</strong> The other figure is now standing right in front of it and hits first.</p>
+
+  <div class="example" id="ex-3">
+    <header><h3><span class="ex">Example 3</span>One empty tile between two Sailors</h3></header>
+    <p>Your Sailor in B2, an enemy Sailor in B4, and B3 empty. Same setup, two different battles.</p>
+    <h3 style="font-size:17px">Battle where you act first</h3>
+    <div class="frames" data-ex="3a"></div>
+    <h3 style="font-size:17px">Battle where the enemy acts first</h3>
+    <div class="frames" data-ex="3b"></div>
+    <div class="rule-box">
+      <span class="kicker">The rule this shows</span>
+      <p>With one empty tile between two figures, whichever side acts first walks into the other's attack. In the second case the enemy Sailor also stepped out of its home row and lost its +1 HP on the way in, which made it even easier to kill.</p>
+    </div>
+  </div>
+
+  <h3>Why it can be two hits, not one</h3>
+  <p>Take a tougher figure of yours that survives a hit, and say contact happens during a battle where you act first. The order of swings looks like this:</p>
+  <div class="timeline" role="table" aria-label="Order of hits across two battles">
+    <div class="p"><span class="b">Battle 1 · you</span>You move into contact</div>
+    <div class="e"><span class="b">Battle 1 · enemy</span>Enemy hits you (hit 1)</div>
+    <div class="e"><span class="b">Battle 2 · enemy</span>Enemy hits you again (hit 2)</div>
+    <div class="p"><span class="b">Battle 2 · you</span>You finally swing</div>
+  </div>
+  <p>Flip it around and the enemy pays the same price. If contact is made by the enemy stepping toward you, you get two swings before it gets one. So the strongest place for your figure is often <strong>two rows short</strong> of an enemy at the end of a battle, letting the enemy close the gap.</p>
+  <p>You can't tell a figure to hold still, but you control timing: when you place, which lane, and items like the Zebra and Stone Tablet that stop enemy placement.</p>
+</section>
+
+<section id="figures">
+  <h2><span class="no">08</span>The five figures</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Figure</th><th class="n">Cost</th><th class="n">ATK</th><th class="n">HP</th><th>Moves</th><th>Attacks</th></tr></thead>
+    <tbody>
+      <tr><td>Sailor (S)</td><td class="n">2</td><td class="n">1</td><td class="n">1</td><td>1 tile straight</td><td>Tile straight ahead</td></tr>
+      <tr><td>Jumper (J)</td><td class="n">2</td><td class="n">1</td><td class="n">3</td><td>1 tile diagonally, bouncing off the edges</td><td>The diagonal tile only</td></tr>
+      <tr><td>Artillery (A)</td><td class="n">2</td><td class="n">–</td><td class="n">5</td><td>Never walks; steps up 1 after firing</td><td>Every 5th battle: 1 damage to every enemy in its lane</td></tr>
+      <tr><td>Runner (R)</td><td class="n">3</td><td class="n">2</td><td class="n">2</td><td>1 tile straight, then 1 extra if clear</td><td>Tile straight ahead (not on the extra step)</td></tr>
+      <tr><td>Swordsman (W)</td><td class="n">3</td><td class="n">2</td><td class="n">1</td><td>1 tile straight</td><td>Tile ahead and the tile behind it</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Stats are base values. Row bonuses and items add to them. The Slave card (cost 1, 0/1, never attacks) still exists in the code but is no longer in any deck.</p>
+
+  <h3>Sailor</h3>
+  <p>The plain rule from <a href="#act">How one figure acts</a>, nothing more. Examples 1 to 3 are all Sailors.</p>
+
+  <h3>Jumper</h3>
+  <ul>
+    <li>Moves one row forward and one lane sideways. Every Jumper, yours or the enemy's, starts out heading toward lane D.</li>
+    <li>If the next lane over would be off the board, it turns around and heads the other way in that same action. It keeps the new heading afterwards, and it turns even if it ends up waiting or attacking.</li>
+    <li>It only ever looks at its diagonal tile. It attacks an enemy there, waits for a friend there, and completely ignores whatever is straight ahead. Jumpers slip past blockers and can hit figures other figures can't reach.</li>
+  </ul>
+  <div class="example" id="ex-5">
+    <header><h3><span class="ex">Example 5</span>A Jumper bounces and attacks on the diagonal</h3></header>
+    <div class="frames" data-ex="5"></div>
+  </div>
+
+  <h3>Artillery</h3>
+  <ul>
+    <li>Has a counter that starts at 0 and goes up by 1 every battle it is on the board. The battle right after you place it counts as the first.</li>
+    <li>On the 5th battle it fires: <strong>1 damage to every enemy figure in its lane</strong>, any row, with no row bonus. It never hurts your own figures.</li>
+    <li>After firing, the counter resets to 0 and it steps forward 1 row if that tile is empty. It never attacks.</li>
+    <li>The rest of the time it is a 5 HP wall: enemies ahead attack it, and your figures behind it wait.</li>
+  </ul>
+  <div class="example" id="ex-6">
+    <header><h3><span class="ex">Example 6</span>Artillery fires down the lane</h3></header>
+    <div class="frames" data-ex="6"></div>
+  </div>
+
+  <h3>Runner</h3>
+  <ul>
+    <li>Takes its normal action. If that action was a move, it takes 1 extra step into an empty tile. The extra step never attacks.</li>
+    <li><strong>Finishing a lane:</strong> if the Runner stands in the second-to-last row (row 4 for you) and the far row tile ahead is occupied by anything, friend or foe, it doesn't attack. It finishes the lane as if it had arrived: the lane lights up and gets wiped, Runner included. This can trigger on its normal action or its extra step. If that lane is already lit, nothing happens and it just stays blocked.</li>
+  </ul>
+  <div class="example" id="ex-7">
+    <header><h3><span class="ex">Example 7</span>Runner steps, gets blocked, and finishes a lane</h3></header>
+    <div class="frames" data-ex="7"></div>
+  </div>
+
+  <h3>Swordsman</h3>
+  <ul>
+    <li>Moves like the plain rule. When an enemy is straight ahead, it hits that enemy for its full attack <strong>and</strong> hits the tile directly behind it (two ahead, same lane).</li>
+    <li>An enemy in that second tile takes full damage. One of your own figures there takes half, rounded down (attack 2 or 3 both do 1).</li>
+    <li>The second hit lands even if the first target died. If the tile ahead isn't an enemy, there is no second hit.</li>
+  </ul>
+  <div class="example" id="ex-8">
+    <header><h3><span class="ex">Example 8</span>Swordsman cleaves two tiles</h3></header>
+    <div class="frames" data-ex="8"></div>
+  </div>
+</section>
+
+<section id="damage">
+  <h2><span class="no">09</span>Damage and death</h2>
+  <ul>
+    <li>Damage applies the instant an attack happens. A figure dies when its current HP, home-row bonus included, reaches 0 or less.</li>
+    <li>A dead figure is removed immediately. Its tile is free for the very next figure, and it does not get its own action later in that phase.</li>
+    <li>Extra damage beyond what kills a figure does nothing.</li>
+    <li><strong>Myrrh</strong> (your item, one use): the first time any of your figures would die, it survives on 1 HP instead. That includes lane wipes and losing a home-row bonus.</li>
+  </ul>
+  <div class="example" id="ex-10">
+    <header><h3><span class="ex">Example 10</span>Dying from a step forward</h3></header>
+    <p>Your Sailor in B2 was hit earlier. Its base HP is 0, and it is only alive on the +1 HP of your home row.</p>
+    <div class="frames" data-ex="10"></div>
+  </div>
+</section>
+
+<section id="lanes">
+  <h2><span class="no">10</span>Reaching the end of a lane</h2>
+  <ul>
+    <li>Above the board are 4 lights for the enemy's end. Your figure arriving in row 5 lights that lane's top light. Below the board are 4 lights for your end, lit by an enemy reaching row 1.</li>
+    <li>Lights are checked after each side's phase, before the other side acts.</li>
+    <li><strong>Lighting an unlit lane wipes it:</strong> every figure in that lane, on both sides, including the one that arrived, takes damage equal to its HP and dies (unless Myrrh saves yours).</li>
+    <li><strong>Arriving in a lane that is already lit:</strong> the figure simply leaves the board. No wipe, and it doesn't count as lost.</li>
+    <li><strong>You win</strong> with 3 of the 4 top lights. <strong>The enemy wins</strong> with all 4 bottom lights, except in the final fight on the coast of Iraq, where it only needs 3. Lighting two lanes at once is fine; going from 2 to 4 still wins.</li>
+    <li>If both sides would win in the same moment, whichever light the game checks first decides it, and nothing overwrites that result <span class="unsure">depends on check order</span>.</li>
+  </ul>
+  <div class="example" id="ex-9">
+    <header><h3><span class="ex">Example 9</span>Lighting a lane, and arriving in a lit one</h3></header>
+    <div class="frames" data-ex="9"></div>
+  </div>
+</section>
+
+<section id="enemy">
+  <h2><span class="no">11</span>How the enemy plays</h2>
+  <ul>
+    <li><strong>Choosing a card:</strong> always its most expensive card it can afford. On a tie, the first one in its hand.</li>
+    <li><strong>Choosing a tile:</strong> a random open tile in row 5. On Hard and in the final fight, it instead picks the lane where your figures have advanced furthest, breaking ties at random. A lane blocked by your Zebra is never chosen.</li>
+    <li><strong>Easy:</strong> each turn there is a 25% chance it stops after placing 1 card.</li>
+    <li><strong>Stone Tablet:</strong> it places nothing on its next turn.</li>
+    <li><strong>Out of cards:</strong> it skips its placing for 3 turns, then reshuffles. The battle still happens every turn.</li>
+    <li><strong>Its deck:</strong> 12 Sailors, 5 Jumpers, 3 Artillery, starting with 4 cards (5 on Hard). Enemy cards never expire.</li>
+    <li><strong>Final fight (coast of Iraq):</strong> 6 Sailors, 4 Jumpers, 2 Artillery, 4 Runners, 4 Swordsmen. It starts with 6 cards, gets at least 6 base units, always targets your furthest lane, and needs only 3 of your lights to win. A warning appears at the start.</li>
+  </ul>
+</section>
+
+<section id="cards">
+  <h2><span class="no">12</span>Cards, units and coins</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Rule</th><th>Exactly</th></tr></thead>
+    <tbody>
+      <tr><td>Starting hand</td><td>3 cards</td></tr>
+      <tr><td>Hand limit</td><td>7. Clicking the deck with 7 in hand still uses your draw for the turn.</td></tr>
+      <tr><td>Card expiry</td><td>A card stays in your hand for 3 of your turns and is discarded at the start of your 4th. It turns orange on its last turn. Cards don't age on turns when your deck is empty, or while kept in the Storage Chest.</td></tr>
+      <tr><td>Empty deck</td><td>You can't draw for 3 turns but still play your hand. The deck reshuffles on the 3rd of those turns. The Compass refills it instantly, once.</td></tr>
+      <tr><td>Dagger</td><td>On your turn only. Destroys one of your own figures in your two home rows, as often as you like. Use it to clear a jammed lane. It counts as a lost figure for the Rhino Horn.</td></tr>
+      <tr><td>Coins</td><td>Winning a fight pays 4 coins, plus 1 for each enemy light you turned green. Coins are only spent in shops.</td></tr>
+      <tr><td>Item bag</td><td>Holds 4 items.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="items">
+  <h2><span class="no">13</span>Items</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Item</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Tin Ingot</td><td>+2 units now</td></tr>
+      <tr><td>Pearl</td><td>+3 units now</td></tr>
+      <tr><td>Pepper</td><td>+1 unit at the start of each of your next 3 turns</td></tr>
+      <tr><td>Nutmeg &amp; Cloves</td><td>+1 base HP to one of your figures</td></tr>
+      <tr><td>Ivory</td><td>+1 base attack to one figure for the rest of the fight</td></tr>
+      <tr><td>Frankincense</td><td>+1 base HP to all your figures</td></tr>
+      <tr><td>Wootz Steel Blade</td><td>2 damage to one enemy figure</td></tr>
+      <tr><td>Cloth</td><td>One figure gets 1 extra step in the next battle</td></tr>
+      <tr><td>Arabian Horse</td><td>One figure gets 1 extra step in every battle from now on</td></tr>
+      <tr><td>Zebra</td><td>The enemy can't place in the chosen lane for its next 3 turns</td></tr>
+      <tr><td>Calicut Stone Tablet</td><td>The enemy places no cards on its next turn</td></tr>
+      <tr><td>Rhino Horn</td><td>The card of your most recently lost figure returns to your hand</td></tr>
+      <tr><td>Ambergris</td><td>Shuffles 5 random cards from this fight's card mix into your deck</td></tr>
+      <tr><td>Compass</td><td>Refills an empty deck instantly, once</td></tr>
+      <tr><td>Storage Chest</td><td>Store a card; take it back later for 0 units</td></tr>
+      <tr><td>Myrrh</td><td>The first of your figures that would die survives on 1 HP</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Extra steps from Cloth and the Horse follow the Runner's rule: only after a successful move, only into empty tiles, never an attack.</p>
+</section>
+
+<section id="decks">
+  <h2><span class="no">14</span>Decks by stop</h2>
+  <p>Your deck is always 20 cards. The mix shifts toward Sailors as the voyage goes on.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Stop</th><th class="n">Sailor</th><th class="n">Jumper</th><th class="n">Artillery</th><th class="n">Runner</th><th class="n">Swordsman</th></tr></thead>
+    <tbody>
+      <tr><td>China (tutorial)</td><td class="n">8</td><td class="n">5</td><td class="n">3</td><td class="n">2</td><td class="n">2</td></tr>
+      <tr><td>Malacca</td><td class="n">9</td><td class="n">4</td><td class="n">3</td><td class="n">2</td><td class="n">2</td></tr>
+      <tr><td>Mogadishu</td><td class="n">10</td><td class="n">4</td><td class="n">2</td><td class="n">2</td><td class="n">2</td></tr>
+      <tr><td>Calicut, India</td><td class="n">11</td><td class="n">3</td><td class="n">2</td><td class="n">2</td><td class="n">2</td></tr>
+      <tr><td>Arabia</td><td class="n">11</td><td class="n">3</td><td class="n">2</td><td class="n">2</td><td class="n">2</td></tr>
+      <tr><td>Coast of Iraq</td><td class="n">13</td><td class="n">2</td><td class="n">1</td><td class="n">2</td><td class="n">2</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>Read from the game's code (FigureParent_obj, Deck_obj, EnemyAI_obj, LaneEndLight_obj, ItemBar_obj) on Nov 1. Two details are marked where the code doesn't fix an order: same-row figures within a side, and a same-moment win for both sides.</footer>
+</main>
+
+<script>
+(function(){
+  const C=56, L=30, T=28, LANES="ABCD";
+  const cx=l=>L+l*C+C/2, cy=r=>T+(5-r)*C+C/2;
+  const pos=s=>[LANES.indexOf(s[0]), +s.slice(1)];
+  const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+  function board(sp){
+    const side=sp.side?232:0, W=L+4*C+10+side, H=T+5*C+30+16;
+    let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(sp.alt||"Board diagram")}">`;
+    for(let r=1;r<=5;r++){
+      const y=T+(5-r)*C, cls=r>=4?"g-te":r<=2?"g-tp":"g-tm";
+      o+=`<rect x="${L}" y="${y}" width="${4*C}" height="${C}" class="${cls}"/>`;
+      o+=`<text x="${L-8}" y="${y+C/2+4}" text-anchor="end" class="g-lab">${r}</text>`;
+      for(let l=0;l<4;l++) o+=`<rect x="${L+l*C}" y="${y}" width="${C}" height="${C}" class="g-cell"/>`;
+    }
+    for(let l=0;l<4;l++){
+      o+=`<text x="${cx(l)}" y="${H-3}" text-anchor="middle" class="g-lab">${LANES[l]}</text>`;
+      const tOn=(sp.top||"....")[l]==="g", bOn=(sp.bot||"....")[l]==="g";
+      o+=`<circle cx="${cx(l)}" cy="${T/2}" r="7" class="g-light${tOn?" on":""}"/>`;
+      o+=`<circle cx="${cx(l)}" cy="${T+5*C+14}" r="7" class="g-light${bOn?" on":""}"/>`;
+    }
+    (sp.fire||[]).forEach(c=>{const [l,r]=pos(c);o+=`<rect x="${L+l*C}" y="${T+(5-r)*C}" width="${C}" height="${C}" class="g-fire"/>`;});
+    (sp.hl||[]).forEach(c=>{const [l,r]=pos(c);o+=`<rect x="${L+l*C+3}" y="${T+(5-r)*C+3}" width="${C-6}" height="${C-6}" rx="4" class="g-hl"/>`;});
+    (sp.ghost||[]).forEach(c=>{const [l,r]=pos(c);o+=`<circle cx="${cx(l)}" cy="${cy(r)-4}" r="17" class="g-ghost"/>`;});
+    (sp.arrows||[]).forEach(a=>{
+      const [l1,r1]=pos(a.f),[l2,r2]=pos(a.t);
+      let x1=cx(l1),y1=cy(r1)-4,x2=cx(l2),y2=cy(r2)-4;
+      const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy),ux=dx/d,uy=dy/d,s0=20,s1=a.k==="a"?17:20;
+      if(a.off){x1+=a.off*-uy;x2+=a.off*-uy;y1+=a.off*ux;y2+=a.off*ux;}
+      const X1=x1+ux*s0,Y1=y1+uy*s0,X2=x2-ux*s1,Y2=y2-uy*s1;
+      const cls=a.k==="a"?"g-a":a.k==="b"?"g-blk":(a.s==="e"?"g-me":"g-mp");
+      const mk=a.k==="a"?"mk-a":a.k==="b"?"mk-b":(a.s==="e"?"mk-e":"mk-p");
+      o+=`<line x1="${X1.toFixed(1)}" y1="${Y1.toFixed(1)}" x2="${X2.toFixed(1)}" y2="${Y2.toFixed(1)}" class="${cls}" marker-end="url(#${mk})"/>`;
+      if(a.n){const mx=(X1+X2)/2+(a.nx||0),my=(Y1+Y2)/2+(a.ny||0);
+        o+=`<circle cx="${mx}" cy="${my}" r="8" class="g-badge"/><text x="${mx}" y="${my+3.5}" text-anchor="middle" class="g-badge-t">${a.n}</text>`;}
+    });
+    (sp.figs||[]).forEach(f=>{
+      const [l,r]=pos(f.at), x=cx(l), y=cy(r)-4;
+      o+=`<g class="${f.dead?"g-dead":""}"><circle cx="${x}" cy="${y}" r="17" class="g-tok-${f.s}"/>`;
+      o+=`<text x="${x}" y="${y+5.5}" text-anchor="middle" class="g-letter">${f.t}</text>`;
+      if(f.st) o+=`<text x="${x}" y="${y+28}" text-anchor="middle" class="g-stat">${f.st}</text>`;
+      o+=`</g>`;
+      if(f.dead) o+=`<line x1="${x-11}" y1="${y-11}" x2="${x+11}" y2="${y+11}" class="g-x"/><line x1="${x+11}" y1="${y-11}" x2="${x-11}" y2="${y+11}" class="g-x"/>`;
+    });
+    (sp.notes||[]).forEach(n=>{
+      const [l,r]=pos(n.at); let x=cx(l), y=cy(r)-4, a="middle";
+      if(n.p==="tr"){x+=27;y-=14;a="end";} else if(n.p==="tl"){x-=26;y-=14;a="start";} else if(n.p==="b"){y+=29;}
+      else if(n.p==="c"){y+=4;}
+      o+=`<text x="${x}" y="${y}" text-anchor="${a}" class="g-note ${n.c||"hit"}">${esc(n.t)}</text>`;
+    });
+    if(sp.side){
+      const X=L+4*C+18;
+      sp.side.forEach(s=>{
+        const y=s.r===6?T/2+4:s.r===0?T+5*C+18:cy(s.r)-3;
+        o+=`<text x="${X}" y="${y}" class="g-side">${esc(s.a)}</text>`;
+        if(s.b) o+=`<text x="${X}" y="${y+15}" class="g-side2">${esc(s.b)}</text>`;
+      });
+    }
+    return o+"</svg>";
+  }
+  const fig=(cap,body,sp)=>`<figure><div>${board(sp)}</div><figcaption><b>${esc(cap)}</b>${body}</figcaption></figure>`;
+
+  // Board overview
+  document.getElementById("fig-board").innerHTML = board({
+    alt:"The board: 4 lanes by 5 rows, enemy lights above and your lights below",
+    top:"....", bot:"....",
+    side:[
+      {r:6,a:"Enemy's end: light 3 to win"},
+      {r:5,a:"Row 5 · enemy places here",b:"Enemy +1 HP · you +1 attack"},
+      {r:4,a:"Row 4 · enemy home",b:"Enemy +1 HP · you +1 attack"},
+      {r:3,a:"Row 3 · middle",b:"No bonus for anyone"},
+      {r:2,a:"Row 2 · your home",b:"You +1 HP · enemy +1 attack"},
+      {r:1,a:"Row 1 · you place here",b:"You +1 HP · enemy +1 attack"},
+      {r:0,a:"Your end: enemy needs all 4"}
+    ],
+    figs:[{at:"B1",s:"p",t:"S",st:"1/2"},{at:"C5",s:"e",t:"S",st:"1/2"}],
+    arrows:[{f:"B1",t:"B2",k:"m",s:"p"},{f:"C5",t:"C4",k:"m",s:"e"}]
+  });
+
+  const EX={
+    "1":[
+      fig("Your phase","Front-most first: the Sailor in B2 moves to B3 (1), then the Sailor in B1 steps into B2 (2).",
+        {alt:"Two Sailors in lane B advance",figs:[{at:"B1",s:"p",t:"S",st:"1/2"},{at:"B2",s:"p",t:"S",st:"1/2"}],
+         arrows:[{f:"B2",t:"B3",k:"m",s:"p",n:1,nx:14},{f:"B1",t:"B2",k:"m",s:"p",n:2,nx:14}]}),
+      fig("Result","Both moved. The front Sailor left your home rows, so it is down to 1 HP.",
+        {alt:"Sailors now in B2 and B3",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B3",s:"p",t:"S",st:"1/1"}],ghost:["B1"]})
+    ],
+    "2":[
+      fig("Your phase","(1) B3 attacks B4 for 1. The enemy is in its home row with 2 HP, so it survives. (2) B2 sees a friend ahead and waits.",
+        {alt:"Front Sailor attacks, rear waits",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B3",s:"p",t:"S",st:"1/1"},{at:"B4",s:"e",t:"S",st:"1/2"}],
+         arrows:[{f:"B3",t:"B4",k:"a",n:1,nx:14}],notes:[{at:"B4",t:"−1",p:"tr"},{at:"B2",t:"2 · waits",p:"tl",c:"info"}]}),
+      fig("Enemy phase","The wounded enemy attacks B3 for 1. Your Sailor in the middle row has 1 HP and dies.",
+        {alt:"Enemy hits back",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B3",s:"p",t:"S",st:"1/1"},{at:"B4",s:"e",t:"S",st:"1/1"}],
+         arrows:[{f:"B4",t:"B3",k:"a",n:1,nx:14}],notes:[{at:"B3",t:"−1",p:"tr"}]}),
+      fig("Result","B3 is empty again. Next battle the enemy acts first and will step into it, right in front of your B2 Sailor.",
+        {alt:"Your front Sailor is gone",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B3",s:"p",t:"S",dead:1},{at:"B4",s:"e",t:"S",st:"1/1"}]})
+    ],
+    "3a":[
+      fig("1 · Your phase","B3 is empty, so your Sailor moves in. Moving is its whole action.",
+        {alt:"You move into contact",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B4",s:"e",t:"S",st:"1/2"}],arrows:[{f:"B2",t:"B3",k:"m",s:"p"}]}),
+      fig("2 · Enemy phase","Your Sailor is now straight ahead of the enemy, so it attacks. 1 damage against 1 HP.",
+        {alt:"Enemy attacks",figs:[{at:"B3",s:"p",t:"S",st:"1/1"},{at:"B4",s:"e",t:"S",st:"1/2"}],arrows:[{f:"B4",t:"B3",k:"a"}],notes:[{at:"B3",t:"−1",p:"tr"}],ghost:["B2"]}),
+      fig("Result","Your Sailor is gone. The enemy took nothing.",
+        {alt:"Your Sailor died",figs:[{at:"B3",s:"p",t:"S",dead:1},{at:"B4",s:"e",t:"S",st:"1/2"}]})
+    ],
+    "3b":[
+      fig("1 · Enemy phase","B3 is empty, so the enemy Sailor moves in. Leaving row 4 costs it the +1 HP.",
+        {alt:"Enemy moves into contact",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B4",s:"e",t:"S",st:"1/2"}],arrows:[{f:"B4",t:"B3",k:"m",s:"e"}]}),
+      fig("2 · Your phase","Now the enemy is straight ahead of you, so you attack. 1 damage against 1 HP.",
+        {alt:"You attack",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B3",s:"e",t:"S",st:"1/1"}],arrows:[{f:"B2",t:"B3",k:"a"}],notes:[{at:"B3",t:"−1",p:"tr"}],ghost:["B4"]}),
+      fig("Result","The enemy Sailor is gone and yours is untouched.",
+        {alt:"Enemy Sailor died",figs:[{at:"B2",s:"p",t:"S",st:"1/2"},{at:"B3",s:"e",t:"S",dead:1}]})
+    ],
+    "4":[
+      fig("Your phase","(1) The Jumper in row 2 acts first and moves diagonally to B3. (2) The Runner moves to B2. (3) Its extra step into B3 finds a friend, so it stops.",
+        {alt:"Jumper takes B3 before the Runner",figs:[{at:"A2",s:"p",t:"J",st:"1/4"},{at:"B1",s:"p",t:"R",st:"2/3"}],
+         arrows:[{f:"A2",t:"B3",k:"m",s:"p",n:1,ny:-10,nx:-8},{f:"B1",t:"B2",k:"m",s:"p",n:2,nx:14},{f:"B2",t:"B3",k:"b",n:3,nx:14}],
+         notes:[{at:"A2",t:"→",p:"tr",c:"info"}]}),
+      fig("Result","Jumper in B3, Runner in B2. Each still gets only one action, and nothing ever shared a tile.",
+        {alt:"Jumper in B3, Runner in B2",figs:[{at:"B3",s:"p",t:"J",st:"1/3"},{at:"B2",s:"p",t:"R",st:"2/3"}],ghost:["A2","B1"]})
+    ],
+    "5":[
+      fig("Battle 1","Heading right from lane D would leave the board, so it turns to head left and moves to C3.",
+        {alt:"Jumper bounces off the right edge",figs:[{at:"D2",s:"p",t:"J",st:"1/4"}],arrows:[{f:"D2",t:"C3",k:"m",s:"p"}],notes:[{at:"D2",t:"→ turns ←",p:"b",c:"info"}]}),
+      fig("Battle 2","It keeps heading left. Its target is B4 diagonal, not C4 straight ahead.",
+        {alt:"Jumper heads left",figs:[{at:"C3",s:"p",t:"J",st:"1/3"}],arrows:[{f:"C3",t:"B4",k:"m",s:"p"}],notes:[{at:"C3",t:"←",p:"tl",c:"info"}]}),
+      fig("Same battle, enemies placed","An enemy in B4 gets attacked. The enemy straight ahead in C4 neither blocks the Jumper nor gets hit.",
+        {alt:"Jumper attacks diagonally",figs:[{at:"C3",s:"p",t:"J",st:"1/3"},{at:"C4",s:"e",t:"S",st:"1/2"},{at:"B4",s:"e",t:"S",st:"1/2"}],
+         arrows:[{f:"C3",t:"B4",k:"a"}],notes:[{at:"B4",t:"−1",p:"tr"},{at:"C4",t:"ignored",p:"tr",c:"info"}]})
+    ],
+    "6":[
+      fig("Counter","Placed in C1. Battles 1 to 4 after placing: counter 1, 2, 3, 4. It just stands there with 6 HP (5 + home row).",
+        {alt:"Artillery waiting",figs:[{at:"C1",s:"p",t:"A",st:"–/6"}],notes:[{at:"C1",t:"1·2·3·4",p:"tl",c:"info"}]}),
+      fig("Battle 5 · fires","Every enemy in lane C takes 1, from any distance and ignoring bonuses.",
+        {alt:"Artillery fires down lane C",fire:["C2","C3","C4","C5"],figs:[{at:"C1",s:"p",t:"A",st:"–/6"},{at:"C3",s:"e",t:"S",st:"1/1"},{at:"C4",s:"e",t:"J",st:"1/4"},{at:"C5",s:"e",t:"S",st:"1/2"}],
+         notes:[{at:"C3",t:"−1",p:"tr"},{at:"C4",t:"−1",p:"tr"},{at:"C5",t:"−1",p:"tr"}]}),
+      fig("Result","The middle Sailor dies and the others are wounded. The counter resets to 0 and the Artillery steps up into the empty C2.",
+        {alt:"After firing",figs:[{at:"C2",s:"p",t:"A",st:"–/6"},{at:"C3",s:"e",t:"S",dead:1},{at:"C4",s:"e",t:"J",st:"1/3"},{at:"C5",s:"e",t:"S",st:"1/1"}],ghost:["C1"],arrows:[{f:"C1",t:"C2",k:"m",s:"p"}]})
+    ],
+    "7":[
+      fig("Clear lane","(1) Normal move to B2. (2) Extra step to B3.",
+        {alt:"Runner moves two",figs:[{at:"B1",s:"p",t:"R",st:"2/3"}],arrows:[{f:"B1",t:"B2",k:"m",s:"p",n:1,nx:14},{f:"B2",t:"B3",k:"m",s:"p",n:2,nx:14}]}),
+      fig("Blocked after one step","It moves to B2, but the extra step never attacks, so it stops in front of the enemy. It attacks next battle.",
+        {alt:"Runner's extra step is blocked",figs:[{at:"B1",s:"p",t:"R",st:"2/3"},{at:"B3",s:"e",t:"S",st:"1/1"}],arrows:[{f:"B1",t:"B2",k:"m",s:"p",n:1,nx:14},{f:"B2",t:"B3",k:"b",n:2,nx:14}]}),
+      fig("Finishing the lane","In row 4 with something in B5 ahead. It doesn't attack; it finishes the lane.",
+        {alt:"Runner finishes lane B",figs:[{at:"B4",s:"p",t:"R",st:"3/2"},{at:"B5",s:"e",t:"S",st:"1/2"},{at:"B2",s:"e",t:"J",st:"2/3"}],hl:["B5"]}),
+      fig("Result","Lane B's top light turns green and the whole lane is wiped: the Runner, the enemy in B5, and the enemy Jumper in B2.",
+        {alt:"Lane B lit and cleared",top:".g..",figs:[{at:"B4",s:"p",t:"R",dead:1},{at:"B5",s:"e",t:"S",dead:1},{at:"B2",s:"e",t:"J",dead:1}]})
+    ],
+    "8":[
+      fig("Cleave","Attack 2 to the enemy in B4, and 2 to the tile behind it, B5.",
+        {alt:"Swordsman hits two enemies",figs:[{at:"B3",s:"p",t:"W",st:"2/1"},{at:"B4",s:"e",t:"S",st:"1/2"},{at:"B5",s:"e",t:"J",st:"1/4"}],
+         arrows:[{f:"B3",t:"B4",k:"a",n:1,nx:-14},{f:"B3",t:"B5",k:"a",n:2,off:14,nx:14}],notes:[{at:"B4",t:"−2",p:"tr"},{at:"B5",t:"−2",p:"tr"}]}),
+      fig("Result","The Sailor dies. The Jumper drops from 4 to 2.",
+        {alt:"After the cleave",figs:[{at:"B3",s:"p",t:"W",st:"2/1"},{at:"B4",s:"e",t:"S",dead:1},{at:"B5",s:"e",t:"J",st:"1/2"}]}),
+      fig("Friend behind the target","The enemy in B3 takes 2 and dies. Your Jumper in B4 takes half: 1.",
+        {alt:"Swordsman cleave hits a friend for half",figs:[{at:"B2",s:"p",t:"W",st:"2/2"},{at:"B3",s:"e",t:"S",st:"1/1"},{at:"B4",s:"p",t:"J",st:"2/3"}],
+         arrows:[{f:"B2",t:"B3",k:"a",n:1,nx:-14},{f:"B2",t:"B4",k:"a",n:2,off:14,nx:14}],notes:[{at:"B3",t:"−2",p:"tr"},{at:"B4",t:"−1",p:"tr"}]})
+    ],
+    "9":[
+      fig("Arrival","Your Sailor in C4 steps into the empty C5.",
+        {alt:"Sailor reaches row 5",figs:[{at:"C4",s:"p",t:"S",st:"2/1"},{at:"C2",s:"e",t:"S",st:"2/1"},{at:"C1",s:"p",t:"S",st:"1/2"}],arrows:[{f:"C4",t:"C5",k:"m",s:"p"}]}),
+      fig("Lane lit and wiped","The C light turns green. Every figure in lane C, both sides, including your arriving Sailor, is destroyed.",
+        {alt:"Lane C wiped",top:"..g.",figs:[{at:"C5",s:"p",t:"S",dead:1},{at:"C2",s:"e",t:"S",dead:1},{at:"C1",s:"p",t:"S",dead:1}]}),
+      fig("Later, lane C already lit","Another Sailor reaches C5. It just leaves the board. No wipe, nobody else is touched.",
+        {alt:"Arriving in a lit lane",top:"..g.",figs:[{at:"C4",s:"p",t:"S",st:"2/1"},{at:"C2",s:"e",t:"S",st:"2/1"}],arrows:[{f:"C4",t:"C5",k:"m",s:"p"}],notes:[{at:"C5",t:"leaves",p:"c",c:"go"}]})
+    ],
+    "10":[
+      fig("Your phase","B3 is empty, so it moves.",
+        {alt:"Wounded Sailor moves",figs:[{at:"B2",s:"p",t:"S",st:"1/1"}],arrows:[{f:"B2",t:"B3",k:"m",s:"p"}],notes:[{at:"B2",t:"base 0 +1",p:"tl",c:"info"}]}),
+      fig("Result","In row 3 there's no bonus, so its HP is 0 and it dies on the spot (\"Lost boost\"). Myrrh would save it.",
+        {alt:"Sailor dies from losing its bonus",figs:[{at:"B3",s:"p",t:"S",dead:1}],ghost:["B2"],notes:[{at:"B3",t:"Lost boost",p:"b",c:"hit"}]})
+    ]
+  };
+  document.querySelectorAll(".frames[data-ex]").forEach(el=>{el.innerHTML=(EX[el.dataset.ex]||[]).join("");});
+})();
+</script>
+
+</body></html>

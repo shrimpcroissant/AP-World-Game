@@ -370,6 +370,61 @@ function draw_credit_icons(cx, top, k)
 	draw_set_valign(fa_top)
 }
 
+// The How to Play text, shown in fights (Deck_obj) and from the main menu (Start_Button)
+function how_to_play_text()
+{
+	return "HOW TO PLAY\n\n" +
+		"THE BOARD is the decks of two ships side by side as the two crews battle at sea: " +
+		"your crew starts at the bottom, the enemy crew at the top. Each column is a lane.\n\n" +
+		"GOAL: get one of your figures to the far end of a lane to turn that lane's light (at the top) green. " +
+		"Turn 3 of the 4 green to win. The enemy has to turn all 4 of yours (at the bottom) green.\n\n" +
+		"YOUR TURN\n" +
+		"- UNITS (shown under your deck) are what you spend to place cards. Each card costs units. " +
+		"They refill every turn, and you get more as the fight goes on and for each lane where you have more figures.\n" +
+		"- DRAWING is free and optional: click your deck once per turn to draw.\n" +
+		"- To place a figure, click a card, then a glowing tile on your front row.\n" +
+		"- END YOUR TURN with the token (left of the ship) or Space. You can end it without drawing or playing anything.\n" +
+		"- Cards only stay in your hand for 3 turns (orange = last turn).\n\n" +
+		"THE BATTLE: after the enemy places its figures, every figure moves forward by itself " +
+		"and attacks the enemy in front of it. Your 2 home rows give +1 HP; the enemy's 2 rows give +1 attack.\n\n" +
+		"THE DAGGER (next to your deck): click it, then one of your own figures on your first two rows, " +
+		"to remove that figure and free up its spot.\n\n" +
+		"COINS AND SHOPS: winning a fight earns coins (more for each light you turned green). " +
+		"Between fights you stop at port shops to spend coins on items. Items sit beside the ship; " +
+		"click one on your turn to use it. Coins are only for shops; units are only for placing cards in a fight.\n\n" +
+		"TIPS: hover cards, figures and items to see what they do. \"DEATH\" means a figure won't survive " +
+		"the next battle. Right-click cancels. Escape pauses."
+}
+
+// The illustrated rulebook on the game's website (opens in a new browser tab)
+function rulebook_url()
+{
+	return "https://shrimpcroissant.github.io/AP-World-Game/rulebook.html"
+}
+
+// ---- How to Play on the main menu (Start_Button) ----
+// The menu is laid out in its top-left 341 x 192. The How to Play button sits under the
+// difficulty buttons; it opens an overlay with the same text and the rulebook link.
+function menu_help_button()
+{
+	return { x1: 170 - 42, y1: 153, x2: 170 + 42, y2: 167 }
+}
+
+function menu_help_layout()
+{
+	var px = 8
+	var py = 4
+	var pw = 341 - 16
+	var ph = 192 - 8
+	var text = how_to_play_text()
+	var wrap = 1000
+	var th = string_height_ext(text, -1, wrap)
+	var ts = min((pw - 16) / wrap, (ph - 44) / th)
+	var ly = py + 8 + th * ts + 6
+	return { px: px, py: py, pw: pw, ph: ph, ts: ts, wrap: wrap, text: text,
+		link: { x1: 170 - 110, y1: ly, x2: 170 + 110, y2: ly + 14 } }
+}
+
 // ---- Text drawing ----
 // Every draw_text call in the game goes through these. On the website the game is scaled to fit
 // the window; there the text alone is drawn with smoothing so letters don't come out mangled,

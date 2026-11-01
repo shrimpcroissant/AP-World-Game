@@ -84,6 +84,14 @@ if (help_unpause)
 }
 if (global.HelpOpen)
 {
+	// The rulebook link in How to Play opens the website's rulebook in a new tab
+	if (!story_open && mouse_check_button_pressed(mb_left) && help_link_hit())
+	{
+		url_open_ext(rulebook_url(), "_blank")
+		hold = 0
+		hold_release = true
+		exit
+	}
 	if (needs_hold)
 	{
 		var holding = mouse_check_button(mb_left) || keyboard_check(vk_space)
