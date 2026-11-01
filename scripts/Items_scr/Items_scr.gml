@@ -105,7 +105,7 @@ function ending_text()
 
 function credits_text()
 {
-	return "MONSOON ROUTE\n\n[CREDITS GO HERE]\n\nArt and design: ted\n\nThanks for playing!"
+	return "MONSOON ROUTE\n\nArt, Design, and Content by Jack Dean\nCode and Mechanics by Jack Dean and Claude\n\nThanks for playing!"
 }
 
 // ---- Difficulty ----
