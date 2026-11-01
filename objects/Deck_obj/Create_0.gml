@@ -627,7 +627,7 @@ tutorial_steps = [
 	{ wait: "next",   spot: "units",  allow: "",           text: "These are your UNITS, what you spend to place cards. Each card costs units. You get 4 a turn, 1 more on turn 2 and 2 more from turn 3 on, plus 1 for each lane where you have more figures than the enemy. Unused units don't carry over." },
 	{ wait: "next",   spot: "bios",   allow: "",           text: "Hover over a card to read its bio: its cost, attack and health, how it moves and how it attacks. Try it now, then press Next." },
 	{ wait: "place",  spot: "hand",   allow: "place",      text: "Now place one. Click a card in your hand, then a glowing tile on your front row." },
-	{ wait: "end",    spot: "token",  allow: "place,end",  text: "You can place more figures if you have units left. When you're done, click the token to end your turn (or press Space)." },
+	{ wait: "end",    spot: "token+hand+tiles", allow: "place,end",  text: "You can place more figures if you have units left. When you're done, click the token to end your turn (or press Space)." },
 	{ wait: "battle", spot: "board",  allow: "",           text: "Battle! First the enemy draws and places its figures. Then each side's figures act one at a time: each one moves forward, or attacks an enemy right in front of it. Click the play button to watch it unfold." },
 	{ wait: "next",   spot: "lights", allow: "",           text: "Get a figure to the far end of a lane to turn that lane's light green. Turn 3 of these 4 green to win. The enemy needs all 4 of yours." },
 	{ wait: "next",   spot: "dagger", allow: "",           text: "The Dagger removes one of your own figures on your first two rows, to free up a spot. Hover anything to see what it does." },
@@ -671,7 +671,9 @@ tutorial_spot = function()
 	var y1 = infinity
 	var x2 = -infinity
 	var y2 = -infinity
-	switch (what)
+	// A spot can name several areas joined by + (like "token+hand+tiles"): it covers all of them
+	var parts = string_split(what, "+")
+	for (var part_i = 0; part_i < array_length(parts); part_i++) switch (parts[part_i])
 	{
 		case "deck":
 			var half = max(pile_width / 2, 85)   // wide enough for the units text under the deck
