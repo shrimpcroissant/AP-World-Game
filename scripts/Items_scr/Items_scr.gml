@@ -320,7 +320,7 @@ function story_text(key)
 		case "astrolabe":
 			return "You were able to use your astrolabe to figure out how to get back to India."
 		case "boss":
-			return "FINAL BOSS BATTLE!\n\nTo win, you must light all four lanes at the top."
+			return story_text("arabia") + "\n\nFINAL BOSS BATTLE! To win, you must light all four lanes at the top."
 	}
 	return ""
 }
@@ -333,7 +333,6 @@ function story_before_fight(fights_won)
 		case 0: return "china"
 		case 1: return "malacca"
 		case 3: return "astrolabe"   // after Mogadishu, on the way back to India
-		case 4: return "arabia"
 		case 5: return "boss"   // final fight: the boss warning
 	}
 	return ""

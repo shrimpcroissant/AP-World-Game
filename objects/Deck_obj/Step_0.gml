@@ -171,7 +171,7 @@ else
 	global.TutorialPhaseMode = false
 	with (EnemyAI_obj) think_delay = 12
 }
-// Playtest "Auto win": lights the enemy's lanes one after another (a quick, sure win)
+// Testing "Auto win": lights the enemy's lanes one after another (a quick, sure win)
 if (auto_win_timer >= 0)
 {
 	auto_win_timer += 1
@@ -215,7 +215,7 @@ if (current_time - dbg_last_fps >= 5000)
 // No drawing cards while the game is paused or a pop-up just closed
 if (input_blocked()) exit
 
-// Playtest shortcut: the "Auto win" button (or F2) plays out a quick win.
+// Testing shortcut: the "Auto win" button (or F2) plays out a quick win.
 // Turn it off for the real game with debug_tools = false in Deck_obj's Create event.
 if (debug_tools && !is_boss_fight())   // no Auto win in the final fight
 {
@@ -226,7 +226,7 @@ if (debug_tools && !is_boss_fight())   // no Auto win in the final fight
 		auto_win_timer = 0
 		global.SelectedCard = noone
 		global.PlayerTurn = false   // no more moves while it plays out
-		show_reminder("Auto win (playtest)")
+		show_reminder("Auto win")
 		exit
 	}
 }

@@ -6,11 +6,11 @@ if (click_delay > 0)
 	exit
 }
 
-// Playtest key (only while Deck_obj's debug_tools is on): F3 = +5 coins
+// Testing key (only while Deck_obj's debug_tools is on): F3 = +5 coins
 if (variable_global_exists("DebugTools") && global.DebugTools && keyboard_check_pressed(vk_f3))
 {
 	global.Money += 5
-	say("+5 coins (playtest)")
+	say("+5 coins")
 }
 
 // Leave: click "Set sail" or press Space

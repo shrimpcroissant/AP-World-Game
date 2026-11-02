@@ -109,10 +109,10 @@ draw_skipped = false
 
 starting_hand = 3  // cards drawn at the start
 
-// Playtest tools: an "Auto win" button in the top-left corner (F2 does the same).
+// Testing tools: an "Auto win" button in the top-left corner (F2 does the same).
 // Set this to false before you hand the game in.
 debug_tools = true
-global.DebugTools = debug_tools   // the shop also has a playtest key: F3 = +5 coins
+global.DebugTools = debug_tools   // the shop also has a testing key: F3 = +5 coins
 debug_btn_x = 20
 debug_btn_y = 20
 debug_btn_w = 150
@@ -527,7 +527,7 @@ global.FightStartPepper = global.PepperTurns
 // Coins for winning, worked out once when you win (shown on the win screen)
 win_reward = -1
 
-// Playtest "Auto win": counts up while it lights the enemy's lanes one by one (-1 = off)
+// Testing "Auto win": counts up while it lights the enemy's lanes one by one (-1 = off)
 auto_win_timer = -1
 
 // ---- Story screens, the "How to play" panel and the China tutorial ----
