@@ -241,12 +241,11 @@ function shop_after_fight(fights_won)
 }
 
 // The shop you visit right BEFORE a fight, after the map ("" = none).
-// 4 = before the Arabia fight, you stop at Hormuz first.
+// (none right now: the Hormuz market was removed, its goods are on the ocean merchant's boat)
 function shop_before_fight(fights_won)
 {
 	switch (fights_won)
 	{
-		case 4: return "hormuz"
 	}
 	return ""
 }
@@ -261,7 +260,7 @@ function shop_items(shop)
 		case "mogadishu": return ["zebra", "ivory", "rhino", "ambergris"]
 		case "calicut":   return ["pepper", "cloth", "wootz", "tablet"]
 		case "hormuz":    return ["frankincense", "horse", "pearl", "myrrh"]
-		case "ocean":     return ["horse", "tablet", "zebra", "myrrh"]   // merchant boat at sea before Iraq: the four strongest items, for the final fight
+		case "ocean":     return ["frankincense", "horse", "pearl", "myrrh"]   // merchant boat at sea before Iraq: the Hormuz goods
 	}
 	return []
 }
