@@ -39,12 +39,11 @@ if (view_enabled && view_visible[0])
 }
 var k = aw / 1366   // text scale, so it looks the same in a zoomed-in room
 
-// Which Map_spr frame: frame 0 after China (heading to Malacca), frame 1 after Malacca, and so on.
-// During the detour the map stays on the old frame until you click "set sail".
-// Map_spr only has 2 frames now, so later stops keep showing the last one until you add more.
-var frame_step = global.FightsWon - 1
-if (detour && !pushed_off_course) frame_step -= 1
-var frame = clamp(frame_step, 0, sprite_get_number(Map_spr) - 1)
+// Which Map_spr frame: frame 1 is the planned route along the coast, frame 0 is the detour route
+// through Mogadishu. The planned route shows until you click "set sail" after Malacca (when the
+// detour story shows), and the detour route from then on.
+var after_detour = (global.FightsWon > 2) || (detour && pushed_off_course)
+var frame = after_detour ? 0 : min(1, sprite_get_number(Map_spr) - 1)
 draw_sprite_stretched(Map_spr, frame, ax, ay, aw, ah)
 
 var done = global.FightsWon >= array_length(global.Stops)
